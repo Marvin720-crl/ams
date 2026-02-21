@@ -1,0 +1,22 @@
+[
+  {
+    "name": "nstp",
+    "teacherId": "11",
+    "teacherName": "Malachi",
+    "day": "Friday",
+    "startTime": "19:14",
+    "dismissalTime": "19:20",
+    "description": "",
+    "id": "SUB-1771586065550"
+  },
+  {
+    "name": "kl",
+    "teacherId": "11",
+    "teacherName": "Malachi",
+    "day": "Friday",
+    "startTime": "19:30",
+    "dismissalTime": "19:43",
+    "description": "",
+    "id": "SUB-1771587054805"
+  }
+]

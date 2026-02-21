@@ -1,0 +1,35 @@
+{
+  "node": {
+    "406bc42788adea257d3fd5a2fdcb5904fd924448dc": {
+      "workers": {
+        "app/profile/page": {
+          "moduleId": "[project]/.next-internal/server/app/profile/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUserByIdAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/profile/page": "action-browser"
+      },
+      "exportedName": "getUserByIdAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "607d6c7ef6411e2f9b6b4c5f8e9f5d7ac25ef37c81": {
+      "workers": {
+        "app/profile/page": {
+          "moduleId": "[project]/.next-internal/server/app/profile/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateUserAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/profile/page": "action-browser"
+      },
+      "exportedName": "updateUserAction",
+      "filename": "src/app/actions/dbActions.ts"
+    }
+  },
+  "edge": {}
+}

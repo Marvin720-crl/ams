@@ -1,0 +1,110 @@
+{
+  "node": {
+    "406bc42788adea257d3fd5a2fdcb5904fd924448dc": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUserByIdAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "getUserByIdAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0034b9dbe8d1912c6539b5c249739e32678f9b0d29": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getLabRequestsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "getLabRequestsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "60138d8dd94732e282313f4d1c7f108127555bc4ba": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateLabRequestAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "updateLabRequestAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0096451ed85f5ac9d34b7defc21c02708e0162bcd8": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUsersAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "getUsersAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00195a8d56f1438da5ca72ef4146039081beb1ca52": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getSubjectsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "getSubjectsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "006d9dd5565ccd47358dc40fb116de02872a8553aa": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getLabsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "getLabsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "4046489c388f0b02acd441eb6b0a3d80beb7291f37": {
+      "workers": {
+        "app/admin/requests/page": {
+          "moduleId": "[project]/.next-internal/server/app/admin/requests/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addAuditLogAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/requests/page": "action-browser"
+      },
+      "exportedName": "addAuditLogAction",
+      "filename": "src/app/actions/dbActions.ts"
+    }
+  },
+  "edge": {}
+}

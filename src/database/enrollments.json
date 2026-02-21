@@ -1,0 +1,16 @@
+[
+  {
+    "id": "ENR-1771586107673",
+    "studentId": "25001198310",
+    "subjectId": "SUB-1771586065550",
+    "enrolledAt": "2026-02-20T11:15:07.673Z",
+    "status": "approved"
+  },
+  {
+    "id": "ENR-1771587085441",
+    "studentId": "25001198310",
+    "subjectId": "SUB-1771587054805",
+    "enrolledAt": "2026-02-20T11:31:25.441Z",
+    "status": "approved"
+  }
+]

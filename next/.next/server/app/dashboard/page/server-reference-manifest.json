@@ -1,0 +1,560 @@
+{
+  "node": {
+    "406bc42788adea257d3fd5a2fdcb5904fd924448dc": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUserByIdAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getUserByIdAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00195a8d56f1438da5ca72ef4146039081beb1ca52": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getSubjectsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getSubjectsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00e409f3fb00fefa105eade17c9be241127faa66f4": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getEnrollmentsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getEnrollmentsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0034b9dbe8d1912c6539b5c249739e32678f9b0d29": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getLabRequestsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getLabRequestsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0096451ed85f5ac9d34b7defc21c02708e0162bcd8": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUsersAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getUsersAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "60138d8dd94732e282313f4d1c7f108127555bc4ba": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateLabRequestAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateLabRequestAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40a2fcd804db058a16761e2ec81eeadae5017df6ac": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addAttendanceAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addAttendanceAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "60cebf7ff9bb2c64cfa7a88759eb7b8b36e03fa114": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateEnrollmentAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateEnrollmentAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "402cdba2fb2b3abaf5bf12d8191b77c1cdddf86efc": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteSubjectAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "deleteSubjectAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "006d9dd5565ccd47358dc40fb116de02872a8553aa": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getLabsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getLabsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "001ba8599dbe3a4297c5519a6d4845e589c1e46caa": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getPcsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getPcsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00d1c201bc8452e9931fc400486a0835ccf8531275": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getAttendancesAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getAttendancesAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0093022404be7a2c8cf3c4e31349a565c01b062b3c": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "cleanupExpiredSessionsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "cleanupExpiredSessionsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00f4762e6567f7a9f098951a867b9624a95b0c2d80": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getRoomsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getRoomsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00e699d72b062c5de96778450dc5e9759d3ad3d21f": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getReservationsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getReservationsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "4092e52943c25ec77739e62fd314ca13c021ae851f": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addReservationAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addReservationAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "4097726e1d31c25350c97f2e6250972b1601864ad7": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteReservationAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "deleteReservationAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "6019669db80b9e3cea05dddcfdb280432bc1b8f14d": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateAttendanceAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateAttendanceAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40944f351bd75dc0b3af980daf1f1c43a809ea5112": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addLabRequestAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addLabRequestAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "408919691b757d427e0e98f7f6950029b002775bdb": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addEnrollmentAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addEnrollmentAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00e0c4dd5a8c37e4625619ce112515b464009c0918": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getBooksAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getBooksAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0068238fd0a454bf3d8537926e84b5307d1190a30f": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getBorrowRequestsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getBorrowRequestsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40115dfcb0f46d5c00b550063e86657c9362db7bb5": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addBorrowRequestAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addBorrowRequestAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "004221dd2f38fdaabc6a51991d7112aec6620f5950": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getLibraryBorrowingsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getLibraryBorrowingsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40f61a276cdfed2a3dff07b79341cf166e3cf2e5a9": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addUserAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addUserAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40ebc3a3568cee87ad5a0f2263791fb4fc9e2f222a": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteUserAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "deleteUserAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40a2f243b05abe2754d48f16e2ce2f93c2f5b84e8f": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addLabAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addLabAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40083d3bc3759646d67641b17a6c27e2e031a2d885": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addRoomAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addRoomAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "60da3e532a4f58fb0f6b0ec0428f926853c871c7c0": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateLabAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateLabAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "001969d45fed01aa4cb5d778fb08fcfaf0becd41d8": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getAuditLogsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getAuditLogsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00232967ca798a5757a07845c638d8e2af30ba68a5": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getSettingsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "getSettingsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40efc60c962ab0e7363ac29d65ba41a05769f22cf8": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateSettingsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateSettingsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "60b22840d6379a9e72673b31a0234ca3643d87d4e0": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateRoomAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateRoomAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "401e52216e62b449efa21e40a52c981ab1d27bba9c": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteRoomAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "deleteRoomAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40c17e7d7dad94ac9f4c22b23ca50c63706a880802": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteLabAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "deleteLabAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40b01aabb52840d1b31436c59737385563dfd7254e": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addSubjectAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "addSubjectAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "4053901c7932ff0a506ceec0b85b281ffc75d7ca4c": {
+      "workers": {
+        "app/dashboard/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateSubjectAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/page": "action-browser"
+      },
+      "exportedName": "updateSubjectAction",
+      "filename": "src/app/actions/dbActions.ts"
+    }
+  },
+  "edge": {}
+}

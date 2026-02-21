@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 49, "column": 0}, "map": {"version":3,"sources":["file:///home/user/studio/src/app/icon--route-entry.js"],"sourcesContent":["import { NextResponse } from 'next/server'\n\nconst contentType = \"image/svg+xml\"\nconst cacheControl = \"no-cache, no-store\"\nconst buffer = Buffer.from(\"PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjI1NiIgaGVpZ2h0PSIyNTYiIHJ4PSI0MCIgcnk9IjQwIiBmaWxsPSIjRDkwNDI5IiAvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSI+QU1TPC90ZXh0Pgo8L3N2Zz4K\", 'base64')\n\nexport function GET() {\n    return new NextResponse(buffer, {\n        headers: {\n            'Content-Type': contentType,\n            'Cache-Control': cacheControl,\n        },\n    })\n}\n\nexport const dynamic = 'force-static'\n"],"names":[],"mappings":";;;;;;AAAA;;AAEA,MAAM,cAAc;AACpB,MAAM,eAAe;AACrB,MAAM,SAAS,OAAO,IAAI,CAAC,4aAA4a;AAEhc,SAAS;IACZ,OAAO,IAAI,gJAAY,CAAC,QAAQ;QAC5B,SAAS;YACL,gBAAgB;YAChB,iBAAiB;QACrB;IACJ;AACJ;AAEO,MAAM,UAAU","debugId":null}}]
+}

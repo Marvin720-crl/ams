@@ -1,0 +1,65 @@
+{
+  "node": {
+    "406bc42788adea257d3fd5a2fdcb5904fd924448dc": {
+      "workers": {
+        "app/register/page": {
+          "moduleId": "[project]/.next-internal/server/app/register/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUserByIdAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/register/page": "action-browser"
+      },
+      "exportedName": "getUserByIdAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "40f61a276cdfed2a3dff07b79341cf166e3cf2e5a9": {
+      "workers": {
+        "app/register/page": {
+          "moduleId": "[project]/.next-internal/server/app/register/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "addUserAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/register/page": "action-browser"
+      },
+      "exportedName": "addUserAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "0096451ed85f5ac9d34b7defc21c02708e0162bcd8": {
+      "workers": {
+        "app/register/page": {
+          "moduleId": "[project]/.next-internal/server/app/register/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUsersAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/register/page": "action-browser"
+      },
+      "exportedName": "getUsersAction",
+      "filename": "src/app/actions/dbActions.ts"
+    },
+    "00232967ca798a5757a07845c638d8e2af30ba68a5": {
+      "workers": {
+        "app/register/page": {
+          "moduleId": "[project]/.next-internal/server/app/register/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/dbActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getSettingsAction",
+          "filename": "src/app/actions/dbActions.ts"
+        }
+      },
+      "layer": {
+        "app/register/page": "action-browser"
+      },
+      "exportedName": "getSettingsAction",
+      "filename": "src/app/actions/dbActions.ts"
+    }
+  },
+  "edge": {}
+}
