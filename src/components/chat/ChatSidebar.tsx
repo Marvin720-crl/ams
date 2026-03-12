@@ -24,7 +24,10 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
     const subjectConvs = conversations.filter(c => c.type === 'subject' || c.type === 'general');
     const privateConvs = conversations.filter(c => c.type === 'private');
 
-    const filteredUsers = users.filter(u => 
+    // Ensure users are unique by ID to prevent duplicate key errors
+    const uniqueUsers = Array.from(new Map(users.map(u => [u.id, u])).values());
+
+    const filteredUsers = uniqueUsers.filter(u => 
         u.id !== user?.id && 
         (u.name.toLowerCase().includes(dmSearch.toLowerCase()) || u.id.includes(dmSearch))
     );
@@ -85,7 +88,7 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                                         {filteredUsers.map(u => (
                                             <button
-                                                key={u.id}
+                                                key={`user-${u.id}`}
                                                 onClick={() => {
                                                     onStartDM(u.id);
                                                     setDmSearch('');
