@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { getAcademicRecordsAction, getTermsAction, getSubjectsAction, getAttenda
 import { AcademicRecord, Term, Subject, Attendance, Classwork, Submission, GradingWeights } from '@/utils/storage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Printer } from 'lucide-react';
+import { Loader2, Printer, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
@@ -30,9 +31,13 @@ export default function GradeSlip() {
             setTerms(sortedTerms);
             
             if (sortedTerms.length > 0) {
-                const defaultTermId = sortedTerms.find(t => t.status === 'active')?.id || sortedTerms[0].id;
+                // Priority: Current Active Term, then most recent ended term
+                const activeTerm = sortedTerms.find(t => t.status === 'active');
+                const defaultTermId = activeTerm?.id || sortedTerms[0].id;
+                
                 setSelectedTermId(defaultTermId);
-                loadTermGrades(defaultTermId, allHistorical);
+                // Directly use sortedTerms and allHistorical to avoid race condition with state
+                loadTermGrades(defaultTermId, sortedTerms, allHistorical);
             }
         } catch (e) {
             console.error(e);
@@ -41,12 +46,16 @@ export default function GradeSlip() {
         }
     };
 
-    const loadTermGrades = async (termId: string, historical?: AcademicRecord[]) => {
+    const loadTermGrades = async (termId: string, currentTerms?: Term[], historical?: AcademicRecord[]) => {
         if (!user) return;
-        const term = terms.find(t => t.id === termId);
         
-        // 1. Check History first
-        const history = (historical || await getAcademicRecordsAction()).filter(r => r.studentId === user.id && r.termId === termId);
+        const termsList = currentTerms || terms;
+        const term = termsList.find(t => t.id === termId);
+        
+        // 1. Check History (Archived Records)
+        const historyData = historical || await getAcademicRecordsAction();
+        const history = historyData.filter(r => r.studentId === user.id && r.termId === termId);
+        
         if (history.length > 0) {
             setRecords(history.map(h => ({
                 code: h.subjectCode,
@@ -58,7 +67,7 @@ export default function GradeSlip() {
             return;
         }
 
-        // 2. If term is active, compute live grades
+        // 2. Compute Live Grades if term is active and no history exists
         if (term?.status === 'active') {
             const [allSubjects, allAttendances, allClassworks, allSubmissions, allWeights] = await Promise.all([
                 getSubjectsAction(),
@@ -86,7 +95,7 @@ export default function GradeSlip() {
                 const subjectClassworks = allClassworks.filter(cw => cw.subjectId === subject.id);
                 const getAverage = (type: string) => {
                     const group = subjectClassworks.filter(cw => cw.type === type);
-                    if (group.length === 0) return 100;
+                    if (group.length === 0) return 100; // Default to full marks if no work assigned yet
                     
                     let percentageTotal = 0;
                     let count = 0;
@@ -171,21 +180,26 @@ export default function GradeSlip() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20">
-            <div className="flex justify-between items-center print:hidden">
-                <div className="w-72">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
+                <div className="w-full sm:w-72">
                     <Select value={selectedTermId} onValueChange={v => { setSelectedTermId(v); loadTermGrades(v); }}>
                         <SelectTrigger className="rounded-full border-primary/10 h-12 shadow-sm"><SelectValue placeholder="Select Term" /></SelectTrigger>
                         <SelectContent className="rounded-2xl">
-                            {terms.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                            {terms.map(t => (
+                                <SelectItem key={t.id} value={t.id} className="font-bold">
+                                    {t.name} {t.status === 'ended' ? '(Finalized)' : ''}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
-                <Button variant="outline" className="rounded-full h-12 px-8 gap-2" onClick={() => window.print()}>
+                <Button variant="outline" className="rounded-full h-12 px-8 gap-2 w-full sm:w-auto" onClick={() => window.print()}>
                     <Printer className="h-4 w-4" /> Print Grade Slip
                 </Button>
             </div>
 
-            <Card className="rounded-none border-0 shadow-2xl overflow-hidden print:shadow-none bg-white p-16 space-y-12">
+            <Card className="rounded-none border-0 shadow-2xl overflow-hidden print:shadow-none bg-white p-8 sm:p-16 space-y-12">
+                {/* Header Section */}
                 <div className="flex flex-col items-center text-center space-y-4">
                     <div className="relative w-24 h-24">
                         <Image src="/logo.png" alt="AMA Logo" fill className="object-contain" />
@@ -196,7 +210,8 @@ export default function GradeSlip() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-20 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                {/* Info Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     <div className="space-y-2">
                         <div className="flex justify-between border-b pb-1"><span>Name:</span> <span className="text-foreground">{user?.name}</span></div>
                         <div className="flex justify-between border-b pb-1"><span>Student ID:</span> <span className="text-foreground">{user?.id}</span></div>
@@ -207,44 +222,56 @@ export default function GradeSlip() {
                     </div>
                 </div>
 
-                <div className="border border-black/5">
-                    <table className="w-full text-xs">
-                        <thead>
-                            <tr className="bg-muted/50 border-b border-black/5 text-left uppercase font-black tracking-widest">
-                                <th className="px-6 py-4">Subject Code</th>
-                                <th className="px-6 py-4">Description</th>
-                                <th className="px-6 py-4 text-center">Units Taken</th>
-                                <th className="px-6 py-4 text-center">Official Grade</th>
-                                <th className="px-6 py-4 text-center">Grade Letter</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-black/5">
-                            {records.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-20 text-center text-muted-foreground font-bold">NO ACADEMIC RECORDS FOUND FOR THIS PERIOD</td></tr>
-                            ) : (
-                                records.map((record, idx) => (
-                                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-muted/20'}>
-                                        <td className="px-6 py-4 font-bold text-primary">{record.code}</td>
-                                        <td className="px-6 py-4 font-bold">{record.description}</td>
-                                        <td className="px-6 py-4 text-center font-bold">{record.units}</td>
-                                        <td className="px-6 py-4 text-center font-black text-sm">{record.grade}</td>
-                                        <td className="px-6 py-4 text-center font-black text-sm text-primary">{record.letter}</td>
+                {/* Table Section */}
+                <div className="border border-black/5 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                            <thead>
+                                <tr className="bg-muted/50 border-b border-black/5 text-left uppercase font-black tracking-widest">
+                                    <th className="px-6 py-4">Subject Code</th>
+                                    <th className="px-6 py-4">Description</th>
+                                    <th className="px-6 py-4 text-center">Units Taken</th>
+                                    <th className="px-6 py-4 text-center">Official Grade</th>
+                                    <th className="px-6 py-4 text-center">Grade Letter</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-black/5">
+                                {records.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                                <Info size={32} />
+                                                <p className="font-bold uppercase tracking-widest">NO ACADEMIC RECORDS FOUND FOR THIS PERIOD</p>
+                                                <p className="text-[10px] normal-case font-normal">If this term just ended, records may take a moment to synchronize.</p>
+                                            </div>
+                                        </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    records.map((record, idx) => (
+                                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-muted/20'}>
+                                            <td className="px-6 py-4 font-bold text-primary">{record.code}</td>
+                                            <td className="px-6 py-4 font-bold">{record.description}</td>
+                                            <td className="px-6 py-4 text-center font-bold">{record.units}</td>
+                                            <td className="px-6 py-4 text-center font-black text-sm">{record.grade}</td>
+                                            <td className="px-6 py-4 text-center font-black text-sm text-primary">{record.letter}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div className="flex justify-between items-end border-t-4 border-primary pt-8">
-                    <div className="space-y-1">
+                {/* Footer Section */}
+                <div className="flex flex-col sm:flex-row justify-between items-end border-t-4 border-primary pt-8 gap-8">
+                    <div className="space-y-1 w-full sm:w-auto">
                         <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Registrar Certification</p>
                         <div className="h-10 w-48 border-b-2 border-black/10" />
                         <p className="text-[9px] font-bold text-muted-foreground uppercase">Authorized Signature</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right w-full sm:w-auto">
                         <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">GENERAL WEIGHTED AVERAGE</p>
-                        <div className="text-5xl font-black text-primary tracking-tighter">GWA: {calculateGWA()}</div>
+                        <div className="text-4xl sm:text-5xl font-black text-primary tracking-tighter">GWA: {calculateGWA()}</div>
                     </div>
                 </div>
             </Card>
