@@ -1,18 +1,21 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Conversation } from '@/utils/storage';
+import { Conversation, CallSession } from '@/utils/storage';
 import { PhoneOff, Mic, MicOff, Video, VideoOff, Maximize2, Users, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { updateCallSignalingAction, getCallSessionAction, updateCallStatusAction } from '@/app/actions/dbActions';
 
 interface CallOverlayProps {
     type: 'audio' | 'video';
     conversation: Conversation;
     isCaller?: boolean;
+    sessionId?: string;
     onEnd: () => void;
 }
 
-export default function CallOverlay({ type, conversation, isCaller = false, onEnd }: CallOverlayProps) {
+export default function CallOverlay({ type, conversation, isCaller = false, sessionId, onEnd }: CallOverlayProps) {
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(type === 'audio');
     const [isConnecting, setIsConnecting] = useState(true);
@@ -20,17 +23,15 @@ export default function CallOverlay({ type, conversation, isCaller = false, onEn
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnection = useRef<RTCPeerConnection | null>(null);
-    const signalingChannel = useRef<BroadcastChannel | null>(null);
     const localStream = useRef<MediaStream | null>(null);
+    const signalingInterval = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        // 1. Initialize Signaling Channel
-        signalingChannel.current = new BroadcastChannel(`signaling_${conversation.id}`);
-        
-        // 2. Setup WebRTC & Media
+        if (!sessionId) return;
+
         const initCall = async () => {
             try {
-                // Request Media
+                // 1. Request Media
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: type === 'video', 
                     audio: true 
@@ -41,16 +42,16 @@ export default function CallOverlay({ type, conversation, isCaller = false, onEn
                     localVideoRef.current.srcObject = stream;
                 }
 
-                // Create Peer Connection
+                // 2. Create Peer Connection
                 const pc = new RTCPeerConnection({
                     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
                 });
                 peerConnection.current = pc;
 
-                // Add tracks to connection
+                // 3. Add tracks to connection
                 stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-                // Listen for remote tracks
+                // 4. Listen for remote tracks
                 pc.ontrack = (event) => {
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = event.streams[0];
@@ -58,35 +59,58 @@ export default function CallOverlay({ type, conversation, isCaller = false, onEn
                     }
                 };
 
-                // ICE Candidate handling
+                // 5. ICE Candidate handling
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        signalingChannel.current?.postMessage({ type: 'candidate', candidate: event.candidate });
+                        const field = isCaller ? 'callerCandidates' : 'receiverCandidates';
+                        getCallSessionAction(sessionId).then(current => {
+                            const candidates = (current as any)[field] || [];
+                            updateCallSignalingAction(sessionId, { [field]: [...candidates, event.candidate] });
+                        });
                     }
                 };
 
-                // Signaling Logic
-                signalingChannel.current!.onmessage = async (msg) => {
-                    const data = msg.data;
-                    if (data.type === 'offer') {
-                        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-                        signalingChannel.current?.postMessage({ type: 'answer', answer });
-                    } else if (data.type === 'answer') {
-                        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    } else if (data.type === 'candidate') {
-                        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    } else if (data.type === 'end') {
+                // 6. DB-based Signaling Loop (Replaces BroadcastChannel for Cross-Device)
+                signalingInterval.current = setInterval(async () => {
+                    const session = await getCallSessionAction(sessionId);
+                    if (!session || session.status === 'ended') {
                         onEnd();
+                        return;
                     }
-                };
 
-                // If I'm the caller, initiate offer
+                    if (isCaller) {
+                        // Caller looks for Answer
+                        if (!pc.remoteDescription && session.answer) {
+                            await pc.setRemoteDescription(new RTCSessionDescription(session.answer));
+                        }
+                        // Caller looks for Receiver Candidates
+                        if (session.receiverCandidates) {
+                            for (const cand of session.receiverCandidates) {
+                                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+                            }
+                        }
+                    } else {
+                        // Receiver looks for Offer
+                        if (!pc.remoteDescription && session.offer) {
+                            await pc.setRemoteDescription(new RTCSessionDescription(session.offer));
+                            const answer = await pc.createAnswer();
+                            await pc.setLocalDescription(answer);
+                            await updateCallSignalingAction(sessionId, { answer });
+                        }
+                        // Receiver looks for Caller Candidates
+                        if (session.callerCandidates) {
+                            for (const cand of session.callerCandidates) {
+                                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+                            }
+                        }
+                    }
+                }, 1500);
+
+                // 7. If I'm the caller, initiate offer
                 if (isCaller) {
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
-                    signalingChannel.current?.postMessage({ type: 'offer', offer });
+                    await updateCallSignalingAction(sessionId, { offer });
                 }
 
             } catch (err) {
@@ -99,11 +123,11 @@ export default function CallOverlay({ type, conversation, isCaller = false, onEn
         initCall();
 
         return () => {
+            if (signalingInterval.current) clearInterval(signalingInterval.current);
             localStream.current?.getTracks().forEach(t => t.stop());
             peerConnection.current?.close();
-            signalingChannel.current?.close();
         };
-    }, [conversation.id, type, isCaller, onEnd]);
+    }, [sessionId, type, isCaller, onEnd]);
 
     const toggleMute = () => {
         if (localStream.current) {
@@ -119,8 +143,10 @@ export default function CallOverlay({ type, conversation, isCaller = false, onEn
         }
     };
 
-    const handleEnd = () => {
-        signalingChannel.current?.postMessage({ type: 'end' });
+    const handleEnd = async () => {
+        if (sessionId) {
+            await updateCallStatusAction(sessionId, 'ended');
+        }
         onEnd();
     };
 

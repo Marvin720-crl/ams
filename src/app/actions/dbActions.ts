@@ -942,6 +942,7 @@ export async function getActiveCallsAction(userId: string): Promise<CallSession[
     const calls: CallSession[] = await readDb('calls');
     const conversations: Conversation[] = await getConversationsAction(userId);
     const myConvIds = conversations.map(c => c.id);
+    // Filter for calls where I am a participant but not the one who initiated it
     return calls.filter(c => c.status === 'pending' && myConvIds.includes(c.conversationId) && c.callerId !== userId);
 }
 
@@ -963,6 +964,20 @@ export async function updateCallStatusAction(id: string, status: 'active' | 'end
     const idx = calls.findIndex(c => c.id === id);
     if (idx !== -1) {
         calls[idx].status = status;
+        await writeDb('calls', calls);
+    }
+}
+
+export async function getCallSessionAction(id: string): Promise<CallSession | null> {
+    const calls: CallSession[] = await readDb('calls');
+    return calls.find(c => c.id === id) || null;
+}
+
+export async function updateCallSignalingAction(id: string, updates: Partial<CallSession>) {
+    const calls: CallSession[] = await readDb('calls');
+    const idx = calls.findIndex(c => c.id === id);
+    if (idx !== -1) {
+        calls[idx] = { ...calls[idx], ...updates };
         await writeDb('calls', calls);
     }
 }

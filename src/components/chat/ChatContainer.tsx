@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -159,10 +160,7 @@ export default function ChatContainer() {
         }
     };
 
-    const handleEndCall = async () => {
-        if (activeCall?.sessionId) {
-            await updateCallStatusAction(activeCall.sessionId, 'ended');
-        }
+    const handleEndCall = () => {
         setActiveCall(null);
     };
 
@@ -203,6 +201,7 @@ export default function ChatContainer() {
                     type={activeCall.type} 
                     conversation={activeCall.conversation} 
                     isCaller={activeCall.isCaller}
+                    sessionId={activeCall.sessionId}
                     onEnd={handleEndCall} 
                 />
             )}

@@ -245,4 +245,9 @@ export interface CallSession {
   type: 'audio' | 'video';
   status: 'pending' | 'active' | 'ended';
   startedAt: string;
+  // Signaling Fields for Cross-Device
+  offer?: any;
+  answer?: any;
+  callerCandidates?: any[];
+  receiverCandidates?: any[];
 }
