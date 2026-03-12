@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -25,15 +24,16 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localStream = useRef<MediaStream | null>(null);
     const signalingInterval = useRef<NodeJS.Timeout | null>(null);
+    const processedCandidates = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         if (!sessionId) return;
 
         const initCall = async () => {
             try {
-                // 1. Request Media
+                // 1. Request Media - Ensure audio is always true
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: type === 'video', 
+                    video: type === 'video' ? { facingMode: 'user' } : false, 
                     audio: true 
                 });
                 
@@ -42,9 +42,12 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     localVideoRef.current.srcObject = stream;
                 }
 
-                // 2. Create Peer Connection
+                // 2. Create Peer Connection with Public STUN
                 const pc = new RTCPeerConnection({
-                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
                 });
                 peerConnection.current = pc;
 
@@ -53,69 +56,90 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
                 // 4. Listen for remote tracks
                 pc.ontrack = (event) => {
+                    console.log("Remote track received");
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = event.streams[0];
                         setIsConnecting(false);
                     }
                 };
 
-                // 5. ICE Candidate handling
+                // 5. ICE Candidate handling - MUST serialize to JSON
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         const field = isCaller ? 'callerCandidates' : 'receiverCandidates';
+                        const candJson = event.candidate.toJSON();
+                        
                         getCallSessionAction(sessionId).then(current => {
-                            const candidates = (current as any)[field] || [];
-                            updateCallSignalingAction(sessionId, { [field]: [...candidates, event.candidate] });
+                            if (!current) return;
+                            const existing = (current as any)[field] || [];
+                            // Avoid duplicate candidates in DB
+                            const candStr = JSON.stringify(candJson);
+                            if (!existing.some((c: any) => JSON.stringify(c) === candStr)) {
+                                updateCallSignalingAction(sessionId, { [field]: [...existing, candJson] });
+                            }
                         });
                     }
                 };
 
-                // 6. DB-based Signaling Loop (Replaces BroadcastChannel for Cross-Device)
+                // 6. DB-based Signaling Loop
                 signalingInterval.current = setInterval(async () => {
                     const session = await getCallSessionAction(sessionId);
                     if (!session || session.status === 'ended') {
+                        clearInterval(signalingInterval.current!);
                         onEnd();
                         return;
                     }
 
-                    if (isCaller) {
-                        // Caller looks for Answer
-                        if (!pc.remoteDescription && session.answer) {
-                            await pc.setRemoteDescription(new RTCSessionDescription(session.answer));
-                        }
-                        // Caller looks for Receiver Candidates
-                        if (session.receiverCandidates) {
-                            for (const cand of session.receiverCandidates) {
-                                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+                    try {
+                        if (isCaller) {
+                            // Caller looks for Answer
+                            if (pc.signalingState === 'have-local-offer' && session.answer && !pc.remoteDescription) {
+                                await pc.setRemoteDescription(new RTCSessionDescription(session.answer));
+                            }
+                            // Caller looks for Receiver Candidates
+                            if (session.receiverCandidates && pc.remoteDescription) {
+                                for (const cand of session.receiverCandidates) {
+                                    const cStr = JSON.stringify(cand);
+                                    if (!processedCandidates.current.has(cStr)) {
+                                        await pc.addIceCandidate(new RTCIceCandidate(cand));
+                                        processedCandidates.current.add(cStr);
+                                    }
+                                }
+                            }
+                        } else {
+                            // Receiver looks for Offer
+                            if (pc.signalingState === 'stable' && session.offer && !pc.remoteDescription) {
+                                await pc.setRemoteDescription(new RTCSessionDescription(session.offer));
+                                const answer = await pc.createAnswer();
+                                await pc.setLocalDescription(answer);
+                                await updateCallSignalingAction(sessionId, { answer: answer.toJSON() });
+                            }
+                            // Receiver looks for Caller Candidates
+                            if (session.callerCandidates && pc.remoteDescription) {
+                                for (const cand of session.callerCandidates) {
+                                    const cStr = JSON.stringify(cand);
+                                    if (!processedCandidates.current.has(cStr)) {
+                                        await pc.addIceCandidate(new RTCIceCandidate(cand));
+                                        processedCandidates.current.add(cStr);
+                                    }
+                                }
                             }
                         }
-                    } else {
-                        // Receiver looks for Offer
-                        if (!pc.remoteDescription && session.offer) {
-                            await pc.setRemoteDescription(new RTCSessionDescription(session.offer));
-                            const answer = await pc.createAnswer();
-                            await pc.setLocalDescription(answer);
-                            await updateCallSignalingAction(sessionId, { answer });
-                        }
-                        // Receiver looks for Caller Candidates
-                        if (session.callerCandidates) {
-                            for (const cand of session.callerCandidates) {
-                                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
-                            }
-                        }
+                    } catch (err) {
+                        console.error("Signaling error:", err);
                     }
-                }, 1500);
+                }, 2000);
 
                 // 7. If I'm the caller, initiate offer
                 if (isCaller) {
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
-                    await updateCallSignalingAction(sessionId, { offer });
+                    await updateCallSignalingAction(sessionId, { offer: offer.toJSON() });
                 }
 
             } catch (err) {
                 console.error("Media Error:", err);
-                toast.error("Could not access camera/microphone");
+                toast.error("Access Denied: Please enable Mic/Camera");
                 onEnd();
             }
         };
@@ -162,9 +186,9 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         <h2 className="text-white font-black uppercase tracking-tighter text-xl">{conversation.name}</h2>
                         <p className="text-white/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                             {isConnecting ? (
-                                <><Loader2 size={10} className="animate-spin"/> Establish Secure Connection...</>
+                                <><Loader2 size={10} className="animate-spin"/> Initializing Secure Line...</>
                             ) : (
-                                <span className="text-green-500">Live Call Active</span>
+                                <span className="text-green-500">Live Call Connected</span>
                             )}
                         </p>
                     </div>
@@ -187,11 +211,11 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary shadow-2xl animate-pulse">
                                 <span className="text-5xl font-black">{conversation.name[0]}</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Waiting for {conversation.name}...</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs text-center">Waiting for {conversation.name} to join...</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
-                        Remote Participant
+                        Remote Stream
                     </div>
                 </div>
 
@@ -209,11 +233,11 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-white/5 border-4 border-white/10 flex items-center justify-center text-white/20">
                                 <span className="text-5xl font-black">YOU</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Self Camera Off</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Self View Off</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
-                        You (Preview)
+                        You (Local)
                     </div>
                 </div>
             </div>
