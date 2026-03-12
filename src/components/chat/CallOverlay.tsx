@@ -31,7 +31,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
         const initCall = async () => {
             try {
-                // 1. Request Media - Always request audio, video only if selected
+                // 1. Request Media
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: type === 'video' ? { facingMode: 'user' } : false, 
                     audio: true 
@@ -42,7 +42,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     localVideoRef.current.srcObject = stream;
                 }
 
-                // 2. Create Peer Connection with Public STUN
+                // 2. Create Peer Connection
                 const pc = new RTCPeerConnection({
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -51,7 +51,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                 });
                 peerConnection.current = pc;
 
-                // 3. Add tracks to connection
+                // 3. Add tracks
                 stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
                 // 4. Listen for remote tracks
@@ -60,22 +60,28 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = event.streams[0];
                         setIsConnecting(false);
+                        // Ensure video starts playing (handling auto-play restrictions)
+                        remoteVideoRef.current.play().catch(e => console.log("Auto-play prevented", e));
                     }
                 };
 
-                // 5. ICE Candidate handling - Serializing to plain JSON
+                // 5. ICE Candidate handling - Manual pick properties for Server Action safety
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         const field = isCaller ? 'callerCandidates' : 'receiverCandidates';
-                        const candJson = JSON.parse(JSON.stringify(event.candidate.toJSON()));
+                        const candData = {
+                            candidate: event.candidate.candidate,
+                            sdpMid: event.candidate.sdpMid,
+                            sdpMLineIndex: event.candidate.sdpMLineIndex,
+                            usernameFragment: event.candidate.usernameFragment
+                        };
                         
                         getCallSessionAction(sessionId).then(current => {
                             if (!current) return;
                             const existing = (current as any)[field] || [];
-                            // Avoid duplicate candidates
-                            const candStr = JSON.stringify(candJson);
+                            const candStr = JSON.stringify(candData);
                             if (!existing.some((c: any) => JSON.stringify(c) === candStr)) {
-                                updateCallSignalingAction(sessionId, { [field]: [...existing, candJson] });
+                                updateCallSignalingAction(sessionId, { [field]: [...existing, candData] });
                             }
                         });
                     }
@@ -112,8 +118,10 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                                 await pc.setRemoteDescription(new RTCSessionDescription(session.offer));
                                 const answer = await pc.createAnswer();
                                 await pc.setLocalDescription(answer);
-                                // Serialize answer to JSON
-                                await updateCallSignalingAction(sessionId, { answer: JSON.parse(JSON.stringify(answer.toJSON())) });
+                                // Manually serialize answer
+                                await updateCallSignalingAction(sessionId, { 
+                                    answer: { type: answer.type, sdp: answer.sdp } 
+                                });
                             }
                             // Receiver looks for Caller Candidates
                             if (session.callerCandidates && pc.remoteDescription) {
@@ -127,20 +135,22 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             }
                         }
                     } catch (err) {
-                        console.error("Signaling loop error:", err);
+                        console.error("Signaling error:", err);
                     }
-                }, 2000);
+                }, 1500); // Slightly faster polling
 
-                // 7. If I'm the caller, initiate offer
+                // 7. If caller, create offer
                 if (isCaller) {
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
-                    // Serialize offer to JSON
-                    await updateCallSignalingAction(sessionId, { offer: JSON.parse(JSON.stringify(offer.toJSON())) });
+                    // Manually serialize offer
+                    await updateCallSignalingAction(sessionId, { 
+                        offer: { type: offer.type, sdp: offer.sdp } 
+                    });
                 }
 
             } catch (err) {
-                console.error("Media Access Error:", err);
+                console.error("Media Error:", err);
                 toast.error("Microphone/Camera Access Denied");
                 onEnd();
             }
@@ -188,9 +198,9 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         <h2 className="text-white font-black uppercase tracking-tighter text-xl">{conversation.name}</h2>
                         <p className="text-white/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                             {isConnecting ? (
-                                <><Loader2 size={10} className="animate-spin"/> Initializing Secure Line...</>
+                                <><Loader2 size={10} className="animate-spin"/> Synchronizing Peer Stream...</>
                             ) : (
-                                <span className="text-green-500">Live Connection Established</span>
+                                <span className="text-green-500">Live Secure Connection</span>
                             )}
                         </p>
                     </div>
@@ -200,7 +210,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
             {/* Video Grid Area */}
             <div className="flex-1 w-full max-w-6xl my-6 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                {/* Remote Video */}
+                {/* Remote Video - NOT MUTED */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={remoteVideoRef} 
@@ -213,15 +223,15 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary shadow-2xl animate-pulse">
                                 <span className="text-5xl font-black">{conversation.name[0]}</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs text-center">Awaiting data from {conversation.name}...</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs text-center px-6">Establishing Handshake with {conversation.name}...</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
-                        Remote Stream
+                        Remote Peer
                     </div>
                 </div>
 
-                {/* Local Video */}
+                {/* Local Video - MUTED */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={localVideoRef} 
@@ -235,11 +245,11 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-white/5 border-4 border-white/10 flex items-center justify-center text-white/20">
                                 <span className="text-5xl font-black">YOU</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Privacy Mode Active</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Sensors Disabled</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
-                        Local View
+                        Local Output
                     </div>
                 </div>
             </div>
