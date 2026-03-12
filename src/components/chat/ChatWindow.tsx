@@ -4,11 +4,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Conversation, ChatMessage } from '@/utils/storage';
 import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, isSameDay } from 'date-fns';
+import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ChatWindowProps {
     conversation: Conversation;
@@ -61,27 +62,31 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#313338]">
+        <div className="flex-1 flex flex-col h-full bg-[#1e1f22]">
             {/* Chat Header */}
-            <div className="h-12 px-4 shadow-sm border-b border-black/20 flex items-center justify-between bg-[#313338]/95 backdrop-blur-md sticky top-0 z-10">
-                <div className="flex items-center gap-2">
-                    {conversation.type === 'private' ? (
-                        <UserIcon className="text-white/40" size={24} />
-                    ) : (
-                        <Hash className="text-white/40" size={24} />
-                    )}
-                    <span className="text-white font-black text-sm uppercase tracking-tighter">{conversation.name}</span>
+            <div className="h-16 px-6 shadow-sm border-b border-white/5 flex items-center justify-between bg-[#1e1f22]/95 backdrop-blur-md sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        {conversation.type === 'private' ? (
+                            <UserIcon size={20} />
+                        ) : (
+                            <Hash size={20} />
+                        )}
+                    </div>
+                    <div>
+                        <span className="text-white font-black text-sm uppercase tracking-tighter block">{conversation.name}</span>
+                        <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Active Now</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-4 text-white/60">
-                    <div className="w-px h-6 bg-white/10" />
+                <div className="flex items-center gap-4 text-white/40">
                     <button className="hover:text-white transition-colors"><MoreVertical size={20}/></button>
                 </div>
             </div>
 
-            {/* Messages Area */}
+            {/* Messages Area - Messenger Style */}
             <div 
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar"
+                className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar"
             >
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-4 p-8">
@@ -89,52 +94,74 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                             {conversation.type === 'private' ? <UserIcon size={40}/> : <Hash size={40}/>}
                         </div>
                         <div>
-                            <h3 className="text-white font-black text-2xl tracking-tighter uppercase">Welcome to #{conversation.name}</h3>
-                            <p className="text-white/30 font-bold uppercase text-[10px] tracking-widest mt-1">This is the start of the conversation history.</p>
+                            <h3 className="text-white font-black text-2xl tracking-tighter uppercase">No Messages Yet</h3>
+                            <p className="text-white/30 font-bold uppercase text-[10px] tracking-widest mt-1">Start the conversation with #{conversation.name}</p>
                         </div>
                     </div>
                 ) : (
-                    messages.map((msg, idx) => {
-                        const prevMsg = idx > 0 ? messages[idx - 1] : null;
-                        const isCompact = prevMsg && prevMsg.senderId === msg.senderId && isSameDay(new Date(prevMsg.timestamp), new Date(msg.timestamp)) && (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() < 300000);
+                    messages.map((msg) => {
+                        const isMe = msg.senderId === user?.id;
                         
                         return (
-                            <div key={msg.id} className={`flex items-start gap-4 hover:bg-white/[0.02] -mx-4 px-4 py-0.5 transition-colors group ${!isCompact ? 'mt-4' : ''}`}>
-                                {!isCompact ? (
-                                    <Avatar className="h-10 w-10 mt-1 shadow-lg shrink-0">
-                                        <AvatarFallback className="bg-primary text-white font-black uppercase">{msg.senderName[0]}</AvatarFallback>
-                                    </Avatar>
-                                ) : (
-                                    <div className="w-10 shrink-0 text-[9px] text-white/10 text-right pr-2 leading-tight opacity-0 group-hover:opacity-100 select-none transition-opacity">
-                                        {format(new Date(msg.timestamp), 'HH:mm')}
-                                    </div>
+                            <div 
+                                key={msg.id} 
+                                className={cn(
+                                    "flex items-end gap-3",
+                                    isMe ? "flex-row-reverse" : "flex-row"
                                 )}
-                                <div className="flex-1 overflow-hidden">
-                                    {!isCompact && (
-                                        <div className="flex items-baseline gap-2 mb-0.5">
-                                            <span className="text-white font-black text-sm tracking-tight hover:underline cursor-pointer">{msg.senderName}</span>
-                                            <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest">{format(new Date(msg.timestamp), 'MM/dd/yyyy HH:mm')}</span>
-                                        </div>
+                            >
+                                {/* Avatar - Only show for others */}
+                                {!isMe && (
+                                    <Avatar className="h-8 w-8 shrink-0 mb-1 border-2 border-white/5">
+                                        <AvatarFallback className="bg-primary text-white font-black uppercase text-[10px]">{msg.senderName[0]}</AvatarFallback>
+                                    </Avatar>
+                                )}
+
+                                <div className={cn(
+                                    "flex flex-col max-w-[75%] space-y-1",
+                                    isMe ? "items-end" : "items-start"
+                                )}>
+                                    {/* Sender Name - Optional for Messenger but added for clarity in group chats */}
+                                    {!isMe && (
+                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">
+                                            {msg.senderName}
+                                        </span>
                                     )}
-                                    <div className="space-y-2">
-                                        {msg.text && <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>}
+
+                                    {/* Message Bubble */}
+                                    <div className={cn(
+                                        "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-lg",
+                                        isMe 
+                                            ? "bg-primary text-white rounded-br-none" 
+                                            : "bg-[#2b2d31] text-white/90 rounded-bl-none border border-white/5"
+                                    )}>
+                                        {msg.text}
+
                                         {msg.fileUrl && (
-                                            <div className="bg-[#2b2d31] rounded-xl p-4 border border-white/5 inline-flex items-center gap-4 max-w-sm group/file hover:bg-[#35373c] transition-colors mt-2">
-                                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                                    <FileIcon size={24} />
+                                            <div className={cn(
+                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
+                                                isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
+                                            )}>
+                                                <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                                    <FileIcon size={20} />
                                                 </div>
                                                 <div className="flex-1 overflow-hidden">
-                                                    <p className="text-white font-bold text-sm truncate">{msg.fileName || 'Attachment'}</p>
-                                                    <p className="text-white/30 text-[10px] uppercase font-black tracking-widest">Shared File</p>
+                                                    <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
+                                                    <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">Download</p>
                                                 </div>
-                                                <Button variant="ghost" size="icon" asChild className="rounded-full text-white/40 hover:text-white hover:bg-white/10">
+                                                <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full text-white/40 hover:text-white hover:bg-white/10">
                                                     <a href={msg.fileUrl} download={msg.fileName}>
-                                                        <Download size={18} />
+                                                        <Download size={14} />
                                                     </a>
                                                 </Button>
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Timestamp */}
+                                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-tighter">
+                                        {format(new Date(msg.timestamp), 'h:mm a')}
+                                    </span>
                                 </div>
                             </div>
                         );
@@ -142,44 +169,48 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                 )}
             </div>
 
-            {/* Input Area */}
-            <div className="p-4 pt-0">
-                <div className="bg-[#38333c] rounded-xl px-4 py-3 flex items-center gap-4 border border-white/5 shadow-inner transition-all focus-within:ring-1 focus-within:ring-white/10">
+            {/* Input Area - Messenger Style */}
+            <div className="p-6 bg-[#1e1f22]">
+                <div className="bg-[#2b2d31] rounded-[1.5rem] px-4 py-2 flex items-center gap-3 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                     <input 
                         type="file" 
                         ref={fileInputRef} 
                         onChange={handleFileChange} 
                         className="hidden" 
                     />
-                    <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-white/40 hover:text-white transition-colors"
-                    >
-                        <PlusCircle size={24}/>
-                    </button>
+                    
+                    <div className="flex items-center gap-1">
+                        <button 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-primary hover:bg-primary/5 transition-all"
+                        >
+                            <PlusCircle size={22}/>
+                        </button>
+                        <button 
+                            onClick={() => setShowNitro(true)}
+                            className="h-10 w-10 rounded-full flex items-center justify-center text-pink-400 hover:bg-pink-400/5 transition-all"
+                        >
+                            <Gift size={22}/>
+                        </button>
+                    </div>
+
                     <textarea 
                         rows={1}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder={`Message #${conversation.name}`}
-                        className="flex-1 bg-transparent text-white border-none outline-none resize-none font-bold text-sm custom-scrollbar placeholder:text-white/20 py-1"
+                        placeholder="Aa"
+                        className="flex-1 bg-transparent text-white border-none outline-none resize-none font-medium text-sm custom-scrollbar placeholder:text-white/20 py-2.5"
                     />
-                    <div className="flex items-center gap-3 text-white/40">
-                        <button 
-                            onClick={() => setShowNitro(true)}
-                            className="hover:text-primary transition-colors text-pink-400"
-                        >
-                            <Gift size={24}/>
-                        </button>
-                        
+
+                    <div className="flex items-center gap-1">
                         <Popover>
                             <PopoverTrigger asChild>
-                                <button className="hover:text-white transition-colors">
-                                    <Smile size={24}/>
+                                <button className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all">
+                                    <Smile size={22}/>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 bg-[#313338] border-white/5 p-4 rounded-3xl shadow-2xl">
+                            <PopoverContent className="w-80 bg-[#2b2d31] border-white/5 p-4 rounded-[2rem] shadow-2xl mr-4 mb-4">
                                 <div className="grid grid-cols-8 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                                     {EMOJIS.map((emoji, index) => (
                                         <button 
@@ -197,9 +228,12 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                         <button 
                             onClick={handleSend} 
                             disabled={!inputText.trim()}
-                            className={`transition-all ${inputText.trim() ? 'text-primary scale-110' : 'text-white/20'}`}
+                            className={cn(
+                                "h-10 w-10 rounded-full flex items-center justify-center transition-all",
+                                inputText.trim() ? "text-primary scale-110" : "text-white/10"
+                            )}
                         >
-                            <Send size={24}/>
+                            <Send size={22}/>
                         </button>
                     </div>
                 </div>
