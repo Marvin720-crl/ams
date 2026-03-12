@@ -23,10 +23,10 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localStream = useRef<MediaStream | null>(null);
+    const remoteStream = useRef<MediaStream | null>(null);
     const signalingInterval = useRef<NodeJS.Timeout | null>(null);
     const processedCandidates = useRef<Set<string>>(new Set());
 
-    // CRITICAL: Stop signaling when ended
     const stopAndClose = () => {
         if (signalingInterval.current) clearInterval(signalingInterval.current);
         localStream.current?.getTracks().forEach(t => t.stop());
@@ -39,7 +39,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
         const initCall = async () => {
             try {
-                // 1. Request Media - Capture local camera/mic
+                // 1. Get User Media
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: type === 'video' ? { facingMode: 'user' } : false, 
                     audio: true 
@@ -50,33 +50,45 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     localVideoRef.current.srcObject = stream;
                 }
 
-                // 2. Create Peer Connection with STUN servers
+                // 2. Initialize PeerConnection
                 const pc = new RTCPeerConnection({
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
                     ]
                 });
                 peerConnection.current = pc;
 
-                // 3. Add tracks to connection
-                stream.getTracks().forEach(track => pc.addTrack(track, stream));
+                // 3. Create Remote Stream Container
+                remoteStream.current = new MediaStream();
+                if (remoteVideoRef.current) {
+                    remoteVideoRef.current.srcObject = remoteStream.current;
+                }
 
-                // 4. Handle incoming remote stream
+                // 4. Track Handling - Robust Audio Routing
                 pc.ontrack = (event) => {
-                    if (remoteVideoRef.current && event.streams[0]) {
-                        remoteVideoRef.current.srcObject = event.streams[0];
-                        setIsConnecting(false);
+                    event.streams[0].getTracks().forEach(track => {
+                        remoteStream.current?.addTrack(track);
+                    });
+                    
+                    setIsConnecting(false);
+                    
+                    // Force audio playback
+                    if (remoteVideoRef.current) {
                         remoteVideoRef.current.play().catch(() => {
-                            console.log("Waiting for user interaction to play audio...");
+                            console.log("Waiting for user interaction...");
                         });
                     }
                 };
 
-                // 5. Generate and Send ICE Candidates
+                // 5. Add local tracks to connection
+                stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+                // 6. ICE Candidate Handling (Manual Plain Object Extraction for Next.js)
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        const candidate = {
+                        const candidateData = {
                             candidate: event.candidate.candidate,
                             sdpMid: event.candidate.sdpMid,
                             sdpMLineIndex: event.candidate.sdpMLineIndex
@@ -86,15 +98,15 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         getCallSessionAction(sessionId).then(current => {
                             if (!current) return;
                             const existing = (current as any)[field] || [];
-                            const candStr = JSON.stringify(candidate);
+                            const candStr = JSON.stringify(candidateData);
                             if (!existing.some((c: any) => JSON.stringify(c) === candStr)) {
-                                updateCallSignalingAction(sessionId, { [field]: [...existing, candidate] });
+                                updateCallSignalingAction(sessionId, { [field]: [...existing, candidateData] });
                             }
                         });
                     }
                 };
 
-                // 6. Signaling Loop (Polling Database)
+                // 7. Signaling Loop (Poll every 1s for fast connection)
                 signalingInterval.current = setInterval(async () => {
                     const session = await getCallSessionAction(sessionId);
                     if (!session || session.status === 'ended') {
@@ -104,14 +116,14 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
                     try {
                         if (isCaller) {
-                            // Caller: Watch for Answer
+                            // Watch for Answer
                             if (pc.signalingState === 'have-local-offer' && session.answer && !pc.remoteDescription) {
                                 await pc.setRemoteDescription(new RTCSessionDescription({
                                     type: session.answer.type,
                                     sdp: session.answer.sdp
                                 }));
                             }
-                            // Apply Receiver Candidates
+                            // Apply Remote Candidates
                             if (session.receiverCandidates && pc.remoteDescription) {
                                 for (const cand of session.receiverCandidates) {
                                     const cStr = JSON.stringify(cand);
@@ -122,7 +134,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                                 }
                             }
                         } else {
-                            // Receiver: Watch for Offer
+                            // Watch for Offer
                             if (pc.signalingState === 'stable' && session.offer && !pc.remoteDescription) {
                                 await pc.setRemoteDescription(new RTCSessionDescription({
                                     type: session.offer.type,
@@ -134,7 +146,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                                     answer: { type: answer.type, sdp: answer.sdp } 
                                 });
                             }
-                            // Apply Caller Candidates
+                            // Apply Remote Candidates
                             if (session.callerCandidates && pc.remoteDescription) {
                                 for (const cand of session.callerCandidates) {
                                     const cStr = JSON.stringify(cand);
@@ -146,11 +158,11 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             }
                         }
                     } catch (err) {
-                        console.error("Signaling Step Failed:", err);
+                        console.error("Signaling Step Failure:", err);
                     }
-                }, 1500);
+                }, 1000);
 
-                // 7. Initial Offer (Caller only)
+                // 8. Initial Offer (Caller Only)
                 if (isCaller) {
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
@@ -160,8 +172,8 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                 }
 
             } catch (err) {
-                console.error("Call Setup Error:", err);
-                toast.error("Media Error: Ensure camera/mic is allowed.");
+                console.error("Call Setup Failure:", err);
+                toast.error("Media Error: Camera/Mic permission denied or unavailable.");
                 stopAndClose();
             }
         };
@@ -208,9 +220,9 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         <h2 className="text-white font-black uppercase tracking-tighter text-xl">{conversation.name}</h2>
                         <p className="text-white/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                             {isConnecting ? (
-                                <><Loader2 size={10} className="animate-spin"/> Connecting Secure Feed...</>
+                                <><Loader2 size={10} className="animate-spin"/> Handshaking Media...</>
                             ) : (
-                                <span className="text-green-500">Live Connection Active</span>
+                                <span className="text-green-500">Live Secure Connection</span>
                             )}
                         </p>
                     </div>
@@ -220,7 +232,8 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
             {/* Video Grid Area */}
             <div className="flex-1 w-full max-w-6xl my-6 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                {/* Remote Video - CRITICAL: NOT MUTED */}
+                
+                {/* Remote Video - NOT MUTED */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={remoteVideoRef} 
@@ -233,15 +246,15 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary shadow-2xl animate-pulse">
                                 <span className="text-5xl font-black">{conversation.name[0]}</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs text-center px-6">Handshaking with {conversation.name}...</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs text-center px-6">Waiting for {conversation.name}...</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
-                        Remote Feed
+                        Remote Monitor
                     </div>
                 </div>
 
-                {/* Local Video - CRITICAL: MUTED TO PREVENT ECHO */}
+                {/* Local Video - MUTED */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={localVideoRef} 
@@ -255,7 +268,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                             <div className="h-32 w-32 rounded-[3.5rem] bg-white/5 border-4 border-white/10 flex items-center justify-center text-white/20">
                                 <span className="text-5xl font-black">YOU</span>
                             </div>
-                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Camera Privacy Active</p>
+                            <p className="text-white/20 font-black uppercase tracking-[0.3em] text-xs">Privacy Mode Active</p>
                         </div>
                     )}
                     <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest border border-white/10">
