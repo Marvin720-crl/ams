@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -35,10 +34,11 @@ export default function ChatContainer() {
     useEffect(() => {
         if (user) {
             initChat();
-            const pollInterval = setInterval(checkIncomingCalls, 3000);
+            // Fast poll for calls (every 2 seconds)
+            const pollInterval = setInterval(checkIncomingCalls, 2000);
             return () => clearInterval(pollInterval);
         }
-    }, [user]);
+    }, [user, activeCall]);
 
     const initChat = async () => {
         setLoading(true);
@@ -50,7 +50,7 @@ export default function ChatContainer() {
             ]);
             setConversations(convs);
             setUsers(allUsers);
-            if (convs.length > 0) {
+            if (convs.length > 0 && !selectedConv) {
                 handleSelectConversation(convs[0]);
             }
         } catch (e) {
@@ -61,7 +61,11 @@ export default function ChatContainer() {
     };
 
     const checkIncomingCalls = async () => {
-        if (!user || activeCall) return;
+        // Only look for incoming if NOT already in a call
+        if (!user || activeCall) {
+            setIncomingCall(null);
+            return;
+        }
         try {
             const calls = await getActiveCallsAction(user.id);
             if (calls.length > 0) {
@@ -147,8 +151,14 @@ export default function ChatContainer() {
         if (!incomingCall || !user) return;
         const conv = conversations.find(c => c.id === incomingCall.conversationId);
         if (conv) {
+            // CRITICAL: Update status to 'active' before mounting overlay
             await updateCallStatusAction(incomingCall.id, 'active');
-            setActiveCall({ type: incomingCall.type, conversation: conv, sessionId: incomingCall.id, isCaller: false });
+            setActiveCall({ 
+                type: incomingCall.type, 
+                conversation: conv, 
+                sessionId: incomingCall.id, 
+                isCaller: false 
+            });
             setIncomingCall(null);
         }
     };
