@@ -84,7 +84,7 @@ export default function ChatContainer() {
         }
     };
 
-    const handleSendMessage = async (text: string) => {
+    const handleSendMessage = async (text: string, file?: { name: string, data: string }) => {
         if (!selectedConv || !user) return;
         try {
             const msg = await sendMessageAction({
@@ -92,12 +92,14 @@ export default function ChatContainer() {
                 senderId: user.id,
                 senderName: user.name,
                 text,
-                type: 'text'
+                type: 'text',
+                fileName: file?.name,
+                fileData: file?.data
             });
             setMessages(prev => [...prev, msg]);
             // Update local conversation list for sorting
             setConversations(prev => {
-                const updated = prev.map(c => c.id === selectedConv.id ? { ...c, lastMessage: text, lastTimestamp: msg.timestamp } : c);
+                const updated = prev.map(c => c.id === selectedConv.id ? { ...c, lastMessage: file ? `Sent a file: ${file.name}` : text, lastTimestamp: msg.timestamp } : c);
                 return updated.sort((a,b) => new Date(b.lastTimestamp || 0).getTime() - new Date(a.lastTimestamp || 0).getTime());
             });
         } catch (e) {

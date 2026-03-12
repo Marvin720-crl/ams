@@ -1,6 +1,7 @@
+
 'use server';
 
-import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile } from '@/lib/db';
+import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
 import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage, CallSession } from '@/utils/storage';
 
 /**
@@ -839,9 +840,19 @@ export async function getMessagesAction(conversationId: string): Promise<ChatMes
     return messages.filter(m => m.conversationId === conversationId);
 }
 
-export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'timestamp'>) {
+export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'timestamp'> & { fileData?: string }) {
     const messages = await readDb('chatmessages');
-    const newMessage = { ...message, id: `MSG-${Date.now()}`, timestamp: new Date().toISOString() };
+    let fileUrl = undefined;
+    if (message.fileData && message.fileName) {
+        fileUrl = await saveChatFile(message.fileName, message.fileData);
+    }
+    const newMessage = { 
+        ...message, 
+        id: `MSG-${Date.now()}`, 
+        timestamp: new Date().toISOString(),
+        fileUrl 
+    };
+    delete (newMessage as any).fileData;
     messages.push(newMessage);
     await writeDb('chatmessages', messages);
     
@@ -849,7 +860,7 @@ export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'times
     const conversations = await readDb('conversations');
     const idx = conversations.findIndex((c: Conversation) => c.id === message.conversationId);
     if (idx !== -1) {
-        conversations[idx].lastMessage = message.text;
+        conversations[idx].lastMessage = message.fileUrl ? "Sent a file" : message.text;
         conversations[idx].lastTimestamp = newMessage.timestamp;
         await writeDb('conversations', conversations);
     }
@@ -885,7 +896,7 @@ export async function ensureSubjectChatsAction() {
             changed = true;
         } else {
             // Update members list if it changed
-            if (JSON.stringify(conv.memberIds.sort()) !== JSON.stringify(memberIds.sort())) {
+            if (JSON.stringify([...conv.memberIds].sort()) !== JSON.stringify([...memberIds].sort())) {
                 const idx = conversations.findIndex(c => c.id === conv?.id);
                 conversations[idx].memberIds = memberIds;
                 changed = true;
@@ -913,7 +924,7 @@ export async function ensureSubjectChatsAction() {
                 .map(e => e.studentId);
             const updatedGeneralMembers = Array.from(new Set([subject.teacherId, ...allTeacherStudents]));
             
-            if (JSON.stringify(generalConv.memberIds.sort()) !== JSON.stringify(updatedGeneralMembers.sort())) {
+            if (JSON.stringify([...generalConv.memberIds].sort()) !== JSON.stringify([...updatedGeneralMembers].sort())) {
                 const idx = conversations.findIndex(c => c.id === generalConv?.id);
                 conversations[idx].memberIds = updatedGeneralMembers;
                 changed = true;

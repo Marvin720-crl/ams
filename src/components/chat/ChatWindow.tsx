@@ -1,23 +1,31 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Conversation, ChatMessage } from '@/utils/storage';
-import { Hash, Phone, Video, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon } from 'lucide-react';
+import { Hash, Phone, Video, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Sparkles, Gem } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface ChatWindowProps {
     conversation: Conversation;
     messages: ChatMessage[];
-    onSend: (text: string) => void;
+    onSend: (text: string, file?: { name: string, data: string }) => void;
     onCall: (type: 'audio' | 'video') => void;
 }
+
+const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖'];
 
 export default function ChatWindow({ conversation, messages, onSend, onCall }: ChatWindowProps) {
     const { user } = useAuth();
     const [inputText, setInputText] = useState('');
+    const [showNitro, setShowNitro] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -37,6 +45,21 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
             onSend(inputText);
             setInputText('');
         }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            onSend('', { name: file.name, data: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const addEmoji = (emoji: string) => {
+        setInputText(prev => prev + emoji);
     };
 
     return (
@@ -96,7 +119,25 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                                             <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest">{format(new Date(msg.timestamp), 'MM/dd/yyyy HH:mm')}</span>
                                         </div>
                                     )}
-                                    <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                                    <div className="space-y-2">
+                                        {msg.text && <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>}
+                                        {msg.fileUrl && (
+                                            <div className="bg-[#2b2d31] rounded-xl p-4 border border-white/5 inline-flex items-center gap-4 max-w-sm group/file">
+                                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                                    <FileIcon size={24} />
+                                                </div>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <p className="text-white font-bold text-sm truncate">{msg.fileName || 'Attachment'}</p>
+                                                    <p className="text-white/30 text-[10px] uppercase font-black tracking-widest">Shared File</p>
+                                                </div>
+                                                <Button variant="ghost" size="icon" asChild className="rounded-full text-white/40 hover:text-white hover:bg-white/5">
+                                                    <a href={msg.fileUrl} download={msg.fileName}>
+                                                        <Download size={18} />
+                                                    </a>
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -104,10 +145,19 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                 )}
             </div>
 
-            {/* Input Area - Matches Screenshot perfectly */}
+            {/* Input Area */}
             <div className="p-4 pt-0">
                 <div className="bg-[#38333c] rounded-xl px-4 py-3 flex items-center gap-4 border border-white/5 shadow-inner">
-                    <button className="text-white/40 hover:text-white transition-colors">
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange} 
+                        className="hidden" 
+                    />
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-white/40 hover:text-white transition-colors"
+                    >
                         <PlusCircle size={24}/>
                     </button>
                     <textarea 
@@ -119,12 +169,34 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                         className="flex-1 bg-transparent text-white border-none outline-none resize-none font-bold text-sm custom-scrollbar placeholder:text-white/20"
                     />
                     <div className="flex items-center gap-3 text-white/40">
-                        <button className="hover:text-white transition-colors">
-                            <Smile size={24}/>
-                        </button>
-                        <button className="hover:text-white transition-colors">
+                        <button 
+                            onClick={() => setShowNitro(true)}
+                            className="hover:text-primary transition-colors text-pink-400"
+                        >
                             <Gift size={24}/>
                         </button>
+                        
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <button className="hover:text-white transition-colors">
+                                    <Smile size={24}/>
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 bg-[#313338] border-white/5 p-4 rounded-3xl">
+                                <div className="grid grid-cols-8 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                    {EMOJIS.map(emoji => (
+                                        <button 
+                                            key={emoji} 
+                                            onClick={() => addEmoji(emoji)}
+                                            className="text-2xl hover:bg-white/5 rounded-lg p-1 transition-colors"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+
                         <button 
                             onClick={handleSend} 
                             className={`transition-all ${inputText.trim() ? 'text-primary scale-110' : 'text-white/20'}`}
@@ -134,6 +206,51 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                     </div>
                 </div>
             </div>
+
+            {/* Nitro Perks Dialog */}
+            <Dialog open={showNitro} onOpenChange={setShowNitro}>
+                <DialogContent className="bg-gradient-to-br from-[#2b2d31] to-[#1e1f22] border-none text-white rounded-[2.5rem] p-10 max-w-lg">
+                    <DialogHeader className="text-center">
+                        <div className="h-20 w-20 bg-pink-500 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-white shadow-2xl shadow-pink-500/20 rotate-3">
+                            <Zap size={40} fill="currentColor" />
+                        </div>
+                        <DialogTitle className="text-4xl font-black uppercase tracking-tighter mb-2">Academic Nitro</DialogTitle>
+                        <DialogDescription className="text-pink-400 font-black uppercase tracking-widest text-[10px]">
+                            Unlock premium portal features
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-6 mt-8">
+                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div className="h-10 w-10 rounded-xl bg-blue-500 flex items-center justify-center"><Download size={20}/></div>
+                            <div className="flex-1">
+                                <p className="font-black text-sm uppercase">Bigger File Uploads</p>
+                                <p className="text-white/40 text-xs font-bold">Share up to 500MB of notes and study material.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div className="h-10 w-10 rounded-xl bg-purple-500 flex items-center justify-center"><Video size={20}/></div>
+                            <div className="flex-1">
+                                <p className="font-black text-sm uppercase">HD Video Streaming</p>
+                                <p className="text-white/40 text-xs font-bold">Host virtual classes in crisp 1080p resolution.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center"><Gem size={20}/></div>
+                            <div className="flex-1">
+                                <p className="font-black text-sm uppercase">Exclusive Badges</p>
+                                <p className="text-white/40 text-xs font-bold">Stand out in subject channels with elite tags.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-10">
+                        <Button className="w-full h-14 bg-pink-500 hover:bg-pink-600 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-xl shadow-pink-500/20">
+                            Upgrade Now
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

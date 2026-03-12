@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -11,6 +12,7 @@ export async function ensureDbStructure() {
     await fs.mkdir(DB_PATH, { recursive: true });
     await fs.mkdir(PROFILE_PATH, { recursive: true });
     await fs.mkdir(UPLOADS_PATH, { recursive: true });
+    await fs.mkdir(path.join(UPLOADS_PATH, 'chat'), { recursive: true });
     
     const files = [
       'users.json', 
@@ -139,4 +141,15 @@ export async function saveSubmissionFile(submissionId: string, fileData: string,
   await fs.writeFile(filePath, buffer);
   
   return `/uploads/submissions/${submissionId}/${safeFileName}`;
+}
+
+export async function saveChatFile(fileName: string, base64Data: string): Promise<string | null> {
+  await ensureDbStructure();
+  const matches = base64Data.match(/^data:.+;base64,(.+)$/);
+  if (!matches) return null;
+  const buffer = Buffer.from(matches[1], 'base64');
+  const safeName = `${Date.now()}-${fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+  const filePath = path.join(UPLOADS_PATH, 'chat', safeName);
+  await fs.writeFile(filePath, buffer);
+  return `/uploads/chat/${safeName}`;
 }

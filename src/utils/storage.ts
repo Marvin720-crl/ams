@@ -232,6 +232,9 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   type: 'text' | 'call_log';
+  fileUrl?: string;
+  fileName?: string;
+  fileType?: string;
 }
 
 export interface CallSession {
