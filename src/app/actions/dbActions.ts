@@ -2,7 +2,7 @@
 'use server';
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
-import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage, CallSession } from '@/utils/storage';
+import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
 
 /**
  * UTILITY: Parse a time string (HH:MM) into a Date object relative to a specific date.
@@ -934,50 +934,5 @@ export async function ensureSubjectChatsAction() {
     
     if (changed) {
         await writeDb('conversations', conversations);
-    }
-}
-
-// CALLING ACTIONS
-export async function getActiveCallsAction(userId: string): Promise<CallSession[]> {
-    const calls: CallSession[] = await readDb('calls');
-    const conversations: Conversation[] = await getConversationsAction(userId);
-    const myConvIds = conversations.map(c => c.id);
-    // Filter for calls where I am a participant but not the one who initiated it
-    return calls.filter(c => c.status === 'pending' && myConvIds.includes(c.conversationId) && c.callerId !== userId);
-}
-
-export async function initiateCallAction(call: Omit<CallSession, 'id' | 'startedAt' | 'status'>) {
-    const calls: CallSession[] = await readDb('calls');
-    const newCall: CallSession = {
-        ...call,
-        id: `CALL-${Date.now()}`,
-        status: 'pending',
-        startedAt: new Date().toISOString()
-    };
-    calls.push(newCall);
-    await writeDb('calls', calls);
-    return newCall;
-}
-
-export async function updateCallStatusAction(id: string, status: 'active' | 'ended') {
-    const calls: CallSession[] = await readDb('calls');
-    const idx = calls.findIndex(c => c.id === id);
-    if (idx !== -1) {
-        calls[idx].status = status;
-        await writeDb('calls', calls);
-    }
-}
-
-export async function getCallSessionAction(id: string): Promise<CallSession | null> {
-    const calls: CallSession[] = await readDb('calls');
-    return calls.find(c => c.id === id) || null;
-}
-
-export async function updateCallSignalingAction(id: string, updates: Partial<CallSession>) {
-    const calls: CallSession[] = await readDb('calls');
-    const idx = calls.findIndex(c => c.id === id);
-    if (idx !== -1) {
-        calls[idx] = { ...calls[idx], ...updates };
-        await writeDb('calls', calls);
     }
 }

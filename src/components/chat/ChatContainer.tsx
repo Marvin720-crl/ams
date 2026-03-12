@@ -1,23 +1,19 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Conversation, ChatMessage, User, CallSession } from '@/utils/storage';
+import { Conversation, ChatMessage, User } from '@/utils/storage';
 import { 
     getConversationsAction, 
     getMessagesAction, 
     sendMessageAction, 
     ensureSubjectChatsAction,
     getUsersAction,
-    createConversationAction,
-    initiateCallAction,
-    getActiveCallsAction,
-    updateCallStatusAction
+    createConversationAction
 } from '@/app/actions/dbActions';
 import ChatSidebar from './ChatSidebar';
 import ChatWindow from './ChatWindow';
-import CallOverlay from './CallOverlay';
-import CallNotification from './CallNotification';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,17 +24,19 @@ export default function ChatContainer() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video', conversation: Conversation, sessionId?: string, isCaller: boolean } | null>(null);
-    const [incomingCall, setIncomingCall] = useState<CallSession | null>(null);
 
     useEffect(() => {
         if (user) {
             initChat();
-            // Fast poll for calls (every 2 seconds)
-            const pollInterval = setInterval(checkIncomingCalls, 2000);
-            return () => clearInterval(pollInterval);
+            // Refresh messages every 5 seconds for basic real-time experience
+            const interval = setInterval(() => {
+                if (selectedConv) {
+                    refreshMessages(selectedConv.id);
+                }
+            }, 5000);
+            return () => clearInterval(interval);
         }
-    }, [user, activeCall]);
+    }, [user, selectedConv?.id]);
 
     const initChat = async () => {
         setLoading(true);
@@ -48,7 +46,7 @@ export default function ChatContainer() {
                 getConversationsAction(user!.id),
                 getUsersAction()
             ]);
-            setConversations(convs);
+            setConversations(convs.sort((a,b) => new Date(b.lastTimestamp || 0).getTime() - new Date(a.lastTimestamp || 0).getTime()));
             setUsers(allUsers);
             if (convs.length > 0 && !selectedConv) {
                 handleSelectConversation(convs[0]);
@@ -60,18 +58,11 @@ export default function ChatContainer() {
         }
     };
 
-    const checkIncomingCalls = async () => {
-        // Only look for incoming if NOT already in a call
-        if (!user || activeCall) {
-            setIncomingCall(null);
-            return;
-        }
+    const refreshMessages = async (convId: string) => {
         try {
-            const calls = await getActiveCallsAction(user.id);
-            if (calls.length > 0) {
-                setIncomingCall(calls[0]);
-            } else {
-                setIncomingCall(null);
+            const msgs = await getMessagesAction(convId);
+            if (msgs.length !== messages.length) {
+                setMessages(msgs);
             }
         } catch (e) {
             // silent fail
@@ -132,48 +123,6 @@ export default function ChatContainer() {
         }
     };
 
-    const handleInitiateCall = async (type: 'audio' | 'video') => {
-        if (!selectedConv || !user) return;
-        try {
-            const call = await initiateCallAction({
-                conversationId: selectedConv.id,
-                callerId: user.id,
-                callerName: user.name,
-                type
-            });
-            setActiveCall({ type, conversation: selectedConv, sessionId: call.id, isCaller: true });
-        } catch (e) {
-            toast.error("Could not start call");
-        }
-    };
-
-    const handleAcceptCall = async () => {
-        if (!incomingCall || !user) return;
-        const conv = conversations.find(c => c.id === incomingCall.conversationId);
-        if (conv) {
-            // CRITICAL: Update status to 'active' before mounting overlay
-            await updateCallStatusAction(incomingCall.id, 'active');
-            setActiveCall({ 
-                type: incomingCall.type, 
-                conversation: conv, 
-                sessionId: incomingCall.id, 
-                isCaller: false 
-            });
-            setIncomingCall(null);
-        }
-    };
-
-    const handleDeclineCall = async () => {
-        if (incomingCall) {
-            await updateCallStatusAction(incomingCall.id, 'ended');
-            setIncomingCall(null);
-        }
-    };
-
-    const handleEndCall = () => {
-        setActiveCall(null);
-    };
-
     if (loading) {
         return (
             <div className="h-[80vh] flex items-center justify-center bg-white rounded-[2.5rem] border shadow-xl">
@@ -197,7 +146,6 @@ export default function ChatContainer() {
                         conversation={selectedConv} 
                         messages={messages} 
                         onSend={handleSendMessage}
-                        onCall={handleInitiateCall}
                     />
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-white/30 font-black uppercase tracking-widest text-xl">
@@ -205,24 +153,6 @@ export default function ChatContainer() {
                     </div>
                 )}
             </div>
-
-            {activeCall && (
-                <CallOverlay 
-                    type={activeCall.type} 
-                    conversation={activeCall.conversation} 
-                    isCaller={activeCall.isCaller}
-                    sessionId={activeCall.sessionId}
-                    onEnd={handleEndCall} 
-                />
-            )}
-
-            {incomingCall && (
-                <CallNotification 
-                    call={incomingCall} 
-                    onAccept={handleAcceptCall} 
-                    onDecline={handleDeclineCall} 
-                />
-            )}
         </div>
     );
 }

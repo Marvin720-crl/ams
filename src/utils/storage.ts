@@ -236,18 +236,3 @@ export interface ChatMessage {
   fileName?: string;
   fileType?: string;
 }
-
-export interface CallSession {
-  id: string;
-  conversationId: string;
-  callerId: string;
-  callerName: string;
-  type: 'audio' | 'video';
-  status: 'pending' | 'active' | 'ended';
-  startedAt: string;
-  // Signaling Fields for Cross-Device
-  offer?: any;
-  answer?: any;
-  callerCandidates?: any[];
-  receiverCandidates?: any[];
-}

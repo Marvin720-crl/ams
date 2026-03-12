@@ -33,7 +33,6 @@ export async function ensureDbStructure() {
       'submissions.json',
       'conversations.json',
       'chatmessages.json',
-      'calls.json',
       'termenrollments.json',
       'terms.json',
       'academicrecords.json',

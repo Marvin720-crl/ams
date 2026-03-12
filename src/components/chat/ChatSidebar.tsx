@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { Conversation, User } from '@/utils/storage';
-import { Hash, Plus, ChevronDown, Volume2, Video, Search, MicOff, Mic, Headphones, Settings } from 'lucide-react';
+import { Hash, Plus, ChevronDown, Search, Volume2, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,22 +24,22 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
     const subjectConvs = conversations.filter(c => c.type === 'subject' || c.type === 'general');
     const privateConvs = conversations.filter(c => c.type === 'private');
 
+    // Filter out duplicates and self from search
     const uniqueUsers = Array.from(new Map(users.map(u => [u.id, u])).values());
-
     const filteredUsers = uniqueUsers.filter(u => 
         u.id !== user?.id && 
-        (u.name.toLowerCase().includes(dmSearch.toLowerCase()) || u.id.includes(dmSearch))
+        (u.name.toLowerCase().includes(dmSearch.toLowerCase()) || u.id.toLowerCase().includes(dmSearch.toLowerCase()))
     );
 
     return (
-        <div className="w-72 bg-[#2b2d31] flex flex-col border-r border-black/20">
+        <div className="w-72 bg-[#2b2d31] flex flex-col border-r border-black/20 shrink-0">
             {/* Server Header */}
             <div className="h-12 px-4 shadow-sm border-b border-black/20 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
                 <span className="text-white font-black text-sm uppercase tracking-tighter">Academic Hub</span>
                 <ChevronDown className="text-white/50 group-hover:text-white transition-colors" size={16} />
             </div>
 
-            <div className="flex-1 overflow-y-auto py-4 space-y-6">
+            <div className="flex-1 overflow-y-auto py-4 space-y-6 custom-scrollbar">
                 {/* Subject Channels */}
                 <div>
                     <div className="px-2 mb-1 flex items-center justify-between text-white/40 hover:text-white/70 transition-colors uppercase font-black text-[10px] tracking-widest">
@@ -86,7 +87,7 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                                         {filteredUsers.map(u => (
                                             <button
-                                                key={`user-dm-${u.id}`}
+                                                key={`dm-search-${u.id}`}
                                                 onClick={() => {
                                                     onStartDM(u.id);
                                                     setDmSearch('');
@@ -137,7 +138,7 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                 </div>
             </div>
 
-            {/* Bottom User Area - Matches Screenshot */}
+            {/* Bottom User Area */}
             <div className="bg-[#232428] p-2 h-14 flex items-center gap-2">
                 <div className="flex-1 flex items-center gap-2 p-1 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
                     <div className="relative">
@@ -145,12 +146,11 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                             <AvatarImage src={user?.profilePic} />
                             <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name[0]}</AvatarFallback>
                         </Avatar>
-                        {/* Red Circle Badge from Screenshot */}
                         <div className="absolute -top-1 -left-1 w-4 h-4 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center text-[8px] font-bold text-white">1</div>
                     </div>
                     <div className="overflow-hidden">
-                        <p className="text-xs font-black text-white truncate leading-none mb-0.5">{user?.id || 'User'}</p>
-                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none truncate">{user?.id || 'Offline'}</p>
+                        <p className="text-xs font-black text-white truncate leading-none mb-0.5">{user?.name || 'User'}</p>
+                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none truncate">{user?.id}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5 px-2">
@@ -158,7 +158,7 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                         <Volume2 size={18}/>
                     </button>
                     <button className="text-white/60 hover:text-white transition-colors">
-                        <Video size={18}/>
+                        <Settings size={18}/>
                     </button>
                 </div>
             </div>
