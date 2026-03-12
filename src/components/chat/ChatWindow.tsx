@@ -207,46 +207,53 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                 </div>
             </div>
 
-            {/* Nitro Perks Dialog */}
+            {/* Nitro Perks Dialog - Matching Screenshot Layout */}
             <Dialog open={showNitro} onOpenChange={setShowNitro}>
-                <DialogContent className="bg-gradient-to-br from-[#2b2d31] to-[#1e1f22] border-none text-white rounded-[2.5rem] p-10 max-w-lg">
-                    <DialogHeader className="text-center">
-                        <div className="h-20 w-20 bg-pink-500 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-white shadow-2xl shadow-pink-500/20 rotate-3">
-                            <Zap size={40} fill="currentColor" />
+                <DialogContent className="bg-[#1e1f22] border-none text-white rounded-[2rem] p-10 max-w-[440px] shadow-2xl">
+                    <div className="flex flex-col items-center text-center">
+                        {/* Pink Icon */}
+                        <div className="h-24 w-24 bg-[#eb459e] rounded-[2.2rem] mb-8 flex items-center justify-center text-white shadow-xl shadow-[#eb459e]/20">
+                            <Zap size={48} fill="currentColor" />
                         </div>
-                        <DialogTitle className="text-4xl font-black uppercase tracking-tighter mb-2">Academic Nitro</DialogTitle>
-                        <DialogDescription className="text-pink-400 font-black uppercase tracking-widest text-[10px]">
-                            Unlock premium portal features
-                        </DialogDescription>
-                    </DialogHeader>
+                        
+                        {/* Title Section */}
+                        <DialogTitle className="text-[2.5rem] font-black uppercase tracking-tight leading-none mb-3">
+                            ACADEMIC NITRO
+                        </DialogTitle>
+                        <p className="text-[#eb459e] font-black uppercase tracking-[0.15em] text-[11px] mb-10">
+                            UNLOCK PREMIUM PORTAL FEATURES
+                        </p>
+                    </div>
                     
-                    <div className="space-y-6 mt-8">
-                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <div className="h-10 w-10 rounded-xl bg-blue-500 flex items-center justify-center"><Download size={20}/></div>
+                    {/* Perk List */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-5 bg-[#2b2d31] p-5 rounded-2xl border border-white/[0.03] hover:bg-[#35373c] transition-colors">
+                            <div className="h-12 w-12 rounded-xl bg-[#00aff4] flex items-center justify-center shadow-lg"><Download size={24} className="text-white"/></div>
                             <div className="flex-1">
-                                <p className="font-black text-sm uppercase">Bigger File Uploads</p>
-                                <p className="text-white/40 text-xs font-bold">Share up to 500MB of notes and study material.</p>
+                                <p className="font-black text-[13px] uppercase tracking-wide">BIGGER FILE UPLOADS</p>
+                                <p className="text-white/40 text-[11px] font-bold mt-0.5">Share up to 500MB of notes and study material.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <div className="h-10 w-10 rounded-xl bg-purple-500 flex items-center justify-center"><Video size={20}/></div>
+                        <div className="flex items-center gap-5 bg-[#2b2d31] p-5 rounded-2xl border border-white/[0.03] hover:bg-[#35373c] transition-colors">
+                            <div className="h-12 w-12 rounded-xl bg-[#5865f2] flex items-center justify-center shadow-lg"><Video size={24} className="text-white"/></div>
                             <div className="flex-1">
-                                <p className="font-black text-sm uppercase">HD Video Streaming</p>
-                                <p className="text-white/40 text-xs font-bold">Host virtual classes in crisp 1080p resolution.</p>
+                                <p className="font-black text-[13px] uppercase tracking-wide">HD VIDEO STREAMING</p>
+                                <p className="text-white/40 text-[11px] font-bold mt-0.5">Host virtual classes in crisp 1080p resolution.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center"><Gem size={20}/></div>
+                        <div className="flex items-center gap-5 bg-[#2b2d31] p-5 rounded-2xl border border-white/[0.03] hover:bg-[#35373c] transition-colors">
+                            <div className="h-12 w-12 rounded-xl bg-[#f47b67] flex items-center justify-center shadow-lg"><Gem size={24} className="text-white"/></div>
                             <div className="flex-1">
-                                <p className="font-black text-sm uppercase">Exclusive Badges</p>
-                                <p className="text-white/40 text-xs font-bold">Stand out in subject channels with elite tags.</p>
+                                <p className="font-black text-[13px] uppercase tracking-wide">EXCLUSIVE BADGES</p>
+                                <p className="text-white/40 text-[11px] font-bold mt-0.5">Stand out in subject channels with elite tags.</p>
                             </div>
                         </div>
                     </div>
 
+                    {/* Footer Button */}
                     <div className="mt-10">
-                        <Button className="w-full h-14 bg-pink-500 hover:bg-pink-600 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-xl shadow-pink-500/20">
-                            Upgrade Now
+                        <Button className="w-full h-[60px] bg-[#eb459e] hover:bg-[#d83c90] text-white font-black uppercase text-sm tracking-[0.1em] rounded-2xl shadow-xl shadow-[#eb459e]/20 transition-transform active:scale-95">
+                            UPGRADE NOW
                         </Button>
                     </div>
                 </DialogContent>
