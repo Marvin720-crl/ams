@@ -46,7 +46,8 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                 const pc = new RTCPeerConnection({
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
                     ]
                 });
                 peerConnection.current = pc;
@@ -56,25 +57,26 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
                 // 4. Listen for remote tracks
                 pc.ontrack = (event) => {
-                    console.log("Remote track received");
+                    console.log("Remote track received:", event.streams[0]);
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = event.streams[0];
                         setIsConnecting(false);
-                        // Ensure video starts playing (handling auto-play restrictions)
-                        remoteVideoRef.current.play().catch(e => console.log("Auto-play prevented", e));
+                        // Force play to handle mobile restrictions
+                        remoteVideoRef.current.play().catch(e => console.error("Auto-play failed:", e));
                     }
                 };
 
-                // 5. ICE Candidate handling - Manual pick properties for Server Action safety
+                // 5. ICE Candidate handling
                 pc.onicecandidate = (event) => {
                     if (event.candidate) {
-                        const field = isCaller ? 'callerCandidates' : 'receiverCandidates';
                         const candData = {
                             candidate: event.candidate.candidate,
                             sdpMid: event.candidate.sdpMid,
                             sdpMLineIndex: event.candidate.sdpMLineIndex,
                             usernameFragment: event.candidate.usernameFragment
                         };
+                        
+                        const field = isCaller ? 'callerCandidates' : 'receiverCandidates';
                         
                         getCallSessionAction(sessionId).then(current => {
                             if (!current) return;
@@ -87,7 +89,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     }
                 };
 
-                // 6. DB-based Signaling Loop
+                // 6. Signaling Loop
                 signalingInterval.current = setInterval(async () => {
                     const session = await getCallSessionAction(sessionId);
                     if (!session || session.status === 'ended') {
@@ -100,9 +102,12 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         if (isCaller) {
                             // Caller looks for Answer
                             if (pc.signalingState === 'have-local-offer' && session.answer && !pc.remoteDescription) {
-                                await pc.setRemoteDescription(new RTCSessionDescription(session.answer));
+                                await pc.setRemoteDescription(new RTCSessionDescription({
+                                    type: session.answer.type,
+                                    sdp: session.answer.sdp
+                                }));
                             }
-                            // Caller looks for Receiver Candidates
+                            // Apply Receiver Candidates
                             if (session.receiverCandidates && pc.remoteDescription) {
                                 for (const cand of session.receiverCandidates) {
                                     const cStr = JSON.stringify(cand);
@@ -115,15 +120,17 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                         } else {
                             // Receiver looks for Offer
                             if (pc.signalingState === 'stable' && session.offer && !pc.remoteDescription) {
-                                await pc.setRemoteDescription(new RTCSessionDescription(session.offer));
+                                await pc.setRemoteDescription(new RTCSessionDescription({
+                                    type: session.offer.type,
+                                    sdp: session.offer.sdp
+                                }));
                                 const answer = await pc.createAnswer();
                                 await pc.setLocalDescription(answer);
-                                // Manually serialize answer
                                 await updateCallSignalingAction(sessionId, { 
                                     answer: { type: answer.type, sdp: answer.sdp } 
                                 });
                             }
-                            // Receiver looks for Caller Candidates
+                            // Apply Caller Candidates
                             if (session.callerCandidates && pc.remoteDescription) {
                                 for (const cand of session.callerCandidates) {
                                     const cStr = JSON.stringify(cand);
@@ -137,21 +144,20 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     } catch (err) {
                         console.error("Signaling error:", err);
                     }
-                }, 1500); // Slightly faster polling
+                }, 1000); // Polling every second
 
-                // 7. If caller, create offer
+                // 7. Initial Offer if caller
                 if (isCaller) {
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
-                    // Manually serialize offer
                     await updateCallSignalingAction(sessionId, { 
                         offer: { type: offer.type, sdp: offer.sdp } 
                     });
                 }
 
             } catch (err) {
-                console.error("Media Error:", err);
-                toast.error("Microphone/Camera Access Denied");
+                console.error("Connection error:", err);
+                toast.error("Call Failed: Camera/Mic Access Denied");
                 onEnd();
             }
         };
@@ -187,8 +193,8 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
     };
 
     return (
-        <div className="absolute inset-0 z-50 bg-[#1e1f22] flex flex-col items-center justify-between p-6 md:p-10 animate-in fade-in zoom-in duration-300">
-            {/* Call Header */}
+        <div className="absolute inset-0 z-[100] bg-[#1e1f22] flex flex-col items-center justify-between p-6 md:p-10 animate-in fade-in zoom-in duration-300">
+            {/* Header */}
             <div className="w-full flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
@@ -210,7 +216,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
 
             {/* Video Grid Area */}
             <div className="flex-1 w-full max-w-6xl my-6 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                {/* Remote Video - NOT MUTED */}
+                {/* Remote Video - CRITICAL: NOT MUTED */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={remoteVideoRef} 
@@ -231,7 +237,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                     </div>
                 </div>
 
-                {/* Local Video - MUTED */}
+                {/* Local Video - CRITICAL: MUTED TO PREVENT ECHO */}
                 <div className="bg-black/40 rounded-[3rem] border-4 border-white/5 overflow-hidden flex items-center justify-center relative shadow-2xl">
                     <video 
                         ref={localVideoRef} 
@@ -254,7 +260,7 @@ export default function CallOverlay({ type, conversation, isCaller = false, sess
                 </div>
             </div>
 
-            {/* Call Controls */}
+            {/* Controls */}
             <div className="flex items-center gap-6 bg-black/40 backdrop-blur-xl px-10 py-6 rounded-[2.5rem] border border-white/5 shadow-2xl">
                 <button 
                     onClick={toggleMute}
