@@ -32,45 +32,34 @@
       },
       "required": ["title", "teacherId", "time", "day"]
     },
-    "Enrollment": {
-      "title": "Enrollment",
-      "description": "Link between a student and a subject.",
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A chat room for subjects or private messages.",
       "type": "object",
       "properties": {
-        "subjectId": { "type": "string" },
-        "studentId": { "type": "string" },
-        "studentName": { "type": "string" },
-        "program": { "type": "string" },
-        "year": { "type": "string" }
-      },
-      "required": ["subjectId", "studentId"]
-    },
-    "Attendance": {
-      "title": "Attendance",
-      "description": "Attendance record marked via QR scan.",
-      "type": "object",
-      "properties": {
-        "subjectId": { "type": "string" },
-        "studentId": { "type": "string" },
-        "date": { "type": "string" },
-        "status": { "type": "string", "enum": ["present", "absent", "late"] }
-      },
-      "required": ["subjectId", "studentId", "date", "status"]
-    },
-    "Reservation": {
-      "title": "Reservation",
-      "description": "A reservation for a room or lab made by a teacher.",
-      "type": "object",
-      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["subject", "private", "general"] },
+        "memberIds": { "type": "array", "items": { "type": "string" } },
         "teacherId": { "type": "string" },
-        "subjectId": { "type": "string" },
-        "locationId": { "type": "string" },
-        "locationType": { "type": "string", "enum": ["room", "lab"] },
-        "date": { "type": "string", "format": "date" },
-        "startTime": { "type": "string", "format": "time" },
-        "endTime": { "type": "string", "format": "time" }
+        "subjectId": { "type": "string" }
       },
-      "required": ["teacherId", "subjectId", "locationId", "locationType", "date", "startTime", "endTime"]
+      "required": ["id", "type", "memberIds"]
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message sent within a conversation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "call_log"] }
+      },
+      "required": ["id", "conversationId", "senderId", "text", "timestamp"]
     }
   },
   "auth": {
@@ -85,17 +74,13 @@
       "schema": "Subject",
       "description": "Collection of all school subjects."
     },
-    "/subjects/{subjectId}/enrollments/{enrollId}": {
-      "schema": "Enrollment",
-      "description": "Students enrolled in a specific subject."
+    "/conversations/{convId}": {
+      "schema": "Conversation",
+      "description": "Chat rooms."
     },
-    "/attendance/{recordId}": {
-      "schema": "Attendance",
-      "description": "Attendance logs."
-    },
-    "/reservations/{reservationId}": {
-      "schema": "Reservation",
-      "description": "Room and lab reservations."
+    "/conversations/{convId}/messages/{msgId}": {
+      "schema": "ChatMessage",
+      "description": "Messages within a conversation."
     }
   }
 }

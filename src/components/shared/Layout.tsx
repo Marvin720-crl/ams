@@ -1,14 +1,16 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, RefreshCw, Monitor, MapPin, Scan, Sparkles, QrCode, ClipboardList, School, GraduationCap
+  BookOpen, BarChart3, FileCheck, Menu, X, RefreshCw, Monitor, MapPin, Scan, Sparkles, QrCode, ClipboardList, School, GraduationCap, MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import ChatContainer from '../chat/ChatContainer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -26,6 +28,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       case 'student':
         return [
           { id: 'home', label: 'Home', icon: Home },
+          { id: 'chat', label: 'Messages', icon: MessageCircle },
           { id: 'view-card', label: 'View Card', icon: GraduationCap },
           { id: 'subjects', label: 'My Subjects', icon: Book },
           { id: 'classwork', label: 'Classwork', icon: ClipboardList },
@@ -38,6 +41,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       case 'teacher':
         return [
           { id: 'home', label: 'Home', icon: Home },
+          { id: 'chat', label: 'Messages', icon: MessageCircle },
           { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
           { id: 'schedule', label: 'My Schedule', icon: Calendar },
           { id: 'scanner', label: 'QR Scanner', icon: QrCode },
@@ -75,6 +79,11 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
   };
 
   const menuItems = getMenuItems();
+
+  const renderContent = () => {
+    if (currentView === 'chat') return <ChatContainer />;
+    return children;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50">
@@ -194,15 +203,16 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        <main className="flex-1 p-4 md:p-8 print:p-0">
+        <main className="flex-1 p-4 md:p-8 print:p-0 overflow-hidden">
           <motion.div
             key={currentView}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
+            className="h-full"
           >
-            {children}
+            {renderContent()}
           </motion.div>
         </main>
       </div>

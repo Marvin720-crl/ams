@@ -1,0 +1,156 @@
+
+'use client';
+
+import React, { useState } from 'react';
+import { Conversation, User } from '@/utils/storage';
+import { Hash, MessageSquare, UserPlus, Search, Volume2, Video, ChevronDown, Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+
+interface ChatSidebarProps {
+    conversations: Conversation[];
+    selectedId?: string;
+    onSelect: (conv: Conversation) => void;
+    onStartDM: (userId: string) => void;
+    users: User[];
+}
+
+export default function ChatSidebar({ conversations, selectedId, onSelect, onStartDM, users }: ChatSidebarProps) {
+    const { user } = useAuth();
+    const [dmSearch, setDmSearch] = useState('');
+
+    const subjectConvs = conversations.filter(c => c.type === 'subject' || c.type === 'general');
+    const privateConvs = conversations.filter(c => c.type === 'private');
+
+    const filteredUsers = users.filter(u => 
+        u.id !== user?.id && 
+        (u.name.toLowerCase().includes(dmSearch.toLowerCase()) || u.id.includes(dmSearch))
+    );
+
+    return (
+        <div className="w-72 bg-[#2b2d31] flex flex-col border-r border-black/20">
+            {/* Server Header */}
+            <div className="h-12 px-4 shadow-sm border-b border-black/20 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+                <span className="text-white font-black text-sm uppercase tracking-tighter">Academic Hub</span>
+                <ChevronDown className="text-white/50 group-hover:text-white transition-colors" size={16} />
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-6">
+                {/* Subject Channels */}
+                <div>
+                    <div className="px-2 mb-1 flex items-center justify-between text-white/40 hover:text-white/70 transition-colors uppercase font-black text-[10px] tracking-widest">
+                        <div className="flex items-center gap-1"><ChevronDown size={12}/> SUBJECT CHANNELS</div>
+                        <Plus size={14} className="cursor-pointer" />
+                    </div>
+                    <div className="space-y-0.5 px-2">
+                        {subjectConvs.map(conv => (
+                            <button
+                                key={conv.id}
+                                onClick={() => onSelect(conv)}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md group transition-all ${
+                                    selectedId === conv.id ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white/80'
+                                }`}
+                            >
+                                <Hash size={20} className="text-white/20 group-hover:text-white/40" />
+                                <span className="text-sm font-bold truncate tracking-tight">{conv.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Direct Messages */}
+                <div>
+                    <div className="px-2 mb-1 flex items-center justify-between text-white/40 hover:text-white/70 transition-colors uppercase font-black text-[10px] tracking-widest">
+                        <div className="flex items-center gap-1"><ChevronDown size={12}/> DIRECT MESSAGES</div>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Plus size={14} className="cursor-pointer hover:scale-110 transition-transform" />
+                            </DialogTrigger>
+                            <DialogContent className="bg-[#313338] border-none text-white rounded-3xl p-6">
+                                <DialogHeader>
+                                    <DialogTitle className="font-black uppercase tracking-tighter text-2xl mb-4">Start a Conversation</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                                        <Input 
+                                            placeholder="Search by name or ID..." 
+                                            className="bg-black/20 border-none pl-10 h-12 rounded-xl text-white font-bold"
+                                            value={dmSearch}
+                                            onChange={(e) => setDmSearch(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                                        {filteredUsers.map(u => (
+                                            <button
+                                                key={u.id}
+                                                onClick={() => {
+                                                    onStartDM(u.id);
+                                                    setDmSearch('');
+                                                }}
+                                                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group"
+                                            >
+                                                <Avatar className="h-10 w-10 border-2 border-white/5">
+                                                    <AvatarImage src={u.profilePic} />
+                                                    <AvatarFallback className="bg-primary text-white font-black">{u.name[0]}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="text-left">
+                                                    <p className="font-black text-sm group-hover:text-primary transition-colors">{u.name}</p>
+                                                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{u.role} • {u.id}</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                    <div className="space-y-0.5 px-2">
+                        {privateConvs.map(conv => {
+                            const otherId = conv.memberIds.find(id => id !== user?.id);
+                            const otherUser = users.find(u => u.id === otherId);
+                            return (
+                                <button
+                                    key={conv.id}
+                                    onClick={() => onSelect(conv)}
+                                    className={`w-full flex items-center gap-3 px-2 py-1.5 rounded-md group transition-all ${
+                                        selectedId === conv.id ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white/80'
+                                    }`}
+                                >
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={otherUser?.profilePic} />
+                                        <AvatarFallback className="bg-white/10 text-white/50 text-[10px] font-black">{otherUser?.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 text-left overflow-hidden">
+                                        <p className="text-sm font-bold truncate leading-tight">{otherUser?.name || conv.name}</p>
+                                        <p className="text-[9px] font-black opacity-30 truncate uppercase tracking-tighter">
+                                            {conv.lastMessage || "Start chatting..."}
+                                        </p>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom User Area */}
+            <div className="bg-[#232428] p-2 flex items-center gap-2">
+                <Avatar className="h-8 w-8 border-2 border-white/5">
+                    <AvatarImage src={user?.profilePic} />
+                    <AvatarFallback className="bg-primary text-white font-black">{user?.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 overflow-hidden">
+                    <p className="text-xs font-black text-white truncate leading-tight">{user?.name}</p>
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{user?.id}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                    <button className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white"><Volume2 size={16}/></button>
+                    <button className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white"><Video size={16}/></button>
+                </div>
+            </div>
+        </div>
+    );
+}

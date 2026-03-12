@@ -1,7 +1,8 @@
+
 'use server';
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile } from '@/lib/db';
-import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore } from '@/utils/storage';
+import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
 
 /**
  * UTILITY: Parse a time string (HH:MM) into a Date object relative to a specific date.
@@ -811,4 +812,110 @@ export async function updateSubmissionAction(id: string, updates: Partial<Submis
         return submissions[index];
     }
     return null;
+}
+
+// CHAT ACTIONS
+export async function getConversationsAction(userId: string): Promise<Conversation[]> {
+    const conversations: Conversation[] = await readDb('conversations');
+    return conversations.filter(c => c.memberIds.includes(userId));
+}
+
+export async function createConversationAction(conversation: Omit<Conversation, 'id'>) {
+    const conversations = await readDb('conversations');
+    const newConversation = { ...conversation, id: `CONV-${Date.now()}` };
+    conversations.push(newConversation);
+    await writeDb('conversations', conversations);
+    return newConversation;
+}
+
+export async function getMessagesAction(conversationId: string): Promise<ChatMessage[]> {
+    const messages: ChatMessage[] = await readDb('chatmessages');
+    return messages.filter(m => m.conversationId === conversationId);
+}
+
+export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'timestamp'>) {
+    const messages = await readDb('chatmessages');
+    const newMessage = { ...message, id: `MSG-${Date.now()}`, timestamp: new Date().toISOString() };
+    messages.push(newMessage);
+    await writeDb('chatmessages', messages);
+    
+    // Update conversation last message info
+    const conversations = await readDb('conversations');
+    const idx = conversations.findIndex((c: Conversation) => c.id === message.conversationId);
+    if (idx !== -1) {
+        conversations[idx].lastMessage = message.text;
+        conversations[idx].lastTimestamp = newMessage.timestamp;
+        await writeDb('conversations', conversations);
+    }
+    
+    return newMessage;
+}
+
+export async function ensureSubjectChatsAction() {
+    const subjects = await getSubjectsAction();
+    const enrollments = await getEnrollmentsAction();
+    const conversations: Conversation[] = await readDb('conversations');
+    
+    let changed = false;
+    for (const subject of subjects) {
+        // Check if a conversation for this subject already exists
+        let conv = conversations.find(c => c.subjectId === subject.id);
+        
+        // Members = teacher + approved students
+        const approvedStudentIds = enrollments
+            .filter(e => e.subjectId === subject.id && e.status === 'approved')
+            .map(e => e.studentId);
+        const memberIds = [subject.teacherId, ...approvedStudentIds];
+        
+        if (!conv) {
+            conversations.push({
+                id: `CONV-SUB-${subject.id}`,
+                name: subject.name,
+                type: 'subject',
+                memberIds: memberIds,
+                teacherId: subject.teacherId,
+                subjectId: subject.id
+            });
+            changed = true;
+        } else {
+            // Update members list if it changed
+            if (JSON.stringify(conv.memberIds.sort()) !== JSON.stringify(memberIds.sort())) {
+                const idx = conversations.findIndex(c => c.id === conv?.id);
+                conversations[idx].memberIds = memberIds;
+                changed = true;
+            }
+        }
+        
+        // Also ensure a "#general" chat exists for each teacher's subjects
+        let generalConv = conversations.find(c => c.teacherId === subject.teacherId && c.type === 'general');
+        if (!generalConv) {
+            conversations.push({
+                id: `CONV-GEN-${subject.teacherId}`,
+                name: "Teacher General",
+                type: 'general',
+                memberIds: memberIds,
+                teacherId: subject.teacherId
+            });
+            changed = true;
+        } else {
+            // Update general members list (all students of this teacher)
+            const allTeacherStudents = enrollments
+                .filter(e => {
+                    const sub = subjects.find(s => s.id === e.subjectId);
+                    return sub?.teacherId === subject.teacherId && e.status === 'approved';
+                })
+                .map(e => e.studentId);
+            const updatedGeneralMembers = Array.from(new Set([subject.teacherId, ...allTeacherStudents]));
+            
+            if (JSON.stringify(generalConv.memberIds.sort()) !== JSON.stringify(updatedGeneralMembers.sort())) {
+                const idx = conversations.findIndex(c => c.id === generalConv?.id);
+                conversations[idx].memberIds = updatedGeneralMembers;
+                changed = true;
+            }
+        }
+    }
+    
+    if (changed) {
+        await writeDb('conversations', conversations);
+    }
 }

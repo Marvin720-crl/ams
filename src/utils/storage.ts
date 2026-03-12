@@ -1,3 +1,4 @@
+
 // Storage utilities for managing user data, subjects, and enrollments
 export type UserRole = 'admin' | 'teacher' | 'student' | 'library_admin';
 
@@ -210,4 +211,25 @@ export interface AuditLog {
   action: string;
   details: string;
   timestamp: string;
+}
+
+export interface Conversation {
+  id: string;
+  name: string;
+  type: 'subject' | 'private' | 'general';
+  memberIds: string[];
+  teacherId?: string;
+  subjectId?: string;
+  lastMessage?: string;
+  lastTimestamp?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+  type: 'text' | 'call_log';
 }
