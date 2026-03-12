@@ -18,7 +18,7 @@ interface ChatWindowProps {
     onCall: (type: 'audio' | 'video') => void;
 }
 
-const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖'];
+const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖'];
 
 export default function ChatWindow({ conversation, messages, onSend, onCall }: ChatWindowProps) {
     const { user } = useAuth();
@@ -184,9 +184,9 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                             </PopoverTrigger>
                             <PopoverContent className="w-80 bg-[#313338] border-white/5 p-4 rounded-3xl">
                                 <div className="grid grid-cols-8 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                    {EMOJIS.map(emoji => (
+                                    {EMOJIS.map((emoji, index) => (
                                         <button 
-                                            key={emoji} 
+                                            key={`${emoji}-${index}`} 
                                             onClick={() => addEmoji(emoji)}
                                             className="text-2xl hover:bg-white/5 rounded-lg p-1 transition-colors"
                                         >
@@ -208,7 +208,7 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
             </div>
 
             {/* Nitro Perks Dialog - Matching Screenshot Layout */}
-            <Dialog open={showNitro} onOpenChange={setShowNitro}>
+            <Dialog open={showNitro} onOpenChange={showNitro => setShowNitro(showNitro)}>
                 <DialogContent className="bg-[#1e1f22] border-none text-white rounded-[2rem] p-10 max-w-[440px] shadow-2xl">
                     <div className="flex flex-col items-center text-center">
                         {/* Pink Icon */}
