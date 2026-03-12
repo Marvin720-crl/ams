@@ -3,18 +3,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Conversation, ChatMessage, User } from '@/utils/storage';
+import { Conversation, ChatMessage, User, CallSession } from '@/utils/storage';
 import { 
     getConversationsAction, 
     getMessagesAction, 
     sendMessageAction, 
     ensureSubjectChatsAction,
     getUsersAction,
-    createConversationAction
+    createConversationAction,
+    initiateCallAction,
+    getActiveCallsAction,
+    updateCallStatusAction
 } from '@/app/actions/dbActions';
 import ChatSidebar from './ChatSidebar';
 import ChatWindow from './ChatWindow';
 import CallOverlay from './CallOverlay';
+import CallNotification from './CallNotification';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -25,11 +29,14 @@ export default function ChatContainer() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video', conversation: Conversation } | null>(null);
+    const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video', conversation: Conversation, sessionId?: string } | null>(null);
+    const [incomingCall, setIncomingCall] = useState<CallSession | null>(null);
 
     useEffect(() => {
         if (user) {
             initChat();
+            const pollInterval = setInterval(checkIncomingCalls, 3000);
+            return () => clearInterval(pollInterval);
         }
     }, [user]);
 
@@ -50,6 +57,20 @@ export default function ChatContainer() {
             toast.error("Failed to load chat data");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkIncomingCalls = async () => {
+        if (!user || activeCall) return;
+        try {
+            const calls = await getActiveCallsAction(user.id);
+            if (calls.length > 0) {
+                setIncomingCall(calls[0]);
+            } else {
+                setIncomingCall(null);
+            }
+        } catch (e) {
+            // silent fail
         }
     };
 
@@ -110,6 +131,45 @@ export default function ChatContainer() {
         }
     };
 
+    const handleInitiateCall = async (type: 'audio' | 'video') => {
+        if (!selectedConv || !user) return;
+        try {
+            const call = await initiateCallAction({
+                conversationId: selectedConv.id,
+                callerId: user.id,
+                callerName: user.name,
+                type
+            });
+            setActiveCall({ type, conversation: selectedConv, sessionId: call.id });
+        } catch (e) {
+            toast.error("Could not start call");
+        }
+    };
+
+    const handleAcceptCall = async () => {
+        if (!incomingCall || !user) return;
+        const conv = conversations.find(c => c.id === incomingCall.conversationId);
+        if (conv) {
+            await updateCallStatusAction(incomingCall.id, 'active');
+            setActiveCall({ type: incomingCall.type, conversation: conv, sessionId: incomingCall.id });
+            setIncomingCall(null);
+        }
+    };
+
+    const handleDeclineCall = async () => {
+        if (incomingCall) {
+            await updateCallStatusAction(incomingCall.id, 'ended');
+            setIncomingCall(null);
+        }
+    };
+
+    const handleEndCall = async () => {
+        if (activeCall?.sessionId) {
+            await updateCallStatusAction(activeCall.sessionId, 'ended');
+        }
+        setActiveCall(null);
+    };
+
     if (loading) {
         return (
             <div className="h-[80vh] flex items-center justify-center bg-white rounded-[2.5rem] border shadow-xl">
@@ -133,7 +193,7 @@ export default function ChatContainer() {
                         conversation={selectedConv} 
                         messages={messages} 
                         onSend={handleSendMessage}
-                        onCall={(type) => setActiveCall({ type, conversation: selectedConv })}
+                        onCall={handleInitiateCall}
                     />
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-white/30 font-black uppercase tracking-widest text-xl">
@@ -146,7 +206,15 @@ export default function ChatContainer() {
                 <CallOverlay 
                     type={activeCall.type} 
                     conversation={activeCall.conversation} 
-                    onEnd={() => setActiveCall(null)} 
+                    onEnd={handleEndCall} 
+                />
+            )}
+
+            {incomingCall && (
+                <CallNotification 
+                    call={incomingCall} 
+                    onAccept={handleAcceptCall} 
+                    onDecline={handleDeclineCall} 
                 />
             )}
         </div>

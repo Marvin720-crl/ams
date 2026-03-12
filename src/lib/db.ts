@@ -12,7 +12,32 @@ export async function ensureDbStructure() {
     await fs.mkdir(PROFILE_PATH, { recursive: true });
     await fs.mkdir(UPLOADS_PATH, { recursive: true });
     
-    const files = ['users.json', 'subjects.json', 'enrollments.json', 'attendance.json', 'labs.json', 'pcs.json', 'labrequests.json', 'auditlog.json', 'settings.json', 'books.json', 'libraryborrowings.json', 'rooms.json', 'reservations.json', 'borrowrequests.json', 'classworks.json', 'submissions.json'];
+    const files = [
+      'users.json', 
+      'subjects.json', 
+      'enrollments.json', 
+      'attendance.json', 
+      'labs.json', 
+      'pcs.json', 
+      'labrequests.json', 
+      'auditlog.json', 
+      'settings.json', 
+      'books.json', 
+      'libraryborrowings.json', 
+      'rooms.json', 
+      'reservations.json', 
+      'borrowrequests.json', 
+      'classworks.json', 
+      'submissions.json',
+      'conversations.json',
+      'chatmessages.json',
+      'calls.json',
+      'termenrollments.json',
+      'terms.json',
+      'academicrecords.json',
+      'gradingweights.json',
+      'examscores.json'
+    ];
     for (const file of files) {
       const filePath = path.join(DB_PATH, file);
       try {

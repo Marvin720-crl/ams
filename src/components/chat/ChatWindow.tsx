@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -77,7 +76,6 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                     </div>
                 ) : (
                     messages.map((msg, idx) => {
-                        const isMe = msg.senderId === user?.id;
                         const showAvatar = idx === 0 || messages[idx-1].senderId !== msg.senderId;
                         
                         return (
@@ -106,22 +104,31 @@ export default function ChatWindow({ conversation, messages, onSend, onCall }: C
                 )}
             </div>
 
-            {/* Input Area */}
+            {/* Input Area - Matches Screenshot perfectly */}
             <div className="p-4 pt-0">
-                <div className="bg-[#38333c] rounded-[1.25rem] px-4 py-2 flex items-center gap-4 border border-white/5 focus-within:border-white/10 transition-all">
-                    <button className="text-white/40 hover:text-white transition-colors"><PlusCircle size={24}/></button>
+                <div className="bg-[#38333c] rounded-xl px-4 py-3 flex items-center gap-4 border border-white/5 shadow-inner">
+                    <button className="text-white/40 hover:text-white transition-colors">
+                        <PlusCircle size={24}/>
+                    </button>
                     <textarea 
                         rows={1}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={`Message #${conversation.name}`}
-                        className="flex-1 bg-transparent text-white border-none outline-none resize-none font-bold text-sm py-2 custom-scrollbar placeholder:text-white/20"
+                        className="flex-1 bg-transparent text-white border-none outline-none resize-none font-bold text-sm custom-scrollbar placeholder:text-white/20"
                     />
                     <div className="flex items-center gap-3 text-white/40">
-                        <button className="hover:text-white transition-colors"><Smile size={24}/></button>
-                        <button className="hover:text-white transition-colors"><Gift size={24}/></button>
-                        <button onClick={handleSend} className={`transition-all ${inputText.trim() ? 'text-primary scale-110' : 'text-white/20 cursor-not-allowed'}`}>
+                        <button className="hover:text-white transition-colors">
+                            <Smile size={24}/>
+                        </button>
+                        <button className="hover:text-white transition-colors">
+                            <Gift size={24}/>
+                        </button>
+                        <button 
+                            onClick={handleSend} 
+                            className={`transition-all ${inputText.trim() ? 'text-primary scale-110' : 'text-white/20'}`}
+                        >
                             <Send size={24}/>
                         </button>
                     </div>

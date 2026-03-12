@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState } from 'react';
 import { Conversation, User } from '@/utils/storage';
-import { Hash, MessageSquare, UserPlus, Search, Volume2, Video, ChevronDown, Plus } from 'lucide-react';
+import { Hash, Plus, ChevronDown, Volume2, Video, Search, MicOff, Mic, Headphones, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,7 +23,6 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
     const subjectConvs = conversations.filter(c => c.type === 'subject' || c.type === 'general');
     const privateConvs = conversations.filter(c => c.type === 'private');
 
-    // Ensure users are unique by ID to prevent duplicate key errors
     const uniqueUsers = Array.from(new Map(users.map(u => [u.id, u])).values());
 
     const filteredUsers = uniqueUsers.filter(u => 
@@ -88,7 +86,7 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                                     <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                                         {filteredUsers.map(u => (
                                             <button
-                                                key={`user-${u.id}`}
+                                                key={`user-dm-${u.id}`}
                                                 onClick={() => {
                                                     onStartDM(u.id);
                                                     setDmSearch('');
@@ -139,19 +137,29 @@ export default function ChatSidebar({ conversations, selectedId, onSelect, onSta
                 </div>
             </div>
 
-            {/* Bottom User Area */}
-            <div className="bg-[#232428] p-2 flex items-center gap-2">
-                <Avatar className="h-8 w-8 border-2 border-white/5">
-                    <AvatarImage src={user?.profilePic} />
-                    <AvatarFallback className="bg-primary text-white font-black">{user?.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 overflow-hidden">
-                    <p className="text-xs font-black text-white truncate leading-tight">{user?.name}</p>
-                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{user?.id}</p>
+            {/* Bottom User Area - Matches Screenshot */}
+            <div className="bg-[#232428] p-2 h-14 flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 p-1 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+                    <div className="relative">
+                        <Avatar className="h-8 w-8">
+                            <AvatarImage src={user?.profilePic} />
+                            <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name[0]}</AvatarFallback>
+                        </Avatar>
+                        {/* Red Circle Badge from Screenshot */}
+                        <div className="absolute -top-1 -left-1 w-4 h-4 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center text-[8px] font-bold text-white">1</div>
+                    </div>
+                    <div className="overflow-hidden">
+                        <p className="text-xs font-black text-white truncate leading-none mb-0.5">{user?.id || 'User'}</p>
+                        <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none truncate">{user?.id || 'Offline'}</p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <button className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white"><Volume2 size={16}/></button>
-                    <button className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-white/50 hover:text-white"><Video size={16}/></button>
+                <div className="flex items-center gap-1.5 px-2">
+                    <button className="text-white/60 hover:text-white transition-colors">
+                        <Volume2 size={18}/>
+                    </button>
+                    <button className="text-white/60 hover:text-white transition-colors">
+                        <Video size={18}/>
+                    </button>
                 </div>
             </div>
         </div>

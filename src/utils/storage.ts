@@ -233,3 +233,13 @@ export interface ChatMessage {
   timestamp: string;
   type: 'text' | 'call_log';
 }
+
+export interface CallSession {
+  id: string;
+  conversationId: string;
+  callerId: string;
+  callerName: string;
+  type: 'audio' | 'video';
+  status: 'pending' | 'active' | 'ended';
+  startedAt: string;
+}

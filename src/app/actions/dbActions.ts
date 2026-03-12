@@ -1,8 +1,7 @@
-
 'use server';
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile } from '@/lib/db';
-import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
+import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage, CallSession } from '@/utils/storage';
 
 /**
  * UTILITY: Parse a time string (HH:MM) into a Date object relative to a specific date.
@@ -202,12 +201,19 @@ export async function endTermAction(termId: string) {
             const getAverage = (type: string) => {
                 const group = subjectClassworks.filter((cw: Classwork) => cw.type === type);
                 if (group.length === 0) return 100;
-                let total = 0;
+                let percentageTotal = 0;
+                let count = 0;
+
                 group.forEach((g: Classwork) => {
                     const sub = studentSubmissions.find((s: Submission) => s.classworkId === g.id);
-                    total += sub?.grade || 0;
+                    if (sub && sub.status === 'graded') {
+                        const earned = sub.grade || 0;
+                        const total = g.totalPoints || 100;
+                        percentageTotal += (earned / total) * 100;
+                        count++;
+                    }
                 });
-                return (total / group.length);
+                return count > 0 ? (percentageTotal / count) : 0;
             };
 
             const activityScore = getAverage('activity');
@@ -322,7 +328,7 @@ export async function getGradingWeightsAction(): Promise<GradingWeights[]> {
 }
 
 export async function updateGradingWeightsAction(weights: GradingWeights) {
-    const data = await getGradingWeightsAction();
+    const data: GradingWeights[] = await getGradingWeightsAction();
     const idx = data.findIndex((w: GradingWeights) => w.subjectId === weights.subjectId);
     if (idx !== -1) {
         data[idx] = weights;
@@ -338,7 +344,7 @@ export async function getExamScoresAction(): Promise<ExamScore[]> {
 }
 
 export async function addExamScoreAction(score: ExamScore) {
-    const data = await getExamScoresAction();
+    const data: ExamScore[] = await getExamScoresAction();
     const idx = data.findIndex((s: ExamScore) => s.studentId === score.studentId && s.subjectId === score.subjectId);
     if (idx !== -1) {
         data[idx] = score;
@@ -917,5 +923,35 @@ export async function ensureSubjectChatsAction() {
     
     if (changed) {
         await writeDb('conversations', conversations);
+    }
+}
+
+// CALLING ACTIONS
+export async function getActiveCallsAction(userId: string): Promise<CallSession[]> {
+    const calls: CallSession[] = await readDb('calls');
+    const conversations: Conversation[] = await getConversationsAction(userId);
+    const myConvIds = conversations.map(c => c.id);
+    return calls.filter(c => c.status === 'pending' && myConvIds.includes(c.conversationId) && c.callerId !== userId);
+}
+
+export async function initiateCallAction(call: Omit<CallSession, 'id' | 'startedAt' | 'status'>) {
+    const calls: CallSession[] = await readDb('calls');
+    const newCall: CallSession = {
+        ...call,
+        id: `CALL-${Date.now()}`,
+        status: 'pending',
+        startedAt: new Date().toISOString()
+    };
+    calls.push(newCall);
+    await writeDb('calls', calls);
+    return newCall;
+}
+
+export async function updateCallStatusAction(id: string, status: 'active' | 'ended') {
+    const calls: CallSession[] = await readDb('calls');
+    const idx = calls.findIndex(c => c.id === id);
+    if (idx !== -1) {
+        calls[idx].status = status;
+        await writeDb('calls', calls);
     }
 }
