@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -29,7 +28,7 @@ export default function ChatContainer() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video', conversation: Conversation, sessionId?: string } | null>(null);
+    const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video', conversation: Conversation, sessionId?: string, isCaller: boolean } | null>(null);
     const [incomingCall, setIncomingCall] = useState<CallSession | null>(null);
 
     useEffect(() => {
@@ -97,7 +96,6 @@ export default function ChatContainer() {
                 fileData: file?.data
             });
             setMessages(prev => [...prev, msg]);
-            // Update local conversation list for sorting
             setConversations(prev => {
                 const updated = prev.map(c => c.id === selectedConv.id ? { ...c, lastMessage: file ? `Sent a file: ${file.name}` : text, lastTimestamp: msg.timestamp } : c);
                 return updated.sort((a,b) => new Date(b.lastTimestamp || 0).getTime() - new Date(a.lastTimestamp || 0).getTime());
@@ -109,17 +107,13 @@ export default function ChatContainer() {
 
     const handleStartDM = async (otherUserId: string) => {
         if (!user) return;
-        
-        // Check if DM already exists
         const existing = conversations.find(c => c.type === 'private' && c.memberIds.includes(otherUserId));
         if (existing) {
             handleSelectConversation(existing);
             return;
         }
-
         const otherUser = users.find(u => u.id === otherUserId);
         if (!otherUser) return;
-
         try {
             const newConv = await createConversationAction({
                 name: otherUser.name,
@@ -142,7 +136,7 @@ export default function ChatContainer() {
                 callerName: user.name,
                 type
             });
-            setActiveCall({ type, conversation: selectedConv, sessionId: call.id });
+            setActiveCall({ type, conversation: selectedConv, sessionId: call.id, isCaller: true });
         } catch (e) {
             toast.error("Could not start call");
         }
@@ -153,7 +147,7 @@ export default function ChatContainer() {
         const conv = conversations.find(c => c.id === incomingCall.conversationId);
         if (conv) {
             await updateCallStatusAction(incomingCall.id, 'active');
-            setActiveCall({ type: incomingCall.type, conversation: conv, sessionId: incomingCall.id });
+            setActiveCall({ type: incomingCall.type, conversation: conv, sessionId: incomingCall.id, isCaller: false });
             setIncomingCall(null);
         }
     };
@@ -208,6 +202,7 @@ export default function ChatContainer() {
                 <CallOverlay 
                     type={activeCall.type} 
                     conversation={activeCall.conversation} 
+                    isCaller={activeCall.isCaller}
                     onEnd={handleEndCall} 
                 />
             )}

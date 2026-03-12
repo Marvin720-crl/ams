@@ -1,9 +1,8 @@
-
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CallSession } from '@/utils/storage';
-import { Phone, PhoneOff, Video, Users } from 'lucide-react';
+import { Phone, PhoneOff, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface CallNotificationProps {
@@ -13,6 +12,15 @@ interface CallNotificationProps {
 }
 
 export default function CallNotification({ call, onAccept, onDecline }: CallNotificationProps) {
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    useEffect(() => {
+        // Try to play ringtone automatically
+        if (audioRef.current) {
+            audioRef.current.play().catch(e => console.log("Audio play blocked by browser. User interaction required."));
+        }
+    }, []);
+
     return (
         <div className="fixed top-6 right-6 z-[100] w-80 bg-[#1e1f22] border-2 border-primary/20 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 animate-in slide-in-from-right-10 duration-500">
             <div className="flex items-center gap-4 mb-6">
@@ -42,7 +50,13 @@ export default function CallNotification({ call, onAccept, onDecline }: CallNoti
                 </Button>
             </div>
             
-            <audio autoPlay loop src="https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3" className="hidden" />
+            <audio 
+                ref={audioRef}
+                autoPlay 
+                loop 
+                src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_78391a5354.mp3?filename=incoming-call-95849.mp3" 
+                className="hidden" 
+            />
         </div>
     );
 }
