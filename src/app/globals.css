@@ -46,6 +46,16 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 .hero-landscape {
   @apply relative overflow-hidden rounded-[2.5rem] bg-[#E30613] text-white shadow-2xl;
   background-image: linear-gradient(135deg, #E30613 0%, #b3050f 100%);

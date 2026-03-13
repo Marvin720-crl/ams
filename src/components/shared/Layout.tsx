@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import Link from 'next/link';
 import ChatContainer from '../Chat/ChatContainer';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -94,7 +94,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-muted/10 flex flex-col">
-      {/* Top Header */}
+      {/* Top Header - Pic 1 Style */}
       <header className="bg-primary text-white h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-md print:hidden">
         <div className="flex items-center gap-3">
           <button 
@@ -103,21 +103,23 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Image src="/logo.png" alt="AMA" width={120} height={32} className="h-8 w-auto" />
-        </div>
-        <div className="hidden lg:block text-[10px] font-black uppercase tracking-[0.3em] opacity-50">
-          Academic Management System v1.0
-        </div>
-        <Link href="/profile" className="flex items-center gap-2 hover:bg-white/10 p-1 rounded-full pr-3 transition-colors">
-          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center overflow-hidden">
-            {user?.profilePic ? (
-              <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xs font-bold">{user?.name.charAt(0)}</span>
-            )}
+          <div className="flex items-center gap-2">
+            <Image src="/logo.png" alt="AMA Student Portal" width={140} height={36} className="h-9 w-auto" />
           </div>
-          <span className="text-xs font-bold hidden sm:inline">{user?.name.split(' ')[0]}</span>
-        </Link>
+        </div>
+        
+        {/* Logout Trigger - Right Side */}
+        <button 
+          onClick={logout}
+          className="flex items-center gap-2 group transition-all"
+          title="Logout"
+        >
+          <Avatar className="h-10 w-10 border-2 border-white/20 group-hover:border-white transition-colors">
+            <AvatarImage src={user?.profilePic} />
+            <AvatarFallback className="bg-white/20 text-white font-bold uppercase">{user?.name?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <LogOut size={18} className="hidden sm:block opacity-50 group-hover:opacity-100" />
+        </button>
       </header>
 
       <div className="flex flex-1 relative">
@@ -134,32 +136,14 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* Sidebar */}
+        {/* Sidebar - Pic 2 Minimal Style */}
         <aside className={cn(
           "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-white border-r w-64 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          {/* Mobile Header Inside Sidebar */}
-          <div className="lg:hidden bg-primary h-16 flex items-center justify-between px-4 shrink-0 shadow-md">
-            <button onClick={() => setSidebarOpen(false)} className="text-white p-2">
-              <X size={24} />
-            </button>
-            <Image src="/logo.png" alt="AMA" width={100} height={28} className="h-7 w-auto" />
-          </div>
-
-          <div className="p-6 border-b flex flex-col items-center shrink-0">
-            <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center text-primary text-2xl font-black mb-3 border-2 border-primary/10 overflow-hidden">
-              {user?.profilePic ? (
-                <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl font-black">{user?.name.charAt(0)}</span>
-              )}
-            </div>
-            <h3 className="font-black text-sm uppercase tracking-tight text-center truncate w-full">{user?.name}</h3>
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">{user?.role.replace('_', ' ')}</p>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar scroll-smooth overscroll-contain">
+          {/* No Header inside Sidebar as per Pic 2 */}
+          
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1 no-scrollbar scroll-smooth overscroll-contain">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
@@ -181,18 +165,10 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             })}
           </nav>
 
-          <div className="p-4 border-t mt-auto shrink-0 bg-white">
-            <button
-              onClick={logout}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-xs font-black uppercase tracking-widest transition-all"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
+          {/* No Footer inside Sidebar as per Pic 2 (Logout moved to Header) */}
         </aside>
 
-        {/* Main Content */}
+        {/* Main Content - Pic 3 Context */}
         <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-8">
           <div className="max-w-7xl mx-auto h-full">
             <motion.div
