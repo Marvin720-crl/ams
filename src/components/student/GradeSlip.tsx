@@ -101,7 +101,7 @@ export default function GradeSlip() {
     const termsList = currentTerms || terms;
     const term = termsList.find((t) => t.id === termId);
 
-    // If term is still active, DO NOT show subjects/grades (as per user request)
+    // If term is still active, DO NOT show subjects/grades
     if (term?.status === 'active') {
       setRecords([]);
       return;
@@ -243,11 +243,11 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Header - EXACTLY LIKE PIC 2 */}
+        {/* Header - EXACTLY LIKE SCREENSHOT */}
 
         <div className="flex flex-row items-start gap-4 sm:gap-8 border-b pb-10">
 
-          <div className="shrink-0">
+          <div className="shrink-0 mt-1">
             <Image
               src="/logo.png"
               alt="logo"
@@ -267,7 +267,7 @@ export default function GradeSlip() {
               Official Academic Grade Report
             </p>
 
-            <p className="text-sm sm:text-lg text-[#94a3b8] font-semibold mt-0.5">
+            <p className="text-sm sm:text-lg text-[#94a3b8] font-bold mt-0.5">
               AMA Computer College – Lipa Campus
             </p>
 
