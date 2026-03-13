@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -63,7 +62,8 @@ export default function QRScanner() {
     if (!data || !teacher) return;
     setLoading(true);
 
-    const studentId = data;
+    // The data is the student's USN (id) from the QR code
+    const studentId = data.trim();
 
     try {
       const allUsers: User[] = await getUsersAction();
@@ -83,6 +83,7 @@ export default function QRScanner() {
       let activeSubject: Subject | undefined;
       let activeSchedule: Schedule | undefined;
 
+      // Find which class is currently active for this teacher
       for (const subject of teacherSubjects) {
           const foundSchedule = subject.schedules?.find(schedule => {
               if (schedule.day !== currentDay || !schedule.startTime || !schedule.dismissalTime) return false;
@@ -96,9 +97,11 @@ export default function QRScanner() {
                   const classEndDate = new Date(now);
                   classEndDate.setHours(endHour, endMin, 0, 0);
                   
-                  return now >= classStartDate && now <= classEndDate;
+                  // Allow a 30-minute early check-in buffer
+                  const bufferStartTime = new Date(classStartDate.getTime() - 30 * 60000);
+                  
+                  return now >= bufferStartTime && now <= classEndDate;
               } catch(e) {
-                  console.error("Error parsing time for subject", subject.id, e);
                   return false;
               }
           });
@@ -169,7 +172,6 @@ export default function QRScanner() {
                 const endTime = new Date(`${r.date}T${r.endTime}`);
                 return now >= startTime && now <= endTime;
             } catch(e) {
-                console.error("Error parsing reservation date/time", e);
                 return false;
             }
         });
@@ -200,7 +202,7 @@ export default function QRScanner() {
                 sessionId: `SESS-${Date.now()}`
             });
             setLastScanned({ studentName: student.name, subjectName: subject.name, mode: 'in', status: newStatus });
-            toast.warning(`Welcome, ${student.name}! Marked as ${newStatus}. (No active room reservation found)`);
+            toast.warning(`Welcome, ${student.name}! Marked as ${newStatus}. (No room reservation found)`);
         }
 
       } else { // mode === 'out'

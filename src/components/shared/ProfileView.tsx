@@ -18,7 +18,8 @@ import {
   Save,
   Loader2,
   QrCode,
-  User as UserIcon
+  User as UserIcon,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateUserAction } from '@/app/actions/dbActions';
@@ -28,7 +29,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
+  DialogClose
 } from '@/components/ui/dialog';
 import { QRCodeSVG as QRCode } from 'qrcode.react';
 
@@ -145,18 +147,35 @@ export default function ProfileView() {
           <div className="flex justify-center pb-4">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="rounded-full h-12 px-8 font-black uppercase text-[10px] tracking-widest gap-2">
+                <Button variant="outline" className="rounded-full h-12 px-8 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-primary hover:text-white transition-all shadow-lg border-primary/10">
                   <QrCode className="h-4 w-4" />
                   Display Digital ID
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-sm rounded-[2rem]">
-                <DialogHeader>
-                  <DialogTitle className="font-black text-center text-xl uppercase tracking-tighter">Identity QR Code</DialogTitle>
-                  <DialogDescription className="text-center font-bold text-[10px] uppercase tracking-widest">Present for Campus Entry</DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-center p-10 bg-white rounded-3xl border">
-                  <QRCode value={user.id} size={220} includeMargin />
+              <DialogContent className="sm:max-w-md rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
+                <div className="bg-white p-10 flex flex-col items-center text-center relative">
+                  <DialogClose className="absolute top-6 right-6 h-10 w-10 rounded-full border border-primary/10 flex items-center justify-center hover:bg-muted transition-colors">
+                    <X className="h-5 w-5 text-primary" />
+                  </DialogClose>
+                  
+                  <div className="space-y-1 mb-10">
+                    <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-foreground">Identity QR Code</DialogTitle>
+                    <DialogDescription className="font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Present for Campus Entry & Services</DialogDescription>
+                  </div>
+
+                  <div className="p-10 bg-white rounded-[2.5rem] border-2 border-primary/5 shadow-2xl shadow-primary/5 mb-8">
+                    <QRCode 
+                      value={user.id} 
+                      size={240} 
+                      includeMargin 
+                      level="H" 
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="font-black text-lg text-primary uppercase tracking-tight">{user.name}</p>
+                    <p className="font-bold text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{user.id}</p>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>

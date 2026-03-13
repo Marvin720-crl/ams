@@ -11,7 +11,9 @@ Monitor,
 GraduationCap,
 Loader2,
 ArrowRight,
-Users
+Users,
+QrCode,
+X
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
@@ -43,6 +45,16 @@ TermEnrollment
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from '@/components/ui/dialog';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -270,17 +282,50 @@ Welcome back, {user?.name}
 
 </motion.div>
 
-<div className="flex gap-2 flex-wrap">
+<div className="flex gap-3 flex-wrap">
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline" className="h-10 rounded-full font-black uppercase text-[10px] tracking-widest gap-2 bg-white shadow-sm border-primary/10 hover:bg-primary hover:text-white transition-all">
+        <QrCode className="h-4 w-4" />
+        Quick ID Scan
+      </Button>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-md rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
+      <div className="bg-white p-10 flex flex-col items-center text-center relative">
+        <DialogClose className="absolute top-6 right-6 h-10 w-10 rounded-full border border-primary/10 flex items-center justify-center hover:bg-muted transition-colors">
+          <X className="h-5 w-5 text-primary" />
+        </DialogClose>
+        
+        <div className="space-y-1 mb-10">
+          <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-foreground">Identity QR Code</DialogTitle>
+          <DialogDescription className="font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Present for Campus Entry & Services</DialogDescription>
+        </div>
 
-{approvedTerms.map(term=>(
-<Badge
-key={term.id}
-className="bg-green-600 text-white font-black uppercase text-[10px] tracking-widest px-4 py-1.5 rounded-full"
->
-Enrolled: {term.name}
-</Badge>
-))}
+        <div className="p-10 bg-white rounded-[2.5rem] border-2 border-primary/5 shadow-2xl shadow-primary/5 mb-8">
+          <QRCode 
+            value={user?.id || ''} 
+            size={240} 
+            includeMargin 
+            level="H" 
+          />
+        </div>
 
+        <div className="space-y-1">
+          <p className="font-black text-lg text-primary uppercase tracking-tight">{user?.name}</p>
+          <p className="font-bold text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{user?.id}</p>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
+
+  {approvedTerms.map(term=>(
+  <Badge
+  key={term.id}
+  className="bg-green-600 text-white font-black uppercase text-[10px] tracking-widest px-4 py-1.5 rounded-full border-none"
+  >
+  Enrolled: {term.name}
+  </Badge>
+  ))}
 </div>
 
 </div>
