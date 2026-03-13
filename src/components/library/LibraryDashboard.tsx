@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,6 +7,7 @@ import ManageBooks from './ManageBooks';
 import BorrowRequests from './BorrowRequests';
 import BorrowRecords from './BorrowRecords';
 import ScanLend from './ScanLend';
+import ProfileView from '../shared/ProfileView';
 import { getBooksAction, getBorrowRequestsAction } from '@/app/actions/dbActions';
 import { Card } from '../ui/card';
 
@@ -109,6 +109,8 @@ export default function LibraryDashboard() {
         return <BorrowRequests />;
       case 'borrow-records':
         return <BorrowRecords />;
+      case 'profile':
+        return <ProfileView />;
       default:
         return renderHome();
     }

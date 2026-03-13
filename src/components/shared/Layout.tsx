@@ -107,7 +107,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </div>
         </div>
         
-        {/* Logout Button Icon only as per request */}
         <button 
           onClick={logout}
           className="p-2 hover:bg-white/10 rounded-full transition-all group"
@@ -118,7 +117,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       </header>
 
       <div className="flex flex-1 relative">
-        {/* Sidebar Overlay */}
         <AnimatePresence>
           {sidebarOpen && (
             <motion.div 
@@ -131,17 +129,23 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* Sidebar */}
         <aside className={cn(
           "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          {/* Profile Header - Designer Style from Pic 2 */}
-          <div className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent">
-            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform hover:rotate-0 cursor-pointer">
-              {user?.name?.charAt(0) || 'S'}
+          {/* Profile Header - Clickable Avatar Section */}
+          <div 
+            onClick={() => handleNav('profile')}
+            className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent cursor-pointer group"
+          >
+            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0">
+              {user?.profilePic ? (
+                <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover rounded-[1.75rem]" />
+              ) : (
+                user?.name?.charAt(0) || 'S'
+              )}
             </div>
-            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-foreground px-4">
+            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-foreground px-4 group-hover:text-primary transition-colors">
               {user?.name}
             </h2>
             <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground text-center">
@@ -175,7 +179,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </nav>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-10">
           <div className="max-w-7xl mx-auto h-full">
             <motion.div

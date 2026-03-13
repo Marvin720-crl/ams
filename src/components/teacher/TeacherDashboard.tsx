@@ -24,6 +24,7 @@ import QRScanner from './QRScanner';
 import SubjectDetails from './SubjectDetails';
 import Classwork from './Classwork/index';
 import GradingSetup from './GradingSetup';
+import ProfileView from '../shared/ProfileView';
 
 import {
 getSubjectsAction,
@@ -131,10 +132,6 @@ setLoading(false);
 }
 
 };
-
-/* ----------------------------
-   HOME VIEW
----------------------------- */
 
 const renderHome = () => (
 
@@ -295,10 +292,6 @@ Enrollments
 
 );
 
-/* ----------------------------
-   ROUTING
----------------------------- */
-
 const renderContent = ()=>{
 
 if(selectedSubject)
@@ -350,16 +343,15 @@ return <RoomReservations/>;
 case 'attendance-records':
 return <AttendanceRecords/>;
 
+case 'profile':
+return <ProfileView />;
+
 default:
 return renderHome();
 
 }
 
 };
-
-/* ----------------------------
-   MAIN
----------------------------- */
 
 return(
 
@@ -377,10 +369,6 @@ onNavigate={setCurrentView}
 );
 
 }
-
-/* ----------------------------
-   STAT CARD
----------------------------- */
 
 function StatCard({title,value,icon}:any){
 

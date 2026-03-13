@@ -11,6 +11,7 @@ import LabManagement from './LabManagement';
 import AuditLog from './AuditLog';
 import SystemSettings from './SystemSettings';
 import TermManagement from './TermManagement';
+import ProfileView from '../shared/ProfileView';
 import { getUsersAction, getEnrollmentsAction, getLabRequestsAction, getTermsAction } from '@/app/actions/dbActions';
 
 function StatCard({ icon, label, value, onClick }: any) {
@@ -136,6 +137,7 @@ export default function AdminDashboard() {
       case 'terms': return <TermManagement />;
       case 'audit': return <AuditLog />;
       case 'settings': return <SystemSettings />;
+      case 'profile': return <ProfileView />;
       default: return renderHome();
     }
   };

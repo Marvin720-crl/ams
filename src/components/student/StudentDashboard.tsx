@@ -8,7 +8,6 @@ import {
 Calendar,
 BookOpen,
 Monitor,
-User,
 GraduationCap,
 Loader2,
 ArrowRight,
@@ -25,6 +24,7 @@ import EnrollSubject from './EnrollSubject';
 import Library from './Library';
 import Classwork from './Classwork';
 import GradeSlip from './GradeSlip';
+import ProfileView from '../shared/ProfileView';
 
 import {
 getEnrollmentsAction,
@@ -36,9 +36,6 @@ requestTermEnrollmentAction
 } from '@/app/actions/dbActions';
 
 import {
-Enrollment,
-Subject,
-LabRequest,
 Term,
 TermEnrollment
 } from '@/utils/storage';
@@ -345,7 +342,6 @@ Awaiting admin approval
 )}
 
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    {/* Today's classes */}
     <Card className="lg:col-span-2 p-8 rounded-[2.5rem] border-primary/5 shadow-xl space-y-8">
 
     <div className="flex justify-between items-center">
@@ -428,7 +424,6 @@ Awaiting admin approval
 
     </Card>
 
-    {/* Side card */}
     <div className="space-y-8">
         <Card className="p-8 rounded-[2.5rem] border-primary/5 shadow-xl bg-primary text-white">
 
@@ -500,6 +495,9 @@ return <Classwork/>;
 
 case 'view-card':
 return <GradeSlip/>;
+
+case 'profile':
+return <ProfileView />;
 
 default:
 return renderHome();
