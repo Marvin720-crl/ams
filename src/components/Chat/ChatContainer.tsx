@@ -20,6 +20,7 @@ import ChatWindow from './ChatWindow';
 
 import { Loader2, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function ChatContainer() {
   const { user } = useAuth();
@@ -29,6 +30,7 @@ export default function ChatContainer() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Cache for tracking message IDs to prevent duplicates during slow net
   const processedMessageIds = useRef<Set<string>>(new Set());
@@ -137,8 +139,12 @@ export default function ChatContainer() {
   }, [initChat]);
 
   const handleSelectConversation = async (conv: Conversation) => {
-    if (selectedConv?.id === conv.id) return;
+    if (selectedConv?.id === conv.id) {
+      setIsSidebarOpen(false);
+      return;
+    }
     setSelectedConv(conv);
+    setIsSidebarOpen(false); // Close sidebar on mobile after selection
     await loadMessages(conv.id);
   };
 
@@ -236,12 +242,22 @@ export default function ChatContainer() {
 
   return (
     <div className="h-[85vh] bg-[#313338] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-[65] md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <ChatSidebar
         conversations={conversations}
         selectedId={selectedConv?.id}
         onSelect={handleSelectConversation}
         onStartDM={handleStartDM}
         users={users}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       <div className="flex-1 flex flex-col bg-[#313338]">
@@ -250,6 +266,7 @@ export default function ChatContainer() {
             conversation={selectedConv}
             messages={messages}
             onSend={handleSendMessage}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 p-8">
@@ -260,6 +277,12 @@ export default function ChatContainer() {
               <h3 className="text-white font-black text-2xl tracking-tighter uppercase">Academic Messaging</h3>
               <p className="text-white/20 font-bold uppercase text-[10px] tracking-widest mt-1">Ready for collaboration</p>
             </div>
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden h-12 px-8 bg-primary rounded-full text-white font-black uppercase text-[10px] tracking-widest"
+            >
+              Open Hub
+            </button>
           </div>
         )}
       </div>

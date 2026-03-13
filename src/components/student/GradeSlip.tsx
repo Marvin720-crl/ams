@@ -243,37 +243,32 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Header - EXACTLY LIKE SCREENSHOT */}
+        {/* Header */}
 
-        <div className="flex flex-row items-start gap-4 sm:gap-8 border-b pb-10">
+         <div className="flex items-center justify-center gap-6 border-b pb-6">
 
-          <div className="shrink-0 mt-1">
-            <Image
-              src="/logo.png"
-              alt="logo"
-              width={100}
-              height={100}
-              className="w-20 sm:w-24 h-auto opacity-100"
-            />
-          </div>
+              <Image
+                src="/logo.png"
+                alt="logo"
+                width={80}
+                height={80}
+              />
+              <div className="text-center">
 
-          <div className="flex flex-col justify-center">
+                <h1 className="text-xl font-black uppercase tracking-widest text-primary">
+                  AMA Education System
+                </h1>
+                  <p className="text-sm font-bold tracking-wide">
+                    Official Academic Grade Report
+                </p>
 
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-black leading-none">
-              AMA EDUCATION SYSTEM
-            </h1>
+                <p className="text-xs text-muted-foreground font-semibold">
+                  AMA Computer College – Lipa Campus
+                </p>
 
-            <p className="text-lg sm:text-2xl font-bold text-black mt-1">
-              Official Academic Grade Report
-            </p>
+              </div>
 
-            <p className="text-sm sm:text-lg text-[#94a3b8] font-bold mt-0.5">
-              AMA Computer College – Lipa Campus
-            </p>
-
-          </div>
-
-        </div>
+               </div>
 
         {/* Student Info */}
 

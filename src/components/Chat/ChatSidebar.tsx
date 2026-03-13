@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -8,7 +9,8 @@ import {
   ChevronDown,
   Search,
   Volume2,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface ChatSidebarProps {
   conversations: Conversation[];
@@ -30,6 +33,8 @@ interface ChatSidebarProps {
   onSelect: (conv: Conversation) => void;
   onStartDM: (userId: string) => void;
   users: User[];
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export default function ChatSidebar({
@@ -37,7 +42,9 @@ export default function ChatSidebar({
   selectedId,
   onSelect,
   onStartDM,
-  users
+  users,
+  isOpen,
+  onClose
 }: ChatSidebarProps) {
 
   const { user } = useAuth();
@@ -73,15 +80,22 @@ export default function ChatSidebar({
   }, [dmSearch, uniqueUsers, user]);
 
   return (
-    <div className="w-72 bg-[#2b2d31] flex flex-col border-r border-black/20 shrink-0 max-md:w-64">
+    <div className={cn(
+      "w-72 bg-[#2b2d31] flex flex-col border-r border-black/20 shrink-0 transition-all duration-300 ease-in-out",
+      "fixed inset-y-0 left-0 z-[70] md:relative md:translate-x-0 md:w-72",
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    )}>
       {/* SERVER HEADER */}
-      <div className="h-12 px-4 border-b border-black/20 flex items-center justify-between hover:bg-white/5 transition cursor-pointer group">
+      <div className="h-16 px-4 border-b border-black/20 flex items-center justify-between hover:bg-white/5 transition cursor-pointer group">
         <span className="text-white font-black text-sm uppercase tracking-tight">Academic Hub</span>
-        <ChevronDown size={16} className="text-white/50 group-hover:text-white" />
+        <button onClick={onClose} className="md:hidden text-white/50 hover:text-white">
+          <X size={20}/>
+        </button>
+        <ChevronDown size={16} className="hidden md:block text-white/50 group-hover:text-white" />
       </div>
 
       {/* CHANNEL LIST */}
-      <div className="flex-1 overflow-y-auto py-4 space-y-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto py-4 space-y-6 no-scrollbar">
         {/* SUBJECT CHANNELS */}
         <div>
           <div className="px-3 mb-2 flex items-center justify-between text-white/40 uppercase font-black text-[10px] tracking-widest">
@@ -125,7 +139,7 @@ export default function ChatSidebar({
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
                     <Input placeholder="Search name or ID..." className="bg-black/20 border-none pl-9 h-10 text-white" value={dmSearch} onChange={(e)=>setDmSearch(e.target.value)} />
                   </div>
-                  <div className="max-h-60 overflow-y-auto space-y-1 custom-scrollbar">
+                  <div className="max-h-60 overflow-y-auto space-y-1 no-scrollbar">
                     {filteredUsers.map(u => (
                       <button key={u.id} onClick={() => { onStartDM(u.id); setDmSearch(''); }} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
                         <Avatar className="h-8 w-8">
