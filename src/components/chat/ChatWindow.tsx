@@ -107,7 +107,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                                 key={msg.id} 
                                 className={cn(
                                     "flex items-end gap-3",
-                                    isMe ? "flex-row-reverse" : "flex-row"
+                                    isMe ? "flex-row-reverse text-right" : "flex-row text-left"
                                 )}
                             >
                                 {/* Avatar - Only show for others */}
@@ -139,7 +139,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
 
                                         {msg.fileUrl && (
                                             <div className={cn(
-                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
+                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full text-left",
                                                 isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
                                             )}>
                                                 <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
