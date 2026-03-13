@@ -15,7 +15,8 @@
         "profilePic": { "type": "string", "description": "Data URI or path for profile picture." },
         "emergencyContactName": { "type": "string", "description": "Name of the person to contact in an emergency." },
         "emergencyContactAddress": { "type": "string", "description": "Address of the emergency contact." },
-        "emergencyContactPhone": { "type": "string", "description": "Phone number of the emergency contact." }
+        "emergencyContactPhone": { "type": "string", "description": "Phone number of the emergency contact." },
+        "lastSeen": { "type": "string", "format": "date-time", "description": "Last activity timestamp for online status." }
       },
       "required": ["usn_emp", "name", "email", "role"]
     },

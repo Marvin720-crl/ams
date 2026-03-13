@@ -104,8 +104,13 @@ export default function ChatContainer() {
 
   const refreshMessages = useCallback(async (convId: string) => {
     try {
-      const msgs = await getMessagesAction(convId);
+      const [msgs, allUsers] = await Promise.all([
+        getMessagesAction(convId),
+        getUsersAction()
+      ]);
       
+      setUsers(allUsers); // Refresh user list for real-time status
+
       // Only update state if message count changed to save data
       setMessages(prev => {
         if (prev.length !== msgs.length) {
@@ -265,6 +270,7 @@ export default function ChatContainer() {
           <ChatWindow
             conversation={selectedConv}
             messages={messages}
+            users={users}
             onSend={handleSendMessage}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />

@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Conversation, ChatMessage } from '@/utils/storage';
+import { Conversation, ChatMessage, User } from '@/utils/storage';
 import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem, Loader2, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -15,18 +14,34 @@ import { cn } from '@/lib/utils';
 interface ChatWindowProps {
     conversation: Conversation;
     messages: ChatMessage[];
+    users: User[];
     onSend: (text: string, file?: { name: string, data: string }) => void;
     onToggleSidebar?: () => void;
 }
 
 const EMOJIS = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖'];
 
-export default function ChatWindow({ conversation, messages, onSend, onToggleSidebar }: ChatWindowProps) {
+export default function ChatWindow({ conversation, messages, users, onSend, onToggleSidebar }: ChatWindowProps) {
     const { user } = useAuth();
     const [inputText, setInputText] = useState('');
     const [showNitro, setShowNitro] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Real-time Active/Offline Status Logic
+    const isPartnerActive = useMemo(() => {
+        if (conversation.type !== 'private') return true; // Channels always "active"
+        
+        const otherId = conversation.memberIds.find(id => id !== user?.id);
+        const partner = users.find(u => u.id === otherId);
+        
+        if (!partner?.lastSeen) return false;
+        
+        const lastSeen = new Date(partner.lastSeen);
+        const now = new Date();
+        // If last activity was within 2 minutes, consider online
+        return (now.getTime() - lastSeen.getTime()) < 120000; 
+    }, [conversation, users, user?.id]);
 
     // Speed Optimization: Scroll immediately on new message
     useEffect(() => {
@@ -165,7 +180,11 @@ export default function ChatWindow({ conversation, messages, onSend, onToggleSid
                     </div>
                     <div className="overflow-hidden">
                         <span className="text-white font-black text-sm uppercase tracking-tighter block truncate">{conversation.name}</span>
-                        <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Active Now</span>
+                        {isPartnerActive ? (
+                            <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Active Now</span>
+                        ) : (
+                            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Offline</span>
+                        )}
                     </div>
                 </div>
                 <div className="flex items-center gap-4 text-white/40">

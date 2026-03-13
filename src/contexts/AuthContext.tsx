@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../utils/storage';
-import { getUserByIdAction } from '@/app/actions/dbActions';
+import { getUserByIdAction, updateLastSeenAction } from '@/app/actions/dbActions';
 
 interface AuthContextType {
   user: User | null;
@@ -67,6 +67,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Real-time presence heartbeat
+  useEffect(() => {
+    if (!user || user.id === 'admin') return;
+
+    // Initial heartbeat
+    updateLastSeenAction(user.id);
+
+    const interval = setInterval(() => {
+      updateLastSeenAction(user.id);
+    }, 30000); // 30 seconds heartbeat
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const login = (userToLogin: User) => {
     localStorage.setItem('currentUserId', userToLogin.id);

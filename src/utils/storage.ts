@@ -14,6 +14,7 @@ export interface User {
   emergencyContactName?: string;
   emergencyContactAddress?: string;
   emergencyContactPhone?: string;
+  lastSeen?: string; // For online status tracking
 }
 
 export interface Schedule {

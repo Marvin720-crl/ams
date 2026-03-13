@@ -21,6 +21,15 @@ function parseTime(timeString: string, date: Date): Date | null {
 }
 
 // SYSTEM ACTIONS
+export async function updateLastSeenAction(userId: string) {
+    const users = await getUsersAction();
+    const index = users.findIndex((u: User) => u.id === userId);
+    if (index !== -1) {
+        users[index].lastSeen = new Date().toISOString();
+        await writeDb('users', users);
+    }
+}
+
 export async function forceResetAllLabsAction() {
     const allAttendances: Attendance[] = await readDb('attendance');
     const nowStr = new Date().toLocaleTimeString('en-US', { hour12: false });
