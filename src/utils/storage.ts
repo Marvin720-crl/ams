@@ -1,6 +1,7 @@
 
 // Storage utilities for managing user data, subjects, and enrollments
 export type UserRole = 'admin' | 'teacher' | 'student' | 'library_admin';
+export type Department = 'college' | 'shs';
 
 export interface User {
   id: string; // USN or EMP number
@@ -8,6 +9,7 @@ export interface User {
   email: string;
   password: string;
   role: UserRole;
+  department?: Department; // New: College or SHS
   program?: string; // For students
   year?: number; // For students
   profilePic?: string;
@@ -45,6 +47,7 @@ export interface Subject {
   teacherId: string;
   teacherName: string;
   termId: string; // Linked to a specific term
+  department?: Department; // New: To identify if SHS or College subject
   schedules: Schedule[];
   description?: string;
   units?: number;

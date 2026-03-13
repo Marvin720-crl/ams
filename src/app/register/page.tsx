@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react'
@@ -25,6 +26,8 @@ import {
   getSettingsAction
 } from '@/app/actions/dbActions'
 
+import { Department } from '@/utils/storage'
+
 type Role = 'student' | 'teacher'
 
 interface RegisterForm {
@@ -33,6 +36,7 @@ interface RegisterForm {
   email: string
   password: string
   role: Role
+  department: Department
   program: string
   year: number
   teacherSecret: string
@@ -52,6 +56,7 @@ export default function RegisterPage() {
     email: '',
     password: '',
     role: 'student',
+    department: 'college',
     program: '',
     year: 1,
     teacherSecret: '',
@@ -98,6 +103,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         role: formData.role,
+        department: formData.department,
         program: formData.role === 'student' ? formData.program : undefined,
         year: formData.role === 'student' ? formData.year : undefined,
         emergencyContactName: formData.role === 'student' ? formData.emergencyContactName : undefined,
@@ -106,7 +112,7 @@ export default function RegisterPage() {
         profilePic: ''
       }
 
-      await addUserAction(newUser)
+      await addUserAction(newUser as any)
 
       toast.success('Registration successful! Please login.')
 
@@ -193,6 +199,26 @@ export default function RegisterPage() {
                 </Select>
               </div>
 
+              {/* DEPARTMENT */}
+
+              <div className="space-y-2">
+                <Label>Department</Label>
+
+                <Select
+                  value={formData.department}
+                  onValueChange={(v: Department) => updateField('department', v)}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="college">College</SelectItem>
+                    <SelectItem value="shs">Senior High School</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* ID */}
 
               <div className="space-y-2">
@@ -263,7 +289,7 @@ export default function RegisterPage() {
                       <Label>Program</Label>
 
                       <Input
-                        placeholder="BSCS"
+                        placeholder={formData.department === 'shs' ? "STEM / ABM" : "BSCS"}
                         value={formData.program}
                         onChange={e => updateField('program', e.target.value)}
                         required
@@ -273,7 +299,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Year</Label>
+                      <Label>Year / Grade Level</Label>
 
                       <Select
                         value={String(formData.year)}
@@ -284,10 +310,19 @@ export default function RegisterPage() {
                         </SelectTrigger>
 
                         <SelectContent>
-                          <SelectItem value="1">1st Year</SelectItem>
-                          <SelectItem value="2">2nd Year</SelectItem>
-                          <SelectItem value="3">3rd Year</SelectItem>
-                          <SelectItem value="4">4th Year</SelectItem>
+                          {formData.department === 'shs' ? (
+                            <>
+                              <SelectItem value="11">Grade 11</SelectItem>
+                              <SelectItem value="12">Grade 12</SelectItem>
+                            </>
+                          ) : (
+                            <>
+                              <SelectItem value="1">1st Year</SelectItem>
+                              <SelectItem value="2">2nd Year</SelectItem>
+                              <SelectItem value="3">3rd Year</SelectItem>
+                              <SelectItem value="4">4th Year</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -19,7 +20,8 @@ import {
   Loader2,
   QrCode,
   User as UserIcon,
-  X
+  X,
+  School
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateUserAction } from '@/app/actions/dbActions';
@@ -33,6 +35,7 @@ import {
   DialogClose
 } from '@/components/ui/dialog';
 import { QRCodeSVG as QRCode } from 'qrcode.react';
+import { Department } from '@/utils/storage';
 
 export default function ProfileView() {
   const { user, updateCurrentUser } = useAuth();
@@ -41,6 +44,7 @@ export default function ProfileView() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    department: 'college' as Department,
     program: '',
     year: 1,
     profilePic: '',
@@ -54,6 +58,7 @@ export default function ProfileView() {
       setFormData({
         name: user.name || '',
         email: user.email || '',
+        department: (user.department as Department) || 'college',
         program: user.program || '',
         year: user.year || 1,
         profilePic: user.profilePic || '',
@@ -81,6 +86,7 @@ export default function ProfileView() {
       const updates: any = {
         name: formData.name,
         email: formData.email,
+        department: formData.department,
         profilePic: formData.profilePic
       };
       if (user.role === 'student') {
@@ -138,7 +144,7 @@ export default function ProfileView() {
               {formData.name}
             </h2>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground mt-2">
-              {user.role.replace('_', ' ')}
+              {user.role.replace('_', ' ')} • {formData.department?.toUpperCase()}
             </p>
           </div>
         </div>
@@ -175,6 +181,7 @@ export default function ProfileView() {
                   <div className="space-y-1">
                     <p className="font-black text-lg text-primary uppercase tracking-tight">{user.name}</p>
                     <p className="font-bold text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{user.id}</p>
+                    <p className="font-black text-[9px] uppercase text-primary/60 mt-1">{formData.department?.toUpperCase()} DEPARTMENT</p>
                   </div>
                 </div>
               </DialogContent>
@@ -191,24 +198,43 @@ export default function ProfileView() {
               <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Program</Label>
-              <Input value={formData.program} disabled={user.role !== 'student'} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Department</Label>
+              <Select value={formData.department} onValueChange={(v: Department) => setFormData({ ...formData, department: v })}>
+                <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  <SelectItem value="college" className="font-bold">College</SelectItem>
+                  <SelectItem value="shs" className="font-bold">Senior High School</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year Level</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year / Grade Level</Label>
               <Select value={String(formData.year)} disabled={user.role !== 'student'} onValueChange={(v) => setFormData({ ...formData, year: parseInt(v) })}>
                 <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
                 <SelectContent className="rounded-2xl">
-                  <SelectItem value="1" className="font-bold">1st Year</SelectItem>
-                  <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
-                  <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
-                  <SelectItem value="4" className="font-bold">4th Year</SelectItem>
+                  {formData.department === 'shs' ? (
+                    <>
+                      <SelectItem value="11" className="font-bold">Grade 11</SelectItem>
+                      <SelectItem value="12" className="font-bold">Grade 12</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="1" className="font-bold">1st Year</SelectItem>
+                      <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
+                      <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
+                      <SelectItem value="4" className="font-bold">4th Year</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Universal ID Number</Label>
               <Input value={user.id} disabled className="h-14 rounded-2xl bg-muted/50 border-primary/5 font-bold px-6" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Program / Strand</Label>
+              <Input value={formData.program} disabled={user.role !== 'student'} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
             </div>
           </div>
 

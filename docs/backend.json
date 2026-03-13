@@ -10,7 +10,8 @@
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "role": { "type": "string", "enum": ["admin", "teacher", "student", "library_admin"] },
-        "program": { "type": "string", "description": "Academic program (e.g., BSCS)." },
+        "department": { "type": "string", "enum": ["college", "shs"] },
+        "program": { "type": "string", "description": "Academic program (e.g., BSCS or STEM)." },
         "year": { "type": "string", "description": "Current year level." },
         "profilePic": { "type": "string", "description": "Data URI or path for profile picture." },
         "emergencyContactName": { "type": "string", "description": "Name of the person to contact in an emergency." },
@@ -29,7 +30,8 @@
         "teacherId": { "type": "string" },
         "teacherName": { "type": "string" },
         "time": { "type": "string", "description": "Start time (e.g., 08:00 AM)." },
-        "day": { "type": "string", "description": "Days of week (e.g., Mon/Wed)." }
+        "day": { "type": "string", "description": "Days of week (e.g., Mon/Wed)." },
+        "department": { "type": "string", "enum": ["college", "shs"] }
       },
       "required": ["title", "teacherId", "time", "day"]
     },

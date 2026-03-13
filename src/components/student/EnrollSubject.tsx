@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -82,7 +83,11 @@ export default function EnrollSubject() {
       setMyApprovedTerms(approvedTerms);
       setExistingEnrollments(enrollments.filter(e => e.studentId === user.id));
 
-      const teacherUsers = users.filter(u => u.role === 'teacher');
+      // Filter teachers by student department
+      const teacherUsers = users.filter(u => 
+        u.role === 'teacher' && 
+        u.department === user.department
+      );
 
       const teachersWithSubjects = teacherUsers.filter(t =>
         allSubjects.some(
@@ -109,7 +114,8 @@ export default function EnrollSubject() {
 
     const filtered = allSubjects.filter(s =>
       s.teacherId === teacherId &&
-      myApprovedTerms.includes(s.termId)
+      myApprovedTerms.includes(s.termId) &&
+      s.department === user.department // New: Filter subjects by department too
     );
 
     setSubjects(filtered);
@@ -196,7 +202,7 @@ export default function EnrollSubject() {
     return (
       <div className="max-w-3xl space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-primary">ENROLL IN SUBJECT</h2>
+          <h2 className="text-2xl font-bold text-primary uppercase">ENROLL IN SUBJECT</h2>
           <p className="text-sm text-muted-foreground">Request registration</p>
         </div>
         <div className="bg-amber-50 border border-amber-200 text-amber-900 p-8 rounded-xl text-center space-y-4">
@@ -212,10 +218,10 @@ export default function EnrollSubject() {
     <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
         <h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
-          ENROLL IN SUBJECT
+          ENROLL IN SUBJECT ({user.department?.toUpperCase()})
         </h2>
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
-          Submit multiple subject enrollment requests
+          Only showing instructors and subjects for your department
         </p>
       </div>
 
@@ -229,7 +235,7 @@ export default function EnrollSubject() {
       <form onSubmit={handleSubmit} className="bg-white border-2 border-primary/5 rounded-[2rem] shadow-xl p-10 space-y-8">
         <div className="space-y-2">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-            Instructor / Faculty
+            {user.department === 'shs' ? 'SHS Instructor' : 'College Instructor'}
           </Label>
           <select
             value={selectedTeacher}
@@ -252,7 +258,7 @@ export default function EnrollSubject() {
             {subjects.length === 0 ? (
               <div className="p-10 border-2 border-dashed rounded-3xl text-center">
                 <BookOpen className="mx-auto text-muted-foreground/30 mb-3" size={32} />
-                <p className="text-xs font-bold text-muted-foreground uppercase">No subjects published by this teacher for your term.</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase">No subjects published by this teacher for your department.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -313,7 +319,7 @@ export default function EnrollSubject() {
 
       <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl text-center">
         <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-relaxed">
-          Protocol: Only subjects within your approved academic term are visible. Requests are subject to instructor validation.
+          Protocol: You are currently assigned to the <span className="underline">{user.department?.toUpperCase()}</span> department. Only related academic records are visible.
         </p>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -65,6 +66,7 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
                 units: parseInt(units),
                 teacherId: user!.id,
                 teacherName: user!.name,
+                department: user!.department, // New: Automatically tag with teacher's department
                 termId,
                 schedules,
                 description
