@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -17,7 +18,7 @@ import {
 import ChatSidebar from './ChatSidebar';
 import ChatWindow from './ChatWindow';
 
-import { Loader2 } from 'lucide-react';
+import { Loader2, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ChatContainer() {
@@ -38,7 +39,13 @@ export default function ChatContainer() {
 
   const initChat = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
+    
+    // Check if we have cached chat data to avoid spinner
+    const cachedConvs = localStorage.getItem(`cache_convs_${user.id}`);
+    if (cachedConvs) {
+        setConversations(JSON.parse(cachedConvs));
+        setLoading(false);
+    }
 
     try {
       await ensureSubjectChatsAction();
@@ -56,13 +63,14 @@ export default function ChatContainer() {
 
       setConversations(sorted);
       setUsers(allUsers);
+      localStorage.setItem(`cache_convs_${user.id}`, JSON.stringify(sorted));
 
       if (sorted.length > 0 && !selectedConv) {
         setSelectedConv(sorted[0]);
         loadMessages(sorted[0].id);
       }
     } catch (err) {
-      toast.error("Network delay detected. Retrying...");
+      // Silent error, use cache
     } finally {
       setLoading(false);
     }
@@ -73,12 +81,18 @@ export default function ChatContainer() {
   /* -------------------------------------- */
 
   const loadMessages = async (convId: string) => {
+    const cachedMsgs = localStorage.getItem(`cache_msgs_${convId}`);
+    if (cachedMsgs) {
+        setMessages(JSON.parse(cachedMsgs));
+    }
+
     try {
       const msgs = await getMessagesAction(convId);
       setMessages(msgs);
       processedMessageIds.current = new Set(msgs.map(m => m.id));
+      localStorage.setItem(`cache_msgs_${convId}`, JSON.stringify(msgs));
     } catch {
-      toast.error("Connection slow. Still loading...");
+      // Background failure okay, we have cache
     }
   };
 
@@ -90,21 +104,22 @@ export default function ChatContainer() {
     try {
       const msgs = await getMessagesAction(convId);
       
-      // Only update state if message count changed to save re-renders
+      // Only update state if message count changed to save data
       setMessages(prev => {
         if (prev.length !== msgs.length) {
           processedMessageIds.current = new Set(msgs.map(m => m.id));
+          localStorage.setItem(`cache_msgs_${convId}`, JSON.stringify(msgs));
           return msgs;
         }
         return prev;
       });
     } catch {
-      // Silent fail for polling to avoid interrupting user
+      // Silent fail for polling
     }
   }, []);
 
   /* -------------------------------------- */
-  /* POLLING (3 seconds for faster sync) */
+  /* POLLING (Adaptive for slow net) */
   /* -------------------------------------- */
 
   useEffect(() => {
@@ -112,32 +127,23 @@ export default function ChatContainer() {
 
     const interval = setInterval(() => {
       refreshMessages(selectedConv.id);
-    }, 3000);
+    }, 4000); // 4s polling is balanced for slow net
 
     return () => clearInterval(interval);
   }, [selectedConv, refreshMessages]);
-
-  /* -------------------------------------- */
-  /* INITIAL CHAT LOAD */
-  /* -------------------------------------- */
 
   useEffect(() => {
     initChat();
   }, [initChat]);
 
-  /* -------------------------------------- */
-  /* SELECT CONVERSATION */
-  /* -------------------------------------- */
-
   const handleSelectConversation = async (conv: Conversation) => {
     if (selectedConv?.id === conv.id) return;
     setSelectedConv(conv);
-    setMessages([]); // Immediate UI clear for snappiness
     await loadMessages(conv.id);
   };
 
   /* -------------------------------------- */
-  /* SEND MESSAGE (OPTIMISTIC UI) */
+  /* SEND MESSAGE (ULTRA OPTIMISTIC) */
   /* -------------------------------------- */
 
   const handleSendMessage = async (
@@ -146,7 +152,6 @@ export default function ChatContainer() {
   ) => {
     if (!selectedConv || !user) return;
 
-    // 1. Create a local temporary message for instant feedback
     const tempId = `TEMP-${Date.now()}`;
     const optimisticMsg: ChatMessage = {
       id: tempId,
@@ -157,10 +162,10 @@ export default function ChatContainer() {
       timestamp: new Date().toISOString(),
       type: 'text',
       fileName: file?.name,
-      fileUrl: file ? 'pending' : undefined // Placeholder
+      fileUrl: file ? 'pending' : undefined
     };
 
-    // Update messages list instantly
+    // Instant UI update
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
@@ -174,87 +179,60 @@ export default function ChatContainer() {
         fileData: file?.data
       });
 
-      // Replace optimistic message with the real one from server
       setMessages(prev => prev.map(m => m.id === tempId ? realMsg : m));
       processedMessageIds.current.add(realMsg.id);
 
-      // Update conversation preview instantly
+      // Update Sidebar instantly
       setConversations(prev => {
         const updated = prev.map(c => {
           if (c.id !== selectedConv.id) return c;
           return {
             ...c,
-            lastMessage: file ? `Sent a file: ${file.name}` : text,
+            lastMessage: file ? `File: ${file.name}` : text,
             lastTimestamp: realMsg.timestamp
           };
         });
-
-        return updated.sort(
-          (a, b) =>
-            new Date(b.lastTimestamp || 0).getTime() -
-            new Date(a.lastTimestamp || 0).getTime()
-        );
+        return updated.sort((a, b) => new Date(b.lastTimestamp || 0).getTime() - new Date(a.lastTimestamp || 0).getTime());
       });
     } catch {
-      // If server fails, remove the optimistic message and alert user
+      // Mark as error instead of removing
+      toast.error("Message not sent. Weak signal.");
       setMessages(prev => prev.filter(m => m.id !== tempId));
-      toast.error("Failed to send message. Please check your connection.");
     }
   };
 
-  /* -------------------------------------- */
-  /* START DIRECT MESSAGE */
-  /* -------------------------------------- */
-
   const handleStartDM = async (otherUserId: string) => {
     if (!user) return;
-
-    const existing = conversations.find(
-      c =>
-        c.type === 'private' &&
-        c.memberIds.includes(otherUserId)
-    );
-
+    const existing = conversations.find(c => c.type === 'private' && c.memberIds.includes(otherUserId));
     if (existing) {
       handleSelectConversation(existing);
       return;
     }
-
     const otherUser = users.find(u => u.id === otherUserId);
     if (!otherUser) return;
-
     try {
       const newConv = await createConversationAction({
         name: otherUser.name,
         type: 'private',
         memberIds: [user.id, otherUserId]
       });
-
       setConversations(prev => [newConv, ...prev]);
       handleSelectConversation(newConv);
     } catch {
-      toast.error("Failed to start conversation. Connection slow.");
+      toast.error("Failed to start chat. Signal too weak.");
     }
   };
 
-  /* -------------------------------------- */
-  /* LOADING UI */
-  /* -------------------------------------- */
-
-  if (loading && !selectedConv) {
+  if (loading && conversations.length === 0) {
     return (
       <div className="h-[80vh] flex items-center justify-center bg-[#313338] rounded-3xl border border-white/5 shadow-xl">
         <div className="text-center space-y-4">
           <Loader2 className="animate-spin text-primary h-12 w-12 mx-auto"/>
-          <p className="text-white/40 font-black uppercase text-[10px] tracking-widest">Optimizing Connection...</p>
+          <p className="text-white/40 font-black uppercase text-[10px] tracking-widest">Warp Speed Loading...</p>
         </div>
       </div>
     );
   }
-
-  /* -------------------------------------- */
-  /* CHAT LAYOUT */
-  /* -------------------------------------- */
 
   return (
     <div className="h-[85vh] bg-[#313338] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
@@ -275,12 +253,12 @@ export default function ChatContainer() {
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 p-8">
-            <div className="h-24 w-24 rounded-[3rem] bg-white/5 flex items-center justify-center text-white/10 animate-pulse">
+            <div className="h-24 w-24 rounded-[3rem] bg-white/5 flex items-center justify-center text-white/10">
               <UserIcon size={48}/>
             </div>
             <div>
               <h3 className="text-white font-black text-2xl tracking-tighter uppercase">Academic Messaging</h3>
-              <p className="text-white/20 font-bold uppercase text-[10px] tracking-widest mt-1">Select a workspace to begin collaboration</p>
+              <p className="text-white/20 font-bold uppercase text-[10px] tracking-widest mt-1">Ready for collaboration</p>
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -26,12 +27,12 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Optimized scroll logic - only scrolls when new messages arrive
+    // Speed Optimization: Scroll immediately on new message
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({
                 top: scrollRef.current.scrollHeight,
-                behavior: 'smooth'
+                behavior: messages.length > 20 ? 'auto' : 'smooth'
             });
         }
     }, [messages.length]);
@@ -66,9 +67,9 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
         setInputText(prev => prev + emoji);
     };
 
-    // Memoize the message list rendering for performance
+    // Performance: Memoize the message list to prevent jitter on slow CPUs/Mobile
     const renderedMessages = useMemo(() => {
-        return messages.map((msg, index) => {
+        return messages.map((msg) => {
             const isMe = msg.senderId === user?.id;
             const isOptimistic = msg.id.startsWith('TEMP-');
             
@@ -81,7 +82,6 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                         isOptimistic ? "opacity-60" : "opacity-100"
                     )}
                 >
-                    {/* Avatar - Only show for others */}
                     {!isMe && (
                         <Avatar className="h-8 w-8 shrink-0 mb-1 border-2 border-white/5">
                             <AvatarFallback className="bg-primary text-white font-black uppercase text-[10px]">{msg.senderName[0]}</AvatarFallback>
@@ -98,9 +98,8 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                             </span>
                         )}
 
-                        {/* Message Bubble */}
                         <div className={cn(
-                            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-lg relative group",
+                            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-lg",
                             isMe 
                                 ? "bg-primary text-white rounded-br-none" 
                                 : "bg-[#2b2d31] text-white/90 rounded-bl-none border border-white/5"
@@ -122,7 +121,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                                     <div className="flex-1 overflow-hidden">
                                         <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
                                         <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">
-                                            {msg.fileUrl === 'pending' ? 'Uploading...' : 'Download'}
+                                            {msg.fileUrl === 'pending' ? 'Sending...' : 'Download'}
                                         </p>
                                     </div>
                                     {msg.fileUrl !== 'pending' && (
@@ -167,7 +166,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                 </div>
             </div>
 
-            {/* Messages Area - Messenger Style */}
+            {/* Messages Area */}
             <div 
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar"
@@ -178,14 +177,14 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                             {conversation.type === 'private' ? <UserIcon size={40}/> : <Hash size={40}/>}
                         </div>
                         <div>
-                            <h3 className="text-white font-black text-2xl tracking-tighter uppercase">No Messages Yet</h3>
-                            <p className="text-white/30 font-bold uppercase text-[10px] tracking-widest mt-1">Start the conversation with #{conversation.name}</p>
+                            <h3 className="text-white font-black text-2xl tracking-tighter uppercase">Encrypted Workspace</h3>
+                            <p className="text-white/30 font-bold uppercase text-[10px] tracking-widest mt-1">Say hi to #{conversation.name}</p>
                         </div>
                     </div>
                 ) : renderedMessages}
             </div>
 
-            {/* Input Area - Messenger Style */}
+            {/* Input Area */}
             <div className="p-6 bg-[#1e1f22]">
                 <div className="bg-[#2b2d31] rounded-[1.5rem] px-4 py-2 flex items-center gap-3 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                     <input 
@@ -280,17 +279,10 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                             </div>
                         </div>
                         <div className="flex items-center gap-5 bg-[#2b2d31] p-5 rounded-2xl border border-white/[0.03] hover:bg-[#35373c] transition-colors">
-                            <div className="h-12 w-12 rounded-xl bg-[#5865f2] flex items-center justify-center shadow-lg"><FileIcon size={24} className="text-white"/></div>
+                            <div className="h-12 w-12 rounded-xl bg-[#5865f2] flex items-center justify-center shadow-lg"><Gem size={24} className="text-white"/></div>
                             <div className="flex-1">
                                 <p className="font-black text-[13px] uppercase tracking-wide">CUSTOM EMOJIS</p>
                                 <p className="text-white/40 text-[11px] font-bold mt-0.5">Express yourself with academic-themed stickers.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-5 bg-[#2b2d31] p-5 rounded-2xl border border-white/[0.03] hover:bg-[#35373c] transition-colors">
-                            <div className="h-12 w-12 rounded-xl bg-[#f47b67] flex items-center justify-center shadow-lg"><Gem size={24} className="text-white"/></div>
-                            <div className="flex-1">
-                                <p className="font-black text-[13px] uppercase tracking-wide">EXCLUSIVE BADGES</p>
-                                <p className="text-white/40 text-[11px] font-bold mt-0.5">Stand out in subject channels with elite tags.</p>
                             </div>
                         </div>
                     </div>

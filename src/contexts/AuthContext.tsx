@@ -21,24 +21,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const checkUser = async () => {
+        // 1. QUICK LOAD: Check localStorage first for instant access
+        const cachedUser = localStorage.getItem('cached_user_profile');
         const currentUserId = localStorage.getItem('currentUserId');
+        
+        if (cachedUser) {
+            setUser(JSON.parse(cachedUser));
+            setLoading(false); // Disable loading immediately if we have a cache
+        }
+
         if (currentUserId) {
             if (currentUserId === 'admin') {
-                setUser({
+                const admin = {
                   id: 'admin',
                   name: 'System Administrator',
                   email: 'admin@school.edu',
                   password: 'ADMIN@2026',
-                  role: 'admin'
-                });
+                  role: 'admin' as const
+                };
+                setUser(admin);
+                localStorage.setItem('cached_user_profile', JSON.stringify(admin));
             } else {
                 try {
+                    // 2. BACKGROUND SYNC: Refresh data from server in background
                     const currentUser = await getUserByIdAction(currentUserId);
-                    setUser(currentUser);
+                    if (currentUser) {
+                        setUser(currentUser);
+                        localStorage.setItem('cached_user_profile', JSON.stringify(currentUser));
+                    }
                 } catch (e) {
-                    console.error("Failed to fetch user, logging out.");
-                    localStorage.removeItem('currentUserId');
-                    setUser(null);
+                    console.warn("Network weak, using cached profile.");
                 }
             }
         }
@@ -48,26 +60,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'currentUserId') {
-        setLoading(true);
         checkUser();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const login = (userToLogin: User) => {
     localStorage.setItem('currentUserId', userToLogin.id);
+    localStorage.setItem('cached_user_profile', JSON.stringify(userToLogin));
     setUser(userToLogin);
   };
 
   const logout = () => {
     localStorage.removeItem('currentUserId');
+    localStorage.removeItem('cached_user_profile');
     setUser(null);
-    // Full page reload to reset all state
     window.location.href = '/';
   };
 
@@ -75,16 +85,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
+        localStorage.setItem('cached_user_profile', JSON.stringify(updatedUser));
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, login, logout, updateCurrentUser, loading }}>
-      {loading ? (
+      {loading && !user ? (
         <div className="flex flex-col items-center justify-center min-h-screen bg-muted/10 p-4">
             <div className="animate-pulse flex flex-col items-center">
                 <div className="w-16 h-16 bg-primary rounded-2xl mb-4" />
                 <p className="text-muted-foreground font-black uppercase tracking-widest">AMS:AMACC</p>
+                <p className="text-[8px] font-bold text-primary/40 mt-2 tracking-[0.3em]">OPTIMIZING CONNECTION...</p>
             </div>
         </div>
       ) : (
