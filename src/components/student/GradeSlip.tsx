@@ -243,29 +243,29 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Header */}
+        {/* Header - EXACT REPLICATION OF PIC 1 */}
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 border-b pb-6 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 border-b pb-8 text-center sm:text-left">
 
           <Image
             src="/logo.png"
             alt="logo"
-            width={60}
-            height={60}
-            className="sm:w-20 sm:h-20"
+            width={100}
+            height={100}
+            className="w-20 h-auto sm:w-24 opacity-90"
           />
 
-          <div>
+          <div className="flex flex-col items-center sm:items-start space-y-0.5">
 
-            <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest text-primary">
-              AMA Education System
+            <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-foreground leading-none">
+              AMA EDUCATION SYSTEM
             </h1>
 
-            <p className="text-xs sm:text-sm font-bold tracking-wide">
+            <p className="text-sm sm:text-lg font-bold tracking-tight text-foreground">
               Official Academic Grade Report
             </p>
 
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
               AMA Computer College – Lipa Campus
             </p>
 
@@ -279,17 +279,17 @@ export default function GradeSlip() {
 
           <div className="space-y-1 sm:space-y-2">
 
-            <p><strong>Student Name:</strong> {user?.name}</p>
+            <p><strong className="font-bold">Student Name:</strong> <span className="font-medium text-muted-foreground">{user?.name}</span></p>
 
-            <p><strong>Student ID:</strong> {user?.id}</p>
+            <p><strong className="font-bold">Student ID:</strong> <span className="font-medium text-muted-foreground">{user?.id}</span></p>
 
           </div>
 
           <div className="space-y-1 sm:space-y-2 text-left sm:text-right">
 
-            <p><strong>Campus:</strong> AMACC – Lipa</p>
+            <p><strong className="font-bold">Campus:</strong> <span className="font-medium text-muted-foreground">AMACC – Lipa</span></p>
 
-            <p><strong>Academic Term:</strong> {currentTerm?.name}</p>
+            <p><strong className="font-bold">Academic Term:</strong> <span className="font-medium text-muted-foreground">{currentTerm?.name}</span></p>
 
           </div>
 
@@ -297,7 +297,7 @@ export default function GradeSlip() {
 
         {/* Table / Status View */}
 
-        <div className="mt-8 sm:mt-10 border rounded-xl overflow-x-auto">
+        <div className="mt-8 sm:mt-10 border rounded-xl overflow-x-auto no-scrollbar">
 
           <table className="w-full text-[10px] sm:text-sm min-w-[600px] sm:min-w-0">
 
@@ -305,11 +305,11 @@ export default function GradeSlip() {
 
               <tr>
 
-                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Course Code</th>
-                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Course Description</th>
-                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Units</th>
-                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Final Grade</th>
-                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Equivalent</th>
+                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter text-foreground">Course Code</th>
+                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter text-foreground">Course Description</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter text-foreground">Units</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter text-foreground">Final Grade</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter text-foreground">Equivalent</th>
 
               </tr>
 
