@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import ChatContainer from '../Chat/ChatContainer';
+import { cn } from '@/lib/utils';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -143,7 +144,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
               {user?.profilePic ? (
                 <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
               ) : (
-                user?.name.charAt(0)
+                <span className="text-2xl font-black">{user?.name.charAt(0)}</span>
               )}
             </div>
             <h3 className="font-black text-sm uppercase tracking-tight text-center truncate w-full">{user?.name}</h3>
