@@ -136,10 +136,18 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
         {/* Sidebar */}
         <aside className={cn(
-          "fixed lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-40 bg-white border-r w-64 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-white border-r w-64 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          <div className="p-6 border-b flex flex-col items-center">
+          {/* Mobile Header Inside Sidebar */}
+          <div className="lg:hidden bg-primary h-16 flex items-center justify-between px-4 shrink-0 shadow-md">
+            <button onClick={() => setSidebarOpen(false)} className="text-white p-2">
+              <X size={24} />
+            </button>
+            <Image src="/logo.png" alt="AMA" width={100} height={28} className="h-7 w-auto" />
+          </div>
+
+          <div className="p-6 border-b flex flex-col items-center shrink-0">
             <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center text-primary text-2xl font-black mb-3 border-2 border-primary/10 overflow-hidden">
               {user?.profilePic ? (
                 <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
@@ -151,7 +159,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">{user?.role.replace('_', ' ')}</p>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar scroll-smooth overscroll-contain">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
@@ -173,7 +181,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             })}
           </nav>
 
-          <div className="p-4 border-t mt-auto">
+          <div className="p-4 border-t mt-auto shrink-0 bg-white">
             <button
               onClick={logout}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-xs font-black uppercase tracking-widest transition-all"
