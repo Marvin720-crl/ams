@@ -5,12 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 import {
   getAcademicRecordsAction,
-  getTermsAction,
-  getSubjectsAction,
-  getAttendancesAction,
-  getClassworksAction,
-  getSubmissionsAction,
-  getGradingWeightsAction
+  getTermsAction
 } from '@/app/actions/dbActions';
 
 import { AcademicRecord, Term } from '@/utils/storage';
@@ -24,7 +19,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { Loader2, Printer, Info } from 'lucide-react';
+import { Loader2, Printer, Info, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import Image from 'next/image';
@@ -69,6 +64,7 @@ export default function GradeSlip() {
           (t) => t.status === 'active'
         );
 
+        // Default to active term if it exists, otherwise most recent
         const defaultTermId =
           activeTerm?.id || sortedTerms[0].id;
 
@@ -91,7 +87,7 @@ export default function GradeSlip() {
   };
 
   /* ------------------------------------------------ */
-  /* LOAD TERM GRADES (LOGIC UNCHANGED) */
+  /* LOAD TERM GRADES (ONLY IF ENDED) */
   /* ------------------------------------------------ */
 
   const loadTermGrades = async (
@@ -104,6 +100,12 @@ export default function GradeSlip() {
 
     const termsList = currentTerms || terms;
     const term = termsList.find((t) => t.id === termId);
+
+    // If term is still active, DO NOT show subjects/grades (as per user request)
+    if (term?.status === 'active') {
+      setRecords([]);
+      return;
+    }
 
     const historyData =
       historical || (await getAcademicRecordsAction());
@@ -126,140 +128,8 @@ export default function GradeSlip() {
         }))
       );
 
-      return;
-
-    }
-
-    if (term?.status === 'active') {
-
-      const [
-        allSubjects,
-        allAttendances,
-        allClassworks,
-        allSubmissions,
-        allWeights
-      ] = await Promise.all([
-        getSubjectsAction(),
-        getAttendancesAction(),
-        getClassworksAction(),
-        getSubmissionsAction(),
-        getGradingWeightsAction()
-      ]);
-
-      const termSubjects = allSubjects.filter(
-        (s) => s.termId === termId
-      );
-
-      const liveGrades: any[] = [];
-
-      for (const subject of termSubjects) {
-
-        const weights =
-          allWeights.find((w) => w.subjectId === subject.id) || {
-            attendance: 10,
-            late: 5,
-            activities: 20,
-            quizzes: 20,
-            performance: 25,
-            finalOutput: 20
-          };
-
-        const studentAttendances = allAttendances.filter(
-          (a) =>
-            a.studentId === user.id &&
-            a.subjectId === subject.id
-        );
-
-        const studentSubmissions = allSubmissions.filter(
-          (s) => s.studentId === user.id
-        );
-
-        const totalSessions = studentAttendances.length || 1;
-
-        const presentPoints =
-          (studentAttendances.filter((a) => a.status === 'present').length / totalSessions) * 100;
-
-        const latePoints =
-          (studentAttendances.filter((a) => a.status === 'late').length / totalSessions) * 100;
-
-        const subjectClassworks = allClassworks.filter(
-          (cw) => cw.subjectId === subject.id
-        );
-
-        const getAverage = (type: string) => {
-
-          const group = subjectClassworks.filter(
-            (cw) => cw.type === type
-          );
-
-          if (group.length === 0) return 100;
-
-          let percentageTotal = 0;
-          let count = 0;
-
-          group.forEach((task) => {
-
-            const sub = studentSubmissions.find(
-              (s) => s.classworkId === task.id
-            );
-
-            if (sub && sub.status === 'graded') {
-
-              const earned = sub.grade || 0;
-              const total = task.totalPoints || 100;
-
-              percentageTotal += (earned / total) * 100;
-              count++;
-
-            }
-
-          });
-
-          return count > 0 ? percentageTotal / count : 0;
-
-        };
-
-        const activityScore = getAverage('activity');
-        const quizScore = getAverage('quiz');
-        const performanceScore = getAverage('performance');
-        const finalOutputScore = getAverage('final_output');
-
-        const finalScore =
-          presentPoints * (weights.attendance / 100) +
-          latePoints * (weights.late / 100) +
-          activityScore * (weights.activities / 100) +
-          quizScore * (weights.quizzes / 100) +
-          performanceScore * (weights.performance / 100) +
-          finalOutputScore * (weights.finalOutput / 100);
-
-        let grade = 5.0;
-
-        if (finalScore >= 97) grade = 1.0;
-        else if (finalScore >= 94) grade = 1.25;
-        else if (finalScore >= 91) grade = 1.5;
-        else if (finalScore >= 88) grade = 1.75;
-        else if (finalScore >= 85) grade = 2.0;
-        else if (finalScore >= 82) grade = 2.25;
-        else if (finalScore >= 79) grade = 2.5;
-        else if (finalScore >= 76) grade = 2.75;
-        else if (finalScore >= 75) grade = 3.0;
-
-        liveGrades.push({
-          code: subject.code || 'SUBJ',
-          description: subject.name,
-          units: subject.units || 3,
-          grade: grade.toFixed(2),
-          letter: getLetter(grade)
-        });
-
-      }
-
-      setRecords(liveGrades);
-
     } else {
-
       setRecords([]);
-
     }
 
   };
@@ -293,6 +163,9 @@ export default function GradeSlip() {
 
   };
 
+  const currentTerm = terms.find(t => t.id === selectedTermId);
+  const isTermActive = currentTerm?.status === 'active';
+
   if (loading)
     return (
       <div className="flex justify-center py-24">
@@ -318,7 +191,7 @@ export default function GradeSlip() {
             }}
           >
 
-            <SelectTrigger className="h-12 rounded-md">
+            <SelectTrigger className="h-12 rounded-md font-bold">
               <SelectValue placeholder="Select Term" />
             </SelectTrigger>
 
@@ -328,7 +201,7 @@ export default function GradeSlip() {
 
                 <SelectItem key={t.id} value={t.id}>
 
-                  {t.name} {t.status === 'ended' ? '(Finalized)' : ''}
+                  {t.name} {t.status === 'ended' ? '(Finalized)' : '(Ongoing)'}
 
                 </SelectItem>
 
@@ -340,7 +213,11 @@ export default function GradeSlip() {
 
         </div>
 
-        <Button onClick={() => window.print()} className="gap-2">
+        <Button 
+          onClick={() => window.print()} 
+          className="gap-2 bg-primary hover:bg-primary/90"
+          disabled={isTermActive || records.length === 0}
+        >
 
           <Printer size={16} />
           Print Grade Slip
@@ -351,7 +228,7 @@ export default function GradeSlip() {
 
       {/* Grade Slip */}
 
-      <Card className="bg-white border p-14 print:p-10 relative overflow-hidden">
+      <Card className="bg-white border p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-3xl">
 
         {/* Watermark */}
 
@@ -379,15 +256,15 @@ export default function GradeSlip() {
 
           <div className="text-center">
 
-            <h1 className="text-xl font-bold uppercase tracking-widest">
+            <h1 className="text-xl font-black uppercase tracking-widest text-primary">
               AMA Education System
             </h1>
 
-            <p className="text-sm font-semibold tracking-wide">
+            <p className="text-sm font-bold tracking-wide">
               Official Academic Grade Report
             </p>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-semibold">
               AMA Computer College – Lipa Campus
             </p>
 
@@ -411,15 +288,15 @@ export default function GradeSlip() {
 
             <p><strong>Campus:</strong> AMACC – Lipa</p>
 
-            <p><strong>Academic Term:</strong> {terms.find(t => t.id === selectedTermId)?.name}</p>
+            <p><strong>Academic Term:</strong> {currentTerm?.name}</p>
 
           </div>
 
         </div>
 
-        {/* Table */}
+        {/* Table / Status View */}
 
-        <div className="mt-10 border">
+        <div className="mt-10 border rounded-xl overflow-hidden">
 
           <table className="w-full text-sm">
 
@@ -427,11 +304,11 @@ export default function GradeSlip() {
 
               <tr>
 
-                <th className="p-3 text-left">Course Code</th>
-                <th className="p-3 text-left">Course Description</th>
-                <th className="p-3 text-center">Units</th>
-                <th className="p-3 text-center">Final Grade</th>
-                <th className="p-3 text-center">Equivalent</th>
+                <th className="p-4 text-left font-black uppercase tracking-tighter">Course Code</th>
+                <th className="p-4 text-left font-black uppercase tracking-tighter">Course Description</th>
+                <th className="p-4 text-center font-black uppercase tracking-tighter">Units</th>
+                <th className="p-4 text-center font-black uppercase tracking-tighter">Final Grade</th>
+                <th className="p-4 text-center font-black uppercase tracking-tighter">Equivalent</th>
 
               </tr>
 
@@ -439,15 +316,32 @@ export default function GradeSlip() {
 
             <tbody>
 
-              {records.length === 0 ? (
+              {isTermActive ? (
+                <tr>
+                  <td colSpan={5} className="p-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 border border-amber-100">
+                        <Lock size={32} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black uppercase tracking-tight text-amber-900">Grades Not Yet Finalized</h3>
+                        <p className="text-sm text-amber-700/70 max-w-xs mx-auto mt-1 font-bold">
+                          The current academic term is still active. 
+                          Please wait for the administrator to finalize the term to view your grades.
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : records.length === 0 ? (
 
                 <tr>
 
-                  <td colSpan={5} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={5} className="text-center py-20 text-muted-foreground">
 
-                    <Info className="mx-auto mb-3" size={28} />
+                    <Info className="mx-auto mb-3 opacity-20" size={48} />
 
-                    No academic records available.
+                    <p className="font-bold">No academic records found for this term.</p>
 
                   </td>
 
@@ -457,13 +351,13 @@ export default function GradeSlip() {
 
                 records.map((record, i) => (
 
-                  <tr key={i} className="border-t">
+                  <tr key={i} className="border-t hover:bg-muted/5 transition-colors">
 
-                    <td className="p-3 font-semibold">{record.code}</td>
-                    <td className="p-3">{record.description}</td>
-                    <td className="p-3 text-center">{record.units}</td>
-                    <td className="p-3 text-center font-semibold">{record.grade}</td>
-                    <td className="p-3 text-center">{record.letter}</td>
+                    <td className="p-4 font-bold text-primary">{record.code}</td>
+                    <td className="p-4 font-medium">{record.description}</td>
+                    <td className="p-4 text-center font-bold">{record.units}</td>
+                    <td className="p-4 text-center font-black text-lg">{record.grade}</td>
+                    <td className="p-4 text-center font-black text-primary">{record.letter}</td>
 
                   </tr>
 
@@ -479,35 +373,43 @@ export default function GradeSlip() {
 
         {/* Footer */}
 
-        <div className="flex justify-between items-end mt-12 border-t pt-6">
+        <div className="flex justify-between items-end mt-12 border-t pt-8">
 
           <div>
 
-            <p className="text-xs font-semibold">Registrar</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-10">Registrar Office</p>
 
-            <div className="border-b w-48 mt-6" />
+            <div className="border-b-2 border-black w-64" />
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-center">
               Authorized Signature
             </p>
 
           </div>
 
-          <div className="text-right">
+          {!isTermActive && records.length > 0 && (
+            <div className="text-right">
 
-            <p className="text-xs font-semibold uppercase">
-              General Weighted Average
-            </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                General Weighted Average
+              </p>
 
-            <p className="text-4xl font-bold text-primary">
-              {calculateGWA()}
-            </p>
+              <p className="text-5xl font-black text-primary tracking-tighter">
+                {calculateGWA()}
+              </p>
 
-          </div>
+            </div>
+          )}
 
         </div>
 
       </Card>
+
+      <div className="text-center print:hidden">
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+          This is an official digital copy of your grade report generated by AMS:AMACC
+        </p>
+      </div>
 
     </div>
 
