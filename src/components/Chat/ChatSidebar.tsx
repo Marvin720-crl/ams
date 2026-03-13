@@ -162,7 +162,7 @@ export default function ChatSidebar({
                   </Avatar>
                   <div className="flex-1 text-left overflow-hidden">
                     <p className="text-sm font-bold truncate">{otherUser?.name || conv.name}</p>
-                    <p className="text-[10px] text-white/40 truncate">{conv.lastMessage || "Start chatting"}</p>
+                    <p className="text-[10px] text-white/40 truncate leading-none">{conv.lastMessage || "Start chatting"}</p>
                   </div>
                 </button>
               );
@@ -174,13 +174,16 @@ export default function ChatSidebar({
       {/* USER FOOTER */}
       <div className="bg-[#232428] p-2 h-14 flex items-center gap-2">
         <div className="flex-1 flex items-center gap-2 p-1 hover:bg-white/5 rounded-lg">
-          <Avatar className="h-8 w-8 relative">
-            <AvatarImage src={user?.profilePic}/>
-            <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name?.[0]}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user?.profilePic}/>
+              <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name?.[0]}</AvatarFallback>
+            </Avatar>
+            <div className="absolute -top-1 -left-1 w-4 h-4 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center text-[8px] font-bold text-white">1</div>
+          </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold text-white truncate">{user?.name}</p>
-            <p className="text-[10px] text-white/40 truncate">{user?.id}</p>
+            <p className="text-xs font-black text-white truncate leading-none mb-0.5">{user?.name || 'User'}</p>
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none truncate">{user?.id}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

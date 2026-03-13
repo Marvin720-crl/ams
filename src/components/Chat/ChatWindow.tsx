@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Conversation, ChatMessage } from '@/utils/storage';
-import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem } from 'lucide-react';
+import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -26,11 +26,15 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Optimized scroll logic - only scrolls when new messages arrive
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
         }
-    }, [messages]);
+    }, [messages.length]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -40,8 +44,9 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
     };
 
     const handleSend = () => {
-        if (inputText.trim()) {
-            onSend(inputText);
+        const trimmed = inputText.trim();
+        if (trimmed) {
+            onSend(trimmed);
             setInputText('');
         }
     };
@@ -60,6 +65,85 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
     const addEmoji = (emoji: string) => {
         setInputText(prev => prev + emoji);
     };
+
+    // Memoize the message list rendering for performance
+    const renderedMessages = useMemo(() => {
+        return messages.map((msg, index) => {
+            const isMe = msg.senderId === user?.id;
+            const isOptimistic = msg.id.startsWith('TEMP-');
+            
+            return (
+                <div 
+                    key={msg.id} 
+                    className={cn(
+                        "flex items-end gap-3 transition-opacity duration-300",
+                        isMe ? "flex-row-reverse" : "flex-row",
+                        isOptimistic ? "opacity-60" : "opacity-100"
+                    )}
+                >
+                    {/* Avatar - Only show for others */}
+                    {!isMe && (
+                        <Avatar className="h-8 w-8 shrink-0 mb-1 border-2 border-white/5">
+                            <AvatarFallback className="bg-primary text-white font-black uppercase text-[10px]">{msg.senderName[0]}</AvatarFallback>
+                        </Avatar>
+                    )}
+
+                    <div className={cn(
+                        "flex flex-col max-w-[75%] space-y-1",
+                        isMe ? "items-end" : "items-start"
+                    )}>
+                        {!isMe && (
+                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">
+                                {msg.senderName}
+                            </span>
+                        )}
+
+                        {/* Message Bubble */}
+                        <div className={cn(
+                            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-lg relative group",
+                            isMe 
+                                ? "bg-primary text-white rounded-br-none" 
+                                : "bg-[#2b2d31] text-white/90 rounded-bl-none border border-white/5"
+                        )}>
+                            {msg.text}
+
+                            {msg.fileUrl && (
+                                <div className={cn(
+                                    "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
+                                    isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
+                                )}>
+                                    {msg.fileUrl === 'pending' ? (
+                                        <div className="h-10 w-10 flex items-center justify-center"><Loader2 className="animate-spin text-white/40 h-5 w-5"/></div>
+                                    ) : (
+                                        <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                            <FileIcon size={20} />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
+                                        <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">
+                                            {msg.fileUrl === 'pending' ? 'Uploading...' : 'Download'}
+                                        </p>
+                                    </div>
+                                    {msg.fileUrl !== 'pending' && (
+                                        <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full text-white/40 hover:text-white hover:bg-white/10">
+                                            <a href={msg.fileUrl} download={msg.fileName}>
+                                                <Download size={14} />
+                                            </a>
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <span className="text-[8px] font-bold text-white/20 uppercase tracking-tighter">
+                            {isOptimistic ? 'Sending...' : format(new Date(msg.timestamp), 'h:mm a')}
+                        </span>
+                    </div>
+                </div>
+            );
+        });
+    }, [messages, user?.id]);
 
     return (
         <div className="flex-1 flex flex-col h-full bg-[#1e1f22]">
@@ -98,73 +182,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                             <p className="text-white/30 font-bold uppercase text-[10px] tracking-widest mt-1">Start the conversation with #{conversation.name}</p>
                         </div>
                     </div>
-                ) : (
-                    messages.map((msg) => {
-                        const isMe = msg.senderId === user?.id;
-                        
-                        return (
-                            <div 
-                                key={msg.id} 
-                                className={cn(
-                                    "flex items-end gap-3",
-                                    isMe ? "flex-row-reverse" : "flex-row"
-                                )}
-                            >
-                                {/* Avatar - Only show for others */}
-                                {!isMe && (
-                                    <Avatar className="h-8 w-8 shrink-0 mb-1 border-2 border-white/5">
-                                        <AvatarFallback className="bg-primary text-white font-black uppercase text-[10px]">{msg.senderName[0]}</AvatarFallback>
-                                    </Avatar>
-                                )}
-
-                                <div className={cn(
-                                    "flex flex-col max-w-[75%] space-y-1",
-                                    isMe ? "items-end" : "items-start"
-                                )}>
-                                    {!isMe && (
-                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">
-                                            {msg.senderName}
-                                        </span>
-                                    )}
-
-                                    {/* Message Bubble */}
-                                    <div className={cn(
-                                        "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-lg",
-                                        isMe 
-                                            ? "bg-primary text-white rounded-br-none" 
-                                            : "bg-[#2b2d31] text-white/90 rounded-bl-none border border-white/5"
-                                    )}>
-                                        {msg.text}
-
-                                        {msg.fileUrl && (
-                                            <div className={cn(
-                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
-                                                isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
-                                            )}>
-                                                <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                                                    <FileIcon size={20} />
-                                                </div>
-                                                <div className="flex-1 overflow-hidden">
-                                                    <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
-                                                    <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">Download</p>
-                                                </div>
-                                                <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full text-white/40 hover:text-white hover:bg-white/10">
-                                                    <a href={msg.fileUrl} download={msg.fileName}>
-                                                        <Download size={14} />
-                                                    </a>
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-tighter">
-                                        {format(new Date(msg.timestamp), 'h:mm a')}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
+                ) : renderedMessages}
             </div>
 
             {/* Input Area - Messenger Style */}
