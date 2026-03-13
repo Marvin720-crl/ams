@@ -11,7 +11,8 @@ Monitor,
 User,
 GraduationCap,
 Loader2,
-ArrowRight
+ArrowRight,
+Users
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
@@ -47,6 +48,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface TodayClass {
 name: string;
