@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import ChatContainer from '../Chat/ChatContainer';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,20 +26,20 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
     switch (user.role) {
       case 'student':
         return [
-          { id: 'home', label: 'Home', icon: Home },
+          { id: 'home', label: 'Dashboard', icon: Home },
           { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'view-card', label: 'View Card', icon: GraduationCap },
+          { id: 'view-card', label: 'Grade Slip', icon: GraduationCap },
           { id: 'subjects', label: 'My Subjects', icon: Book },
           { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'make-request', label: 'Make Request', icon: FileText },
           { id: 'my-requests', label: 'My Requests', icon: FileCheck },
           { id: 'my-sessions', label: 'My Sessions', icon: Calendar },
-          { id: 'enroll', label: 'Enroll in Subject', icon: Users },
+          { id: 'enroll', label: 'Enrollment', icon: Users },
           { id: 'library', label: 'Library', icon: BookOpen },
         ];
       case 'teacher':
         return [
-          { id: 'home', label: 'Home', icon: Home },
+          { id: 'home', label: 'Dashboard', icon: Home },
           { id: 'chat', label: 'Messages', icon: MessageCircle },
           { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
           { id: 'schedule', label: 'My Schedule', icon: Calendar },
@@ -94,8 +93,8 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-muted/10 flex flex-col">
-      {/* Top Header - Pic 1 Style */}
-      <header className="bg-primary text-white h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-md print:hidden">
+      {/* Header */}
+      <header className="bg-primary text-white h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-md print:hidden">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -103,22 +102,18 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <Image src="/logo.png" alt="AMA Student Portal" width={140} height={36} className="h-9 w-auto" />
           </div>
         </div>
         
-        {/* Logout Trigger - Right Side */}
+        {/* Logout Button */}
         <button 
           onClick={logout}
-          className="flex items-center gap-2 group transition-all"
+          className="p-2 hover:bg-white/10 rounded-full transition-all group"
           title="Logout"
         >
-          <Avatar className="h-10 w-10 border-2 border-white/20 group-hover:border-white transition-colors">
-            <AvatarImage src={user?.profilePic} />
-            <AvatarFallback className="bg-white/20 text-white font-bold uppercase">{user?.name?.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <LogOut size={18} className="hidden sm:block opacity-50 group-hover:opacity-100" />
+          <LogOut size={24} className="opacity-70 group-hover:opacity-100" />
         </button>
       </header>
 
@@ -136,14 +131,25 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* Sidebar - Pic 2 Minimal Style */}
+        {/* Sidebar */}
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-white border-r w-64 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          {/* No Header inside Sidebar as per Pic 2 */}
+          {/* Profile Header */}
+          <div className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent">
+            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3">
+              {user?.name?.charAt(0) || 'S'}
+            </div>
+            <h2 className="mt-6 text-sm font-black uppercase tracking-tight text-center leading-tight text-foreground px-4">
+              {user?.name}
+            </h2>
+            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground text-center">
+              {user?.role === 'admin' ? 'SYSTEM ADMINISTRATOR' : user?.role?.replace('_', ' ')}
+            </p>
+          </div>
           
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1 no-scrollbar scroll-smooth overscroll-contain">
+          <nav className="flex-1 overflow-y-auto px-4 pb-8 space-y-1 no-scrollbar scroll-smooth">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
@@ -152,24 +158,25 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                   key={item.id}
                   onClick={() => handleNav(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                    "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all group",
                     isActive 
-                      ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
-                      : "text-muted-foreground hover:bg-muted hover:text-primary"
+                      ? "bg-white text-primary border-l-4 border-primary shadow-sm scale-[1.02]" 
+                      : "text-muted-foreground hover:bg-white/50 hover:text-primary"
                   )}
                 >
-                  <Icon size={18} />
+                  <Icon size={18} className={cn(
+                    "transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                  )} />
                   {item.label}
                 </button>
               );
             })}
           </nav>
-
-          {/* No Footer inside Sidebar as per Pic 2 (Logout moved to Header) */}
         </aside>
 
-        {/* Main Content - Pic 3 Context */}
-        <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-8">
+        {/* Main Content */}
+        <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-10">
           <div className="max-w-7xl mx-auto h-full">
             <motion.div
               key={currentView}
