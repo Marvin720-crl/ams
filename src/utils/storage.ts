@@ -232,7 +232,7 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   type: 'text' | 'call_log';
-  fileUrl?: string;
+  fileUrl?: string | null;
   fileName?: string;
   fileType?: string;
 }

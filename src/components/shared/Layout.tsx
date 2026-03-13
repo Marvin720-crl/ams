@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -10,7 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import ChatContainer from '../chat/ChatContainer';
+import ChatContainer from '../Chat/ChatContainer';
 
 interface LayoutProps {
   children: React.ReactNode;

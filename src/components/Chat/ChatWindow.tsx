@@ -5,9 +5,9 @@ import { Conversation, ChatMessage } from '@/utils/storage';
 import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -107,7 +107,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                                 key={msg.id} 
                                 className={cn(
                                     "flex items-end gap-3",
-                                    isMe ? "flex-row-reverse text-right" : "flex-row text-left"
+                                    isMe ? "flex-row-reverse" : "flex-row"
                                 )}
                             >
                                 {/* Avatar - Only show for others */}
@@ -121,7 +121,6 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                                     "flex flex-col max-w-[75%] space-y-1",
                                     isMe ? "items-end" : "items-start"
                                 )}>
-                                    {/* Sender Name - Optional for Messenger but added for clarity in group chats */}
                                     {!isMe && (
                                         <span className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">
                                             {msg.senderName}
@@ -139,7 +138,7 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
 
                                         {msg.fileUrl && (
                                             <div className={cn(
-                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full text-left",
+                                                "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
                                                 isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
                                             )}>
                                                 <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -158,7 +157,6 @@ export default function ChatWindow({ conversation, messages, onSend }: ChatWindo
                                         )}
                                     </div>
 
-                                    {/* Timestamp */}
                                     <span className="text-[8px] font-bold text-white/20 uppercase tracking-tighter">
                                         {format(new Date(msg.timestamp), 'h:mm a')}
                                     </span>
