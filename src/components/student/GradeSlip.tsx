@@ -64,7 +64,6 @@ export default function GradeSlip() {
           (t) => t.status === 'active'
         );
 
-        // Default to active term if it exists, otherwise most recent
         const defaultTermId =
           activeTerm?.id || sortedTerms[0].id;
 
@@ -101,7 +100,6 @@ export default function GradeSlip() {
     const termsList = currentTerms || terms;
     const term = termsList.find((t) => t.id === termId);
 
-    // If term is still active, DO NOT show subjects/grades (as per user request)
     if (term?.status === 'active') {
       setRecords([]);
       return;
@@ -175,13 +173,13 @@ export default function GradeSlip() {
 
   return (
 
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 px-2 sm:px-0">
 
       {/* Controls */}
 
-      <div className="flex justify-between items-center print:hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 print:hidden">
 
-        <div className="w-72">
+        <div className="w-full sm:w-72">
 
           <Select
             value={selectedTermId}
@@ -191,15 +189,15 @@ export default function GradeSlip() {
             }}
           >
 
-            <SelectTrigger className="h-12 rounded-md font-bold">
+            <SelectTrigger className="h-12 rounded-xl font-black uppercase text-[10px] tracking-widest border-primary/10">
               <SelectValue placeholder="Select Term" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="rounded-2xl">
 
               {terms.map(t => (
 
-                <SelectItem key={t.id} value={t.id}>
+                <SelectItem key={t.id} value={t.id} className="text-[10px] font-black uppercase">
 
                   {t.name} {t.status === 'ended' ? '(Finalized)' : '(Ongoing)'}
 
@@ -215,7 +213,7 @@ export default function GradeSlip() {
 
         <Button 
           onClick={() => window.print()} 
-          className="gap-2 bg-primary hover:bg-primary/90"
+          className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest rounded-xl h-12 shadow-lg shadow-primary/20"
           disabled={isTermActive || records.length === 0}
         >
 
@@ -228,7 +226,7 @@ export default function GradeSlip() {
 
       {/* Grade Slip */}
 
-      <Card className="bg-white border p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-3xl">
+      <Card className="bg-white border p-6 sm:p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-[2.5rem]">
 
         {/* Watermark */}
 
@@ -245,26 +243,27 @@ export default function GradeSlip() {
 
         {/* Header */}
 
-        <div className="flex items-center justify-center gap-6 border-b pb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 border-b pb-8 relative z-10">
 
           <Image
             src="/logo.png"
             alt="logo"
-            width={80}
-            height={80}
+            width={60}
+            height={60}
+            className="sm:w-20 sm:h-20"
           />
 
-          <div className="text-center">
+          <div className="text-center sm:text-left">
 
-            <h1 className="text-xl font-black uppercase tracking-widest text-primary">
+            <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest text-primary">
               AMA Education System
             </h1>
 
-            <p className="text-sm font-bold tracking-wide">
+            <p className="text-xs sm:text-sm font-bold tracking-wide">
               Official Academic Grade Report
             </p>
 
-            <p className="text-xs text-muted-foreground font-semibold">
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
               AMA Computer College – Lipa Campus
             </p>
 
@@ -274,21 +273,21 @@ export default function GradeSlip() {
 
         {/* Student Info */}
 
-        <div className="grid grid-cols-2 gap-8 mt-10 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mt-10 text-xs sm:text-sm relative z-10">
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-center sm:text-left">
 
-            <p><strong>Student Name:</strong> {user?.name}</p>
+            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Student Name</span> <strong>{user?.name}</strong></p>
 
-            <p><strong>Student ID:</strong> {user?.id}</p>
+            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Student ID</span> <strong>{user?.id}</strong></p>
 
           </div>
 
-          <div className="space-y-2 text-right">
+          <div className="space-y-2 text-center sm:text-right">
 
-            <p><strong>Campus:</strong> AMACC – Lipa</p>
+            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Campus</span> <strong>AMACC – Lipa</strong></p>
 
-            <p><strong>Academic Term:</strong> {currentTerm?.name}</p>
+            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Academic Term</span> <strong>{currentTerm?.name}</strong></p>
 
           </div>
 
@@ -296,105 +295,107 @@ export default function GradeSlip() {
 
         {/* Table / Status View */}
 
-        <div className="mt-10 border rounded-xl overflow-hidden">
+        <div className="mt-10 border rounded-2xl overflow-hidden relative z-10 bg-white/50 backdrop-blur-sm">
 
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[10px] sm:text-sm">
 
-            <thead className="bg-gray-100">
-
-              <tr>
-
-                <th className="p-4 text-left font-black uppercase tracking-tighter">Course Code</th>
-                <th className="p-4 text-left font-black uppercase tracking-tighter">Course Description</th>
-                <th className="p-4 text-center font-black uppercase tracking-tighter">Units</th>
-                <th className="p-4 text-center font-black uppercase tracking-tighter">Final Grade</th>
-                <th className="p-4 text-center font-black uppercase tracking-tighter">Equivalent</th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {isTermActive ? (
-                <tr>
-                  <td colSpan={5} className="p-20 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 border border-amber-100">
-                        <Lock size={32} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-black uppercase tracking-tight text-amber-900">Grades Not Yet Finalized</h3>
-                        <p className="text-sm text-amber-700/70 max-w-xs mx-auto mt-1 font-bold">
-                          The current academic term is still active. 
-                          Please wait for the administrator to finalize the term to view your grades.
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ) : records.length === 0 ? (
+              <thead className="bg-muted/30">
 
                 <tr>
 
-                  <td colSpan={5} className="text-center py-20 text-muted-foreground">
-
-                    <Info className="mx-auto mb-3 opacity-20" size={48} />
-
-                    <p className="font-bold">No academic records found for this term.</p>
-
-                  </td>
+                  <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Code</th>
+                  <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Description</th>
+                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Units</th>
+                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Grade</th>
+                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Eq.</th>
 
                 </tr>
 
-              ) : (
+              </thead>
 
-                records.map((record, i) => (
+              <tbody>
 
-                  <tr key={i} className="border-t hover:bg-muted/5 transition-colors">
+                {isTermActive ? (
+                  <tr>
+                    <td colSpan={5} className="p-12 sm:p-20 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 border border-amber-100 animate-pulse">
+                          <Lock size={32} />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black uppercase tracking-tight text-amber-900">Grades Not Yet Finalized</h3>
+                          <p className="text-xs sm:text-sm text-amber-700/70 max-w-xs mx-auto mt-1 font-bold">
+                            The current academic term is still active. 
+                            Please wait for the administrator to finalize the term.
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : records.length === 0 ? (
 
-                    <td className="p-4 font-bold text-primary">{record.code}</td>
-                    <td className="p-4 font-medium">{record.description}</td>
-                    <td className="p-4 text-center font-bold">{record.units}</td>
-                    <td className="p-4 text-center font-black text-lg">{record.grade}</td>
-                    <td className="p-4 text-center font-black text-primary">{record.letter}</td>
+                  <tr>
+
+                    <td colSpan={5} className="text-center py-20 text-muted-foreground">
+
+                      <Info className="mx-auto mb-3 opacity-20" size={48} />
+
+                      <p className="font-bold">No academic records found for this term.</p>
+
+                    </td>
 
                   </tr>
 
-                ))
+                ) : (
 
-              )}
+                  records.map((record, i) => (
 
-            </tbody>
+                    <tr key={i} className="border-t hover:bg-muted/5 transition-colors">
 
-          </table>
+                      <td className="p-3 sm:p-4 font-bold text-primary">{record.code}</td>
+                      <td className="p-3 sm:p-4 font-medium max-w-[120px] sm:max-w-none truncate">{record.description}</td>
+                      <td className="p-3 sm:p-4 text-center font-bold">{record.units}</td>
+                      <td className="p-3 sm:p-4 text-center font-black text-base sm:text-lg">{record.grade}</td>
+                      <td className="p-3 sm:p-4 text-center font-black text-primary">{record.letter}</td>
+
+                    </tr>
+
+                  ))
+
+                )}
+
+              </tbody>
+
+            </table>
+          </div>
 
         </div>
 
         {/* Footer */}
 
-        <div className="flex justify-between items-end mt-12 border-t pt-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end mt-12 border-t pt-10 gap-8 relative z-10">
 
-          <div>
+          <div className="text-center sm:text-left">
 
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-10">Registrar Office</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-10">Registrar Office</p>
 
-            <div className="border-b-2 border-black w-64" />
+            <div className="border-b-2 border-black w-48 sm:w-64" />
 
-            <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-center">
+            <p className="text-[9px] font-black uppercase tracking-widest mt-2">
               Authorized Signature
             </p>
 
           </div>
 
           {!isTermActive && records.length > 0 && (
-            <div className="text-right">
+            <div className="text-center sm:text-right">
 
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
                 General Weighted Average
               </p>
 
-              <p className="text-5xl font-black text-primary tracking-tighter">
+              <p className="text-4xl sm:text-6xl font-black text-primary tracking-tighter">
                 {calculateGWA()}
               </p>
 
@@ -405,9 +406,9 @@ export default function GradeSlip() {
 
       </Card>
 
-      <div className="text-center print:hidden">
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-          This is an official digital copy of your grade report generated by AMS:AMACC
+      <div className="text-center print:hidden px-4">
+        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-relaxed">
+          This is an official digital copy of your grade report generated by AMS:AMACC v1.0
         </p>
       </div>
 

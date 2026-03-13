@@ -86,7 +86,7 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground font-bold text-[10px] tracking-[0.2em] mt-2 uppercase">Root Management v1.0</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <StatCard
           icon={<School size={28} />}
           label="Active Trimesters"
@@ -142,7 +142,9 @@ export default function AdminDashboard() {
 
   return (
     <Layout currentView={currentView} onNavigate={setCurrentView}>
-      {renderContent()}
+      <div className="h-full">
+        {renderContent()}
+      </div>
     </Layout>
   );
 }

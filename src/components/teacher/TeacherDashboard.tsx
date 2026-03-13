@@ -33,6 +33,7 @@ getTermsAction
 } from '@/app/actions/dbActions';
 
 import { Term } from '@/utils/storage';
+import { Card } from '../ui/card';
 
 export default function TeacherDashboard() {
 
@@ -145,11 +146,11 @@ const renderHome = () => (
 
 <div>
 
-<h2 className="text-3xl font-bold text-primary tracking-tight">
+<h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
 Faculty Hub
 </h2>
 
-<p className="text-sm text-muted-foreground mt-1">
+<p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
 Welcome back, {user?.name}
 </p>
 
@@ -160,7 +161,7 @@ Welcome back, {user?.name}
 {activeTerms.map(term=>(
 <span
 key={term.id}
-className="px-4 py-1.5 text-xs rounded-full bg-primary/10 text-primary font-semibold"
+className="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full bg-primary/10 text-primary border border-primary/5"
 >
 Active: {term.name}
 </span>
@@ -210,24 +211,24 @@ icon={<ClipboardList size={22}/>}
 
 ) : subjects.length===0 ? (
 
-<div className="text-center py-20 bg-white rounded-xl border">
+<div className="text-center py-20 bg-white rounded-[2.5rem] border-primary/5 shadow-xl">
 
 <Book
 size={56}
-className="mx-auto text-primary opacity-30 mb-6"
+className="mx-auto text-primary opacity-20 mb-6"
 />
 
-<h3 className="text-lg font-semibold">
+<h3 className="text-xl font-black uppercase tracking-tighter">
 No Subjects Assigned
 </h3>
 
-<p className="text-sm text-muted-foreground mt-2 mb-6">
-Create or assign subjects to start teaching.
+<p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-2 mb-8">
+Provision your load to start teaching.
 </p>
 
 <button
 onClick={()=>setCurrentView('manage-subjects')}
-className="px-6 py-3 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90"
+className="px-8 py-4 rounded-2xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all"
 >
 Create Subject
 </button>
@@ -240,48 +241,49 @@ Create Subject
 
 {subjects.map(subject=>(
 
-<div
+<Card
 key={subject.id}
 onClick={()=>setSelectedSubject(subject)}
-className="bg-white rounded-xl border p-6 cursor-pointer hover:shadow-md transition"
+className="bg-white rounded-[2rem] border-primary/5 p-8 cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all group"
 >
 
-<div className="flex items-center gap-3 mb-4">
+<div className="flex items-center gap-4 mb-6">
 
-<div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-<School size={20}/>
+<div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<School size={24}/>
 </div>
 
-<h3 className="font-semibold text-primary">
+<h3 className="font-black text-primary uppercase tracking-tight group-hover:text-primary transition-colors leading-tight">
 {subject.name}
 </h3>
 
 </div>
 
-<div className="text-xs text-muted-foreground space-y-1 mb-4">
+<div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest space-y-2 mb-6">
 
 {subject.schedules?.map((s:any,i:number)=>(
-<div key={i}>
-{s.day} • {s.startTime}
+<div key={i} className="flex items-center gap-2">
+    <div className="w-1.5 h-1.5 rounded-full bg-primary/20"/>
+    {s.day} • {s.startTime}
 </div>
 ))}
 
 </div>
 
-<div className="flex justify-between items-center border-t pt-3">
+<div className="flex justify-between items-center border-t pt-5">
 
-<span className="text-xs text-muted-foreground">
-Students
+<span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+Enrollments
 </span>
 
-<span className="flex items-center gap-1 text-primary font-semibold">
+<span className="flex items-center gap-1.5 text-primary font-black">
 {subject.studentCount}
 <Users size={14}/>
 </span>
 
 </div>
 
-</div>
+</Card>
 
 ))}
 
@@ -366,7 +368,7 @@ currentView={currentView}
 onNavigate={setCurrentView}
 >
 
-<div className="p-4 sm:p-6 lg:p-8">
+<div className="h-full">
 {renderContent()}
 </div>
 
@@ -384,19 +386,19 @@ function StatCard({title,value,icon}:any){
 
 return(
 
-<div className="bg-white p-6 rounded-xl border flex items-center gap-4 hover:shadow-sm transition">
+<div className="bg-white p-8 rounded-[2.5rem] border-primary/5 shadow-xl flex items-center gap-6 hover:shadow-2xl transition-all group">
 
-<div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
 {icon}
 </div>
 
 <div>
 
-<p className="text-xs text-muted-foreground mb-1">
+<p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
 {title}
 </p>
 
-<p className="text-2xl font-semibold text-primary">
+<p className="text-3xl font-black text-primary tracking-tighter">
 {value}
 </p>
 

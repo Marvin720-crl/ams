@@ -261,11 +261,11 @@ return(
 
 <motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}}>
 
-<h2 className="text-3xl font-bold text-primary">
+<h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
 Student Hub
 </h2>
 
-<p className="text-sm text-muted-foreground mt-1">
+<p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
 Welcome back, {user?.name}
 </p>
 
@@ -276,7 +276,7 @@ Welcome back, {user?.name}
 {approvedTerms.map(term=>(
 <Badge
 key={term.id}
-className="bg-green-600 text-white"
+className="bg-green-600 text-white font-black uppercase text-[10px] tracking-widest px-4 py-1.5 rounded-full"
 >
 Enrolled: {term.name}
 </Badge>
@@ -290,21 +290,27 @@ Enrolled: {term.name}
 
 {(unenrolledTerms.length>0 || pendingTerms.length>0) && (
 
-<div className="grid md:grid-cols-2 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
 {unenrolledTerms.map(term=>(
-<Card key={term.id} className="p-6 flex flex-col gap-4">
+<Card key={term.id} className="p-8 rounded-[2rem] border-primary/5 shadow-xl flex flex-col gap-6">
 
-<div className="flex items-center gap-3">
+<div className="flex items-center gap-4">
 
-<GraduationCap className="text-primary"/>
+<div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+<GraduationCap />
+</div>
 
-<h3 className="font-semibold">{term.name}</h3>
+<div>
+<h3 className="font-black text-lg uppercase tracking-tight">{term.name}</h3>
+<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Academic Term</p>
+</div>
 
 </div>
 
 <Button
 onClick={()=>handleTermEnroll(term.id)}
+className="h-12 rounded-xl font-black uppercase text-xs tracking-widest"
 >
 Join Academic Term
 </Button>
@@ -313,24 +319,22 @@ Join Academic Term
 ))}
 
 {pendingTerms.map(term=>(
-<Card key={term.id} className="p-6 bg-amber-50">
+<Card key={term.id} className="p-8 rounded-[2rem] bg-amber-50 border-amber-100 flex items-center gap-6">
 
-<div className="flex items-center gap-3">
-
-<Loader2 className="animate-spin text-amber-600"/>
+<div className="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600">
+<Loader2 className="animate-spin" />
+</div>
 
 <div>
 
-<p className="font-semibold">{term.name}</p>
+<p className="font-black text-lg uppercase tracking-tight">{term.name}</p>
 
-<p className="text-sm text-muted-foreground">
+<p className="text-[10px] font-black text-amber-700/60 uppercase tracking-widest">
 Awaiting admin approval
 </p>
 
 </div>
 
-</div>
-
 </Card>
 ))}
 
@@ -338,107 +342,125 @@ Awaiting admin approval
 
 )}
 
-{/* Today's classes */}
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {/* Today's classes */}
+    <Card className="lg:col-span-2 p-8 rounded-[2.5rem] border-primary/5 shadow-xl space-y-8">
 
-<Card className="p-6 space-y-6">
+    <div className="flex justify-between items-center">
 
-<div className="flex justify-between items-center">
+    <h3 className="font-black text-xl uppercase tracking-tighter flex items-center gap-3">
+    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+        <Calendar size={20}/>
+    </div>
+    Today's Schedule
+    </h3>
 
-<h3 className="font-semibold flex items-center gap-2">
-<Calendar size={18}/>
-Today's Schedule
-</h3>
+    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+    {new Date().toDateString()}
+    </span>
 
-<span className="text-xs text-muted-foreground">
-{new Date().toDateString()}
-</span>
+    </div>
 
+    {loading ? (
+
+    <div className="py-10 text-center">
+    <Loader2 className="animate-spin mx-auto text-primary"/>
+    </div>
+
+    ) : todayClasses.length===0 ? (
+
+    <div className="py-16 text-center bg-muted/20 rounded-[2rem] border-2 border-dashed">
+        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No classes scheduled today</p>
+    </div>
+
+    ) : (
+
+    <div className="space-y-4">
+
+    {todayClasses.map((item,idx)=>(
+
+    <div
+    key={idx}
+    className="flex items-center justify-between border border-primary/5 rounded-[1.5rem] p-5 hover:bg-muted/20 transition-colors"
+    >
+
+    <div className="flex items-center gap-4">
+
+    <div className="p-3 bg-primary/10 rounded-xl text-primary">
+
+    {item.type==='class'
+    ?<BookOpen size={20}/>
+    :<Monitor size={20}/>
+    }
+
+    </div>
+
+    <div>
+
+    <p className="font-black text-primary uppercase leading-tight">
+    {item.name}
+    </p>
+
+    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+    {item.time} • {item.teacher}
+    </p>
+
+    </div>
+
+    </div>
+
+    <Badge className={cn(
+        "rounded-full px-3 font-black text-[9px] uppercase tracking-widest",
+        item.status === 'ongoing' ? "bg-green-500" : "bg-primary/10 text-primary"
+    )}>
+    {item.status}
+    </Badge>
+
+    </div>
+
+    ))}
+
+    </div>
+
+    )}
+
+    </Card>
+
+    {/* Side card */}
+    <div className="space-y-8">
+        <Card className="p-8 rounded-[2.5rem] border-primary/5 shadow-xl bg-primary text-white">
+
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">
+        Approved Terms
+        </p>
+
+        <p className="text-5xl font-black tracking-tighter">
+        {approvedTerms.length}
+        </p>
+
+        <Button
+        variant="secondary"
+        className="mt-8 w-full h-14 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl"
+        onClick={()=>setCurrentView('view-card')}
+        >
+        View Grade Slip
+        <ArrowRight size={16} className="ml-2"/>
+        </Button>
+
+        </Card>
+
+        <Card className="p-8 rounded-[2.5rem] border-primary/5 shadow-xl overflow-hidden relative group cursor-pointer" onClick={() => setCurrentView('enroll')}>
+            <div className="relative z-10">
+                <Users className="text-primary mb-4" size={32} />
+                <h4 className="font-black text-xl uppercase tracking-tighter">New Registration</h4>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 leading-relaxed">Enroll in new subjects for the current trimester.</p>
+            </div>
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                <ArrowRight size={64} />
+            </div>
+        </Card>
+    </div>
 </div>
-
-{loading ? (
-
-<div className="py-10 text-center">
-<Loader2 className="animate-spin mx-auto text-primary"/>
-</div>
-
-) : todayClasses.length===0 ? (
-
-<div className="py-10 text-center text-muted-foreground">
-No classes scheduled today
-</div>
-
-) : (
-
-<div className="space-y-4">
-
-{todayClasses.map((item,idx)=>(
-
-<div
-key={idx}
-className="flex items-center justify-between border rounded-lg p-4"
->
-
-<div className="flex items-center gap-4">
-
-<div className="p-3 bg-primary/10 rounded-lg text-primary">
-
-{item.type==='class'
-?<BookOpen size={18}/>
-:<Monitor size={18}/>
-}
-
-</div>
-
-<div>
-
-<p className="font-medium">
-{item.name}
-</p>
-
-<p className="text-xs text-muted-foreground">
-{item.time} • {item.teacher}
-</p>
-
-</div>
-
-</div>
-
-<Badge>
-{item.status}
-</Badge>
-
-</div>
-
-))}
-
-</div>
-
-)}
-
-</Card>
-
-{/* Side card */}
-
-<Card className="p-6">
-
-<p className="text-sm text-muted-foreground">
-Approved Terms
-</p>
-
-<p className="text-2xl font-bold">
-{approvedTerms.length}
-</p>
-
-<Button
-variant="outline"
-className="mt-6 w-full"
-onClick={()=>setCurrentView('view-card')}
->
-View Grade Slip
-<ArrowRight size={14} className="ml-2"/>
-</Button>
-
-</Card>
 
 </div>
 

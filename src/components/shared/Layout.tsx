@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, RefreshCw, Monitor, MapPin, Scan, Sparkles, QrCode, ClipboardList, School, GraduationCap, MessageCircle
+  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -19,7 +19,7 @@ interface LayoutProps {
 
 export default function Layout({ children, currentView, onNavigate }: LayoutProps) {
   const { user, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const getMenuItems = () => {
     if (!user) return [];
@@ -30,7 +30,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           { id: 'chat', label: 'Messages', icon: MessageCircle },
           { id: 'view-card', label: 'View Card', icon: GraduationCap },
           { id: 'subjects', label: 'My Subjects', icon: Book },
-          { id: 'classwork', label: 'Classwork', icon: ClipboardList },
+          { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'make-request', label: 'Make Request', icon: FileText },
           { id: 'my-requests', label: 'My Requests', icon: FileCheck },
           { id: 'my-sessions', label: 'My Sessions', icon: Calendar },
@@ -43,9 +43,9 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           { id: 'chat', label: 'Messages', icon: MessageCircle },
           { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
           { id: 'schedule', label: 'My Schedule', icon: Calendar },
-          { id: 'scanner', label: 'QR Scanner', icon: QrCode },
+          { id: 'scanner', label: 'QR Scanner', icon: Scan },
           { id: 'manage-subjects', label: 'Manage Subjects', icon: Book },
-          { id: 'classwork', label: 'Classwork', icon: ClipboardList },
+          { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'reservations', label: 'Room Reservations', icon: MapPin },
           { id: 'pending-requests', label: 'Pending Requests', icon: FileText },
           { id: 'pending-enrollments', label: 'Pending Enrollments', icon: Users },
@@ -79,155 +79,125 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   const menuItems = getMenuItems();
 
+  const handleNav = (id: string) => {
+    onNavigate(id);
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   const renderContent = () => {
     if (currentView === 'chat') return <ChatContainer />;
     return children;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-red-50/20 to-gray-50">
-      <motion.div 
-        className="bg-gradient-to-r from-[#b40000] via-[#c41010] to-[#b40000] text-white py-6 px-4 md:py-8 md:px-8 shadow-2xl relative overflow-hidden print:hidden"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),transparent)]" />
-        <div className="flex items-center justify-between relative z-10">
-          <motion.div
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex items-center gap-3"
-          >
-            <Image src="/logo.png" alt="Logo" width={150} height={40} priority />
-          </motion.div>
-          <motion.button
+    <div className="min-h-screen bg-muted/10 flex flex-col">
+      {/* Top Header */}
+      <header className="bg-primary text-white h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-md print:hidden">
+        <div className="flex items-center gap-3">
+          <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 hover:bg-white/20 rounded-xl transition-colors backdrop-blur-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            className="p-2 hover:bg-white/10 rounded-lg lg:hidden"
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          </motion.button>
+          </button>
+          <Image src="/logo.png" alt="AMA" width={120} height={32} className="h-8 w-auto" />
         </div>
-      </motion.div>
+        <div className="hidden lg:block text-[10px] font-black uppercase tracking-[0.3em] opacity-50">
+          Academic Management System v1.0
+        </div>
+        <Link href="/profile" className="flex items-center gap-2 hover:bg-white/10 p-1 rounded-full pr-3 transition-colors">
+          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center overflow-hidden">
+            {user?.profilePic ? (
+              <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs font-bold">{user?.name.charAt(0)}</span>
+            )}
+          </div>
+          <span className="text-xs font-bold hidden sm:inline">{user?.name.split(' ')[0]}</span>
+        </Link>
+      </header>
 
-      <div className="flex">
-        <AnimatePresence mode="wait">
+      <div className="flex flex-1 relative">
+        {/* Sidebar Overlay */}
+        <AnimatePresence>
           {sidebarOpen && (
-            <motion.aside
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed lg:sticky top-0 left-0 h-screen w-64 bg-white/80 backdrop-blur-xl shadow-2xl z-40 flex flex-col border-r border-gray-200/50 print:hidden"
-            >
-              <Link href="/profile">
-                <motion.div 
-                  className="p-6 border-b border-gray-200/50 hover:bg-gray-50/50 transition-colors"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                >
-                  <motion.div 
-                    className="w-20 h-20 bg-gradient-to-br from-[#b40000] to-[#8b0000] rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl shadow-lg"
-                    whileHover={{ scale: 1.05, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {user?.profilePic ? (
-                        <Image src={user.profilePic} alt={user.name} width={80} height={80} className="rounded-2xl object-cover" />
-                    ) : (
-                        user?.name.charAt(0).toUpperCase()
-                    )}
-                  </motion.div>
-                  <h3 className="text-center font-black text-sm tracking-tight mb-1 uppercase">{user?.name}</h3>
-                  <p className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{user?.role.replace('_', ' ')}</p>
-                </motion.div>
-              </Link>
-
-              <nav className="flex-1 overflow-y-auto py-4">
-                {menuItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const isActive = currentView === item.id;
-                  return (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => onNavigate(item.id)}
-                      className={`w-full px-6 py-3 flex items-center gap-3 transition-all duration-300 rounded-r-xl mr-4 relative ${
-                        isActive
-                          ? 'bg-gradient-to-r from-red-50 to-transparent text-[#b40000] shadow-sm'
-                          : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent'
-                      }`}
-                      initial={{ x: -50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.05 * index, duration: 0.3 }}
-                      whileHover={{ x: 5 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {isActive && (
-                        <motion.div 
-                          className="absolute left-0 top-0 bottom-0 w-1 bg-[#b40000] rounded-r-full"
-                          layoutId="activeTab"
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        />
-                      )}
-                      <Icon size={20} className={isActive ? 'text-primary' : 'text-gray-400'} />
-                      <span className={`text-xs font-black uppercase tracking-widest ${isActive ? 'text-primary' : ''}`}>{item.label}</span>
-                    </motion.button>
-                  );
-                })}
-              </nav>
-
-              <motion.div 
-                className="p-4 border-t border-gray-200/50"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                <motion.button
-                  onClick={logout}
-                  className="w-full px-4 py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-red-50 hover:to-red-100 text-gray-700 hover:text-[#b40000] rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <LogOut size={20} />
-                  <span className="text-xs font-black uppercase tracking-widest">Logout</span>
-                </motion.button>
-              </motion.div>
-            </motion.aside>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+            />
           )}
         </AnimatePresence>
 
-        <main className="flex-1 p-4 md:p-8 print:p-0 overflow-hidden">
-          <motion.div
-            key={currentView}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="h-full"
-          >
-            {renderContent()}
-          </motion.div>
+        {/* Sidebar */}
+        <aside className={cn(
+          "fixed lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-40 bg-white border-r w-64 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <div className="p-6 border-b flex flex-col items-center">
+            <div className="w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center text-primary text-2xl font-black mb-3 border-2 border-primary/10 overflow-hidden">
+              {user?.profilePic ? (
+                <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user?.name.charAt(0)
+              )}
+            </div>
+            <h3 className="font-black text-sm uppercase tracking-tight text-center truncate w-full">{user?.name}</h3>
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">{user?.role.replace('_', ' ')}</p>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNav(item.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                    isActive 
+                      ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
+                      : "text-muted-foreground hover:bg-muted hover:text-primary"
+                  )}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t mt-auto">
+            <button
+              onClick={logout}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive text-xs font-black uppercase tracking-widest transition-all"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-8">
+          <div className="max-w-7xl mx-auto h-full">
+            <motion.div
+              key={currentView}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-full"
+            >
+              {renderContent()}
+            </motion.div>
+          </div>
         </main>
       </div>
-
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm print:hidden"
-            onClick={() => setSidebarOpen(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
