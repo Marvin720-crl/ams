@@ -243,29 +243,31 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Header - REPLICATING IMAGE */}
+        {/* Header - EXACTLY LIKE PIC 2 */}
 
-        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-4 sm:gap-8 border-b pb-10 text-center sm:text-left">
+        <div className="flex flex-row items-start gap-4 sm:gap-8 border-b pb-10">
 
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={100}
-            height={100}
-            className="w-24 h-auto opacity-100"
-          />
+          <div className="shrink-0">
+            <Image
+              src="/logo.png"
+              alt="logo"
+              width={100}
+              height={100}
+              className="w-20 sm:w-24 h-auto opacity-100"
+            />
+          </div>
 
-          <div className="flex flex-col items-center sm:items-start">
+          <div className="flex flex-col justify-center">
 
-            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black leading-tight">
+            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-black leading-none">
               AMA EDUCATION SYSTEM
             </h1>
 
-            <p className="text-xl sm:text-2xl font-bold text-black mt-1">
+            <p className="text-lg sm:text-2xl font-bold text-black mt-1">
               Official Academic Grade Report
             </p>
 
-            <p className="text-base sm:text-lg text-gray-400 font-medium mt-0.5">
+            <p className="text-sm sm:text-lg text-[#94a3b8] font-semibold mt-0.5">
               AMA Computer College – Lipa Campus
             </p>
 
@@ -279,17 +281,17 @@ export default function GradeSlip() {
 
           <div className="space-y-1 sm:space-y-2">
 
-            <p><strong className="font-bold">Student Name:</strong> <span className="font-medium text-muted-foreground">{user?.name}</span></p>
+            <p><strong className="font-bold text-foreground">Student Name:</strong> <span className="font-medium text-muted-foreground">{user?.name}</span></p>
 
-            <p><strong className="font-bold">Student ID:</strong> <span className="font-medium text-muted-foreground">{user?.id}</span></p>
+            <p><strong className="font-bold text-foreground">Student ID:</strong> <span className="font-medium text-muted-foreground">{user?.id}</span></p>
 
           </div>
 
           <div className="space-y-1 sm:space-y-2 text-left sm:text-right">
 
-            <p><strong className="font-bold">Campus:</strong> <span className="font-medium text-muted-foreground">AMACC – Lipa</span></p>
+            <p><strong className="font-bold text-foreground">Campus:</strong> <span className="font-medium text-muted-foreground">AMACC – Lipa</span></p>
 
-            <p><strong className="font-bold">Academic Term:</strong> <span className="font-medium text-muted-foreground">{currentTerm?.name}</span></p>
+            <p><strong className="font-bold text-foreground">Academic Term:</strong> <span className="font-medium text-muted-foreground">{currentTerm?.name}</span></p>
 
           </div>
 
