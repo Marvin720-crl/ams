@@ -189,15 +189,15 @@ export default function GradeSlip() {
             }}
           >
 
-            <SelectTrigger className="h-12 rounded-xl font-black uppercase text-[10px] tracking-widest border-primary/10">
+            <SelectTrigger className="h-12 rounded-xl font-bold border-primary/10">
               <SelectValue placeholder="Select Term" />
             </SelectTrigger>
 
-            <SelectContent className="rounded-2xl">
+            <SelectContent>
 
               {terms.map(t => (
 
-                <SelectItem key={t.id} value={t.id} className="text-[10px] font-black uppercase">
+                <SelectItem key={t.id} value={t.id}>
 
                   {t.name} {t.status === 'ended' ? '(Finalized)' : '(Ongoing)'}
 
@@ -213,7 +213,7 @@ export default function GradeSlip() {
 
         <Button 
           onClick={() => window.print()} 
-          className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-white font-black uppercase text-[10px] tracking-widest rounded-xl h-12 shadow-lg shadow-primary/20"
+          className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-white rounded-xl h-12 shadow-lg"
           disabled={isTermActive || records.length === 0}
         >
 
@@ -224,191 +224,138 @@ export default function GradeSlip() {
 
       </div>
 
-      {/* Grade Slip */}
+      {/* Grade Slip Document Card */}
 
-      <Card className="bg-white border p-6 sm:p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-[2.5rem]">
+      <Card className="bg-white border p-10 sm:p-16 print:p-10 shadow-2xl rounded-sm">
 
-        {/* Watermark */}
+        {/* Header Section */}
 
-        <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center pointer-events-none">
+        <div className="flex flex-col items-center justify-center text-center relative pb-6 border-b">
+          
+          <div className="absolute left-0 top-0 hidden sm:block">
+             <Image src="/logo.png" alt="AMA Logo" width={80} height={80} />
+          </div>
 
-          <Image
-            src="/logo.png"
-            alt="watermark"
-            width={400}
-            height={400}
-          />
-
-        </div>
-
-        {/* Header */}
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 border-b pb-8 relative z-10">
-
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={60}
-            height={60}
-            className="sm:w-20 sm:h-20"
-          />
-
-          <div className="text-center sm:text-left">
-
-            <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest text-primary">
-              AMA Education System
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold uppercase tracking-tight text-foreground">
+              AMA EDUCATION SYSTEM
             </h1>
-
-            <p className="text-xs sm:text-sm font-bold tracking-wide">
+            <p className="text-base font-semibold">
               Official Academic Grade Report
             </p>
-
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
+            <p className="text-sm text-muted-foreground">
               AMA Computer College – Lipa Campus
             </p>
-
           </div>
 
         </div>
 
-        {/* Student Info */}
+        {/* Student Information Grid */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mt-10 text-xs sm:text-sm relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 mt-10 text-sm">
 
-          <div className="space-y-2 text-center sm:text-left">
-
-            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Student Name</span> <strong>{user?.name}</strong></p>
-
-            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Student ID</span> <strong>{user?.id}</strong></p>
-
+          <div className="space-y-2">
+            <p><span className="font-bold">Student Name:</span> {user?.name}</p>
+            <p><span className="font-bold">Student ID:</span> {user?.id}</p>
           </div>
 
-          <div className="space-y-2 text-center sm:text-right">
-
-            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Campus</span> <strong>AMACC – Lipa</strong></p>
-
-            <p><span className="text-muted-foreground uppercase font-black text-[9px] block">Academic Term</span> <strong>{currentTerm?.name}</strong></p>
-
+          <div className="space-y-2 text-left sm:text-right">
+            <p><span className="font-bold">Campus:</span> AMACC – Lipa</p>
+            <p><span className="font-bold">Academic Term:</span> {currentTerm?.name}</p>
           </div>
 
         </div>
 
-        {/* Table / Status View */}
+        {/* Grades Table */}
 
-        <div className="mt-10 border rounded-2xl overflow-hidden relative z-10 bg-white/50 backdrop-blur-sm">
+        <div className="mt-10 border rounded-none overflow-hidden bg-white">
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-[10px] sm:text-sm">
+          <table className="w-full text-sm border-collapse">
 
-              <thead className="bg-muted/30">
+            <thead className="bg-gray-50 border-b">
+
+              <tr>
+                <th className="p-4 text-left font-bold border-r">Course Code</th>
+                <th className="p-4 text-left font-bold border-r">Course Description</th>
+                <th className="p-4 text-center font-bold border-r">Units</th>
+                <th className="p-4 text-center font-bold border-r">Final Grade</th>
+                <th className="p-4 text-center font-bold">Equivalent</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {isTermActive ? (
+                <tr>
+                  <td colSpan={5} className="p-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Lock size={32} className="text-amber-500" />
+                      <p className="font-semibold text-muted-foreground">
+                        Grades for this term are not yet finalized.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : records.length === 0 ? (
 
                 <tr>
-
-                  <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Code</th>
-                  <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Description</th>
-                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Units</th>
-                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Grade</th>
-                  <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Eq.</th>
-
+                  <td colSpan={5} className="text-center py-24 text-muted-foreground">
+                    <div className="flex flex-col items-center gap-3">
+                      <Info size={40} className="opacity-20" />
+                      <p>No academic records available.</p>
+                    </div>
+                  </td>
                 </tr>
 
-              </thead>
+              ) : (
 
-              <tbody>
+                records.map((record, i) => (
 
-                {isTermActive ? (
-                  <tr>
-                    <td colSpan={5} className="p-12 sm:p-20 text-center">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 border border-amber-100 animate-pulse">
-                          <Lock size={32} />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-black uppercase tracking-tight text-amber-900">Grades Not Yet Finalized</h3>
-                          <p className="text-xs sm:text-sm text-amber-700/70 max-w-xs mx-auto mt-1 font-bold">
-                            The current academic term is still active. 
-                            Please wait for the administrator to finalize the term.
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : records.length === 0 ? (
-
-                  <tr>
-
-                    <td colSpan={5} className="text-center py-20 text-muted-foreground">
-
-                      <Info className="mx-auto mb-3 opacity-20" size={48} />
-
-                      <p className="font-bold">No academic records found for this term.</p>
-
-                    </td>
-
+                  <tr key={i} className="border-b">
+                    <td className="p-4 border-r">{record.code}</td>
+                    <td className="p-4 border-r">{record.description}</td>
+                    <td className="p-4 text-center border-r">{record.units}</td>
+                    <td className="p-4 text-center border-r font-bold">{record.grade}</td>
+                    <td className="p-4 text-center font-bold text-primary">{record.letter}</td>
                   </tr>
 
-                ) : (
+                ))
 
-                  records.map((record, i) => (
+              )}
 
-                    <tr key={i} className="border-t hover:bg-muted/5 transition-colors">
+            </tbody>
 
-                      <td className="p-3 sm:p-4 font-bold text-primary">{record.code}</td>
-                      <td className="p-3 sm:p-4 font-medium max-w-[120px] sm:max-w-none truncate">{record.description}</td>
-                      <td className="p-3 sm:p-4 text-center font-bold">{record.units}</td>
-                      <td className="p-3 sm:p-4 text-center font-black text-base sm:text-lg">{record.grade}</td>
-                      <td className="p-3 sm:p-4 text-center font-black text-primary">{record.letter}</td>
-
-                    </tr>
-
-                  ))
-
-                )}
-
-              </tbody>
-
-            </table>
-          </div>
+          </table>
 
         </div>
 
-        {/* Footer */}
+        {/* Footer Section */}
 
-        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end mt-12 border-t pt-10 gap-8 relative z-10">
+        <div className="flex flex-col sm:flex-row justify-between items-end mt-16 border-t pt-10">
 
-          <div className="text-center sm:text-left">
-
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-10">Registrar Office</p>
-
-            <div className="border-b-2 border-black w-48 sm:w-64" />
-
-            <p className="text-[9px] font-black uppercase tracking-widest mt-2">
-              Authorized Signature
-            </p>
-
+          <div className="space-y-1">
+            <p className="font-bold text-sm">Registrar</p>
+            <div className="border-b border-gray-300 w-64 pt-8" />
+            <p className="text-[10px] text-muted-foreground">Authorized Signature</p>
           </div>
 
-          {!isTermActive && records.length > 0 && (
-            <div className="text-center sm:text-right">
-
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                General Weighted Average
-              </p>
-
-              <p className="text-4xl sm:text-6xl font-black text-primary tracking-tighter">
-                {calculateGWA()}
-              </p>
-
-            </div>
-          )}
+          <div className="text-right">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              GENERAL WEIGHTED AVERAGE
+            </p>
+            <p className="text-6xl font-bold text-primary mt-1">
+              {calculateGWA()}
+            </p>
+          </div>
 
         </div>
 
       </Card>
 
-      <div className="text-center print:hidden px-4">
-        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground leading-relaxed">
-          This is an official digital copy of your grade report generated by AMS:AMACC v1.0
+      <div className="text-center mt-4 print:hidden">
+        <p className="text-[10px] font-medium text-muted-foreground">
+          AMA Computer College Lipa Student Portal Document System v1.0
         </p>
       </div>
 
