@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -20,7 +19,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-import { Loader2, Printer, Info, Lock, ShieldAlert } from 'lucide-react';
+import { Loader2, Printer, Info, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import Image from 'next/image';
@@ -65,6 +64,7 @@ export default function GradeSlip() {
           (t) => t.status === 'active'
         );
 
+        // Default to active term if it exists, otherwise most recent
         const defaultTermId =
           activeTerm?.id || sortedTerms[0].id;
 
@@ -87,7 +87,7 @@ export default function GradeSlip() {
   };
 
   /* ------------------------------------------------ */
-  /* LOAD TERM GRADES */
+  /* LOAD TERM GRADES (ONLY IF ENDED) */
   /* ------------------------------------------------ */
 
   const loadTermGrades = async (
@@ -101,6 +101,7 @@ export default function GradeSlip() {
     const termsList = currentTerms || terms;
     const term = termsList.find((t) => t.id === termId);
 
+    // If term is still active, DO NOT show subjects/grades (as per user request)
     if (term?.status === 'active') {
       setRecords([]);
       return;
@@ -190,7 +191,7 @@ export default function GradeSlip() {
             }}
           >
 
-            <SelectTrigger className="h-12 rounded-xl font-bold border-primary/10">
+            <SelectTrigger className="h-12 rounded-md font-bold">
               <SelectValue placeholder="Select Term" />
             </SelectTrigger>
 
@@ -214,7 +215,7 @@ export default function GradeSlip() {
 
         <Button 
           onClick={() => window.print()} 
-          className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-white rounded-xl h-12 shadow-lg"
+          className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90"
           disabled={isTermActive || records.length === 0}
         >
 
@@ -225,62 +226,91 @@ export default function GradeSlip() {
 
       </div>
 
-      {/* Grade Slip Document Card */}
+      {/* Grade Slip */}
 
-      <Card className="bg-white border p-8 sm:p-12 md:p-16 print:p-10 shadow-2xl rounded-sm">
+      <Card className="bg-white border p-6 sm:p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-3xl">
 
-        {/* Header Section based on image */}
+        {/* Watermark */}
 
-        <div className="flex items-center justify-center text-center relative pb-10 border-b border-gray-100">
-          
-          <div className="absolute left-0 top-0">
-             <Image src="/logo.png" alt="AMA Logo" width={60} height={60} className="opacity-20" />
-          </div>
+        <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center pointer-events-none">
 
-          <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#E30613]">
-              AMA EDUCATION SYSTEM
+          <Image
+            src="/logo.png"
+            alt="watermark"
+            width={400}
+            height={400}
+          />
+
+        </div>
+
+        {/* Header */}
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 border-b pb-6 text-center sm:text-left">
+
+          <Image
+            src="/logo.png"
+            alt="logo"
+            width={60}
+            height={60}
+            className="sm:w-20 sm:h-20"
+          />
+
+          <div>
+
+            <h1 className="text-lg sm:text-xl font-black uppercase tracking-widest text-primary">
+              AMA Education System
             </h1>
-            <p className="text-sm sm:text-base font-bold text-gray-800">
+
+            <p className="text-xs sm:text-sm font-bold tracking-wide">
               Official Academic Grade Report
             </p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium">
+
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
               AMA Computer College – Lipa Campus
             </p>
+
           </div>
 
         </div>
 
-        {/* Student Information Grid - Precise Alignment */}
+        {/* Student Info */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 mt-12 text-[13px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mt-8 sm:mt-10 text-xs sm:text-sm">
 
-          <div className="space-y-2">
-            <p className="flex gap-2"><span className="font-bold">Student Name:</span> <span className="text-gray-600 font-medium">{user?.name}</span></p>
-            <p className="flex gap-2"><span className="font-bold">Student ID:</span> <span className="text-gray-600 font-medium">{user?.id}</span></p>
+          <div className="space-y-1 sm:space-y-2">
+
+            <p><strong>Student Name:</strong> {user?.name}</p>
+
+            <p><strong>Student ID:</strong> {user?.id}</p>
+
           </div>
 
-          <div className="space-y-2 text-left sm:text-right">
-            <p className="flex sm:justify-end gap-2"><span className="font-bold">Campus:</span> <span className="text-gray-600 font-medium">AMACC – Lipa</span></p>
-            <p className="flex sm:justify-end gap-2"><span className="font-bold">Academic Term:</span> <span className="text-gray-600 font-medium">{currentTerm?.name}</span></p>
+          <div className="space-y-1 sm:space-y-2 text-left sm:text-right">
+
+            <p><strong>Campus:</strong> AMACC – Lipa</p>
+
+            <p><strong>Academic Term:</strong> {currentTerm?.name}</p>
+
           </div>
 
         </div>
 
-        {/* Grades Box */}
+        {/* Table / Status View */}
 
-        <div className="mt-12 border rounded-xl overflow-hidden bg-white shadow-sm">
+        <div className="mt-8 sm:mt-10 border rounded-xl overflow-x-auto">
 
-          <table className="w-full text-[11px] border-collapse">
+          <table className="w-full text-[10px] sm:text-sm min-w-[600px] sm:min-w-0">
 
-            <thead className="bg-[#f8f9fa] border-b">
+            <thead className="bg-gray-100">
 
               <tr>
-                <th className="p-4 text-left font-black text-gray-700 tracking-wider">COURSE CODE</th>
-                <th className="p-4 text-left font-black text-gray-700 tracking-wider">COURSE DESCRIPTION</th>
-                <th className="p-4 text-center font-black text-gray-700 tracking-wider">UNITS</th>
-                <th className="p-4 text-center font-black text-gray-700 tracking-wider">FINAL GRADE</th>
-                <th className="p-4 text-center font-black text-gray-700 tracking-wider">EQUIVALENT</th>
+
+                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Course Code</th>
+                <th className="p-3 sm:p-4 text-left font-black uppercase tracking-tighter">Course Description</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Units</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Final Grade</th>
+                <th className="p-3 sm:p-4 text-center font-black uppercase tracking-tighter">Equivalent</th>
+
               </tr>
 
             </thead>
@@ -289,23 +319,16 @@ export default function GradeSlip() {
 
               {isTermActive ? (
                 <tr>
-                  <td colSpan={5} className="p-0">
-                    <div className="flex flex-col items-center justify-center py-32 px-10 text-center space-y-6 relative overflow-hidden">
-                      {/* Watermark AMA logo bg */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02]">
-                         <Image src="/logo.png" alt="AMA" width={400} height={400} />
+                  <td colSpan={5} className="p-10 sm:p-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="h-12 w-12 sm:h-16 sm:w-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 border border-amber-100">
+                        <Lock size={24} className="sm:w-8 sm:h-8" />
                       </div>
-
-                      <div className="w-20 h-20 rounded-full bg-[#FFF9F0] border-2 border-[#FFECCF] flex items-center justify-center text-[#B45309] shadow-lg">
-                        <Lock size={36} />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h2 className="text-xl font-black text-[#92400E] uppercase tracking-tight">
-                          GRADES NOT YET FINALIZED
-                        </h2>
-                        <p className="text-sm text-[#B45309]/70 font-bold max-w-sm mx-auto leading-relaxed">
-                          The current academic term is still active. Please wait for the administrator to finalize the term to view your grades.
+                      <div className="px-4">
+                        <h3 className="text-base sm:text-lg font-black uppercase tracking-tight text-amber-900">Grades Not Yet Finalized</h3>
+                        <p className="text-[10px] sm:text-sm text-amber-700/70 max-w-xs mx-auto mt-1 font-bold">
+                          The current academic term is still active. 
+                          Please wait for the administrator to finalize the term to view your grades.
                         </p>
                       </div>
                     </div>
@@ -314,24 +337,31 @@ export default function GradeSlip() {
               ) : records.length === 0 ? (
 
                 <tr>
-                  <td colSpan={5} className="text-center py-24 text-muted-foreground">
-                    <div className="flex flex-col items-center gap-3">
-                      <Info size={40} className="opacity-20" />
-                      <p className="font-bold uppercase tracking-widest text-[10px]">No academic records available for this term.</p>
-                    </div>
+
+                  <td colSpan={5} className="text-center py-16 sm:py-20 text-muted-foreground">
+
+                    <Info className="mx-auto mb-3 opacity-20" size={40} />
+
+                    <p className="font-bold">No academic records found for this term.</p>
+
                   </td>
+
                 </tr>
 
               ) : (
 
                 records.map((record, i) => (
-                  <tr key={i} className="border-b last:border-0 hover:bg-muted/5 transition-colors">
-                    <td className="p-4 font-bold text-gray-800">{record.code}</td>
-                    <td className="p-4 text-gray-600 font-medium">{record.description}</td>
-                    <td className="p-4 text-center font-bold text-gray-800">{record.units}</td>
-                    <td className="p-4 text-center font-black text-[#E30613]">{record.grade}</td>
-                    <td className="p-4 text-center font-black text-primary">{record.letter}</td>
+
+                  <tr key={i} className="border-t hover:bg-muted/5 transition-colors">
+
+                    <td className="p-3 sm:p-4 font-bold text-primary">{record.code}</td>
+                    <td className="p-3 sm:p-4 font-medium">{record.description}</td>
+                    <td className="p-3 sm:p-4 text-center font-bold">{record.units}</td>
+                    <td className="p-3 sm:p-4 text-center font-black text-base sm:text-lg">{record.grade}</td>
+                    <td className="p-3 sm:p-4 text-center font-black text-primary">{record.letter}</td>
+
                   </tr>
+
                 ))
 
               )}
@@ -342,24 +372,33 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Footer Section - Precise Matching */}
+        {/* Footer */}
 
-        <div className="mt-20 pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-between items-end gap-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-10 sm:mt-12 border-t pt-8 gap-8 sm:gap-0">
 
-          <div className="space-y-1 w-full md:w-auto">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">REGISTRAR OFFICE</p>
-            <div className="border-b-2 border-gray-900 w-full sm:w-72 pt-10" />
-            <p className="text-[9px] font-black text-gray-900 uppercase tracking-tighter mt-2">AUTHORIZED SIGNATURE</p>
+          <div className="w-full sm:w-auto">
+
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-8 sm:mb-10">Registrar Office</p>
+
+            <div className="border-b-2 border-black w-full sm:w-64" />
+
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest mt-2 text-center">
+              Authorized Signature
+            </p>
+
           </div>
 
           {!isTermActive && records.length > 0 && (
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                GENERAL WEIGHTED AVERAGE
+            <div className="text-left sm:text-right w-full sm:w-auto">
+
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                General Weighted Average
               </p>
-              <p className="text-6xl font-black text-[#E30613] tracking-tighter mt-1">
+
+              <p className="text-4xl sm:text-5xl font-black text-primary tracking-tighter">
                 {calculateGWA()}
               </p>
+
             </div>
           )}
 
@@ -367,9 +406,9 @@ export default function GradeSlip() {
 
       </Card>
 
-      <div className="text-center mt-6 print:hidden">
-        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
-          AMA Computer College Lipa • Student Portal Document System v1.0
+      <div className="text-center print:hidden px-4">
+        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-relaxed">
+          This is an official digital copy of your grade report generated by AMS:AMACC
         </p>
       </div>
 
