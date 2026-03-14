@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useDesign } from '@/contexts/DesignContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -90,8 +90,10 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   description: string,
   onChange: (field: string, val: string) => void 
 }) => {
+  // Use local state to handle the immediate input without triggering full parent re-renders too fast
   const [localColor, setLocalColor] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setLocalColor(value);
@@ -100,18 +102,20 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
     setLocalColor(newVal);
+    
+    // Smooth update: update parent context immediately but handle internal state locally
     onChange(field, newVal);
   };
 
   return (
     <div className="space-y-4 p-6 rounded-[2.5rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all group">
       <div className="flex justify-between items-start">
-        <div>
-          <Label className="font-black uppercase text-[10px] tracking-widest text-primary">{label}</Label>
+        <div className="flex-1">
+          <Label className="font-black uppercase text-[10px] tracking-widest text-primary leading-none">{label}</Label>
           <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1 leading-tight">{description}</p>
         </div>
         <div 
-          className="h-12 w-12 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110" 
+          className="h-14 w-14 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
           style={{ backgroundColor: localColor }} 
         />
       </div>
@@ -121,12 +125,12 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
           <PopoverTrigger asChild>
             <button 
               onClick={() => setIsOpen(true)}
-              className="h-14 w-full rounded-2xl border-2 border-primary/10 flex items-center px-5 bg-muted/10 hover:bg-muted/30 transition-colors"
+              className="h-16 w-full rounded-full border-2 border-primary/10 flex items-center px-8 bg-muted/10 hover:bg-muted/30 transition-colors"
             >
-              <div className="flex-1 font-mono text-xs font-black text-muted-foreground tracking-tighter text-left">
+              <div className="flex-1 font-mono text-sm font-black text-primary tracking-tighter text-center">
                 {localColor?.toUpperCase()}
               </div>
-              <Palette size={16} className="text-primary/40" />
+              <Palette size={18} className="text-primary/40" />
             </button>
           </PopoverTrigger>
           <PopoverContent 
@@ -138,15 +142,15 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Precision Palette</span>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="h-10 w-10 rounded-full bg-[#E5EEF0] flex items-center justify-center hover:bg-muted transition-colors"
+                  className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
                 >
-                  <X size={16} className="text-primary" />
+                  <X size={16} />
                 </button>
               </div>
               
-              <div className="relative aspect-square w-full rounded-[2rem] overflow-hidden border-4 border-primary/5 shadow-inner group">
+              <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden border-4 border-primary/5 shadow-inner group">
                 <div 
-                  className="absolute inset-0 transition-colors duration-150" 
+                  className="absolute inset-0 transition-colors duration-75" 
                   style={{ backgroundColor: localColor }}
                 />
                 <input 
@@ -156,10 +160,10 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
                   className="absolute inset-0 w-full h-full cursor-crosshair opacity-0"
                 />
                 <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/5 transition-all">
-                   <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border-2 border-white/40">
-                      <Droplets size={24} className="text-white drop-shadow-md" />
+                   <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border-2 border-white/40">
+                      <Droplets size={28} className="text-white drop-shadow-md" />
                    </div>
-                   <p className="text-[9px] font-black text-white uppercase tracking-widest mt-2 drop-shadow-md opacity-0 group-hover:opacity-100">Tap to tune</p>
+                   <p className="text-[10px] font-black text-white uppercase tracking-widest mt-3 drop-shadow-md opacity-0 group-hover:opacity-100">Hold & Drag Spectrum</p>
                 </div>
               </div>
 
@@ -171,7 +175,7 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
                   onClick={() => setIsOpen(false)}
                   className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
                 >
-                  <X size={20} strokeWidth={3} />
+                  <Save size={20} strokeWidth={3} />
                 </button>
               </div>
             </div>
