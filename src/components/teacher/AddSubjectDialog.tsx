@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -40,7 +39,7 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
             const data = await getTermsAction();
             const active = data.filter((t: any) => t.status === 'active');
             setActiveTerms(active);
-            if (active.length > 0) {
+            if (active.length > 0 && !termId) {
                 setTermId(active[0].id);
             }
         } catch (e) {
@@ -150,8 +149,13 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
-                            <Select key={activeTerms.length} value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
-                                <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
+                            <Select 
+                                key={activeTerms.length} 
+                                value={termId} 
+                                onValueChange={setTermId} 
+                                disabled={fetchingTerms || activeTerms.length === 0}
+                            >
+                                <SelectTrigger className="h-14 rounded-2xl border-2 border-primary font-bold px-6 bg-white">
                                     <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl">

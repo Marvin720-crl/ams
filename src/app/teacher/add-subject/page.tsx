@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,11 +20,11 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 export default function AddSubjectPage() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const [termId, setTermId] = useState('');
   const router = useRouter();
   const { toast } = useToast();
 
   const [title, setTitle] = useState('');
-  const [termId, setTermId] = useState('');
   const [activeTerms, setActiveTerms] = useState<Term[]>([]);
   const [fetchingTerms, setFetchingTerms] = useState(true);
   const [schedules, setSchedules] = useState<Partial<Schedule>[]>([{ day: '', startTime: '', dismissalTime: '' }]);
@@ -33,15 +32,15 @@ export default function AddSubjectPage() {
   useEffect(() => {
     setFetchingTerms(true);
     getTermsAction().then(data => {
-      const active = data.filter(t => t.status === 'active');
+      const active = data.filter((t: any) => t.status === 'active');
       setActiveTerms(active);
-      if (active.length > 0) {
+      if (active.length > 0 && !termId) {
         setTermId(active[0].id);
       }
     }).catch(() => {
       toast({ variant: "destructive", title: "Error", description: "Could not sync academic terms." });
     }).finally(() => setFetchingTerms(false));
-  }, [toast]);
+  }, [toast, termId]);
 
   const handleScheduleChange = (index: number, field: keyof Schedule, value: string) => {
     const newSchedules = [...schedules];
@@ -138,7 +137,7 @@ export default function AddSubjectPage() {
                 )}
 
                 <Select key={activeTerms.length} value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
-                  <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
+                  <SelectTrigger className="h-14 rounded-2xl border-2 border-primary font-bold px-6 bg-white">
                     <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">

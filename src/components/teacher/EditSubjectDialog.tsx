@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -179,8 +178,13 @@ Update subject details and schedule
 
 <div className="space-y-2">
 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
-<Select key={activeTerms.length} value={formData.termId} onValueChange={(v) => setFormData({...formData, termId: v})} disabled={fetchingTerms || activeTerms.length === 0}>
-<SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
+<Select 
+    key={activeTerms.length} 
+    value={formData.termId} 
+    onValueChange={(v) => setFormData({...formData, termId: v})} 
+    disabled={fetchingTerms || activeTerms.length === 0}
+>
+<SelectTrigger className="h-14 rounded-2xl border-2 border-primary font-bold px-6 bg-white">
 <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
 </SelectTrigger>
 <SelectContent className="rounded-2xl">
