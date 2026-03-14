@@ -12,7 +12,7 @@ import { BookOpen, Clock, Calendar, ArrowLeft, Loader2, Plus, Trash2, School, Al
 import Link from 'next/link';
 import { addSubjectAction, getTermsAction } from '@/app/actions/dbActions';
 import { Schedule, Term } from '@/utils/storage';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -30,17 +30,23 @@ export default function AddSubjectPage() {
   const [schedules, setSchedules] = useState<Partial<Schedule>[]>([{ day: '', startTime: '', dismissalTime: '' }]);
 
   useEffect(() => {
-    setFetchingTerms(true);
-    getTermsAction().then(data => {
-      const active = data.filter((t: any) => t.status === 'active');
-      setActiveTerms(active);
-      if (active.length > 0 && !termId) {
-        setTermId(active[0].id);
+    const init = async () => {
+      setFetchingTerms(true);
+      try {
+        const data = await getTermsAction();
+        const active = data.filter((t: any) => t.status === 'active');
+        setActiveTerms(active);
+        if (active.length > 0) {
+          setTermId(active[0].id);
+        }
+      } catch (e) {
+        toast({ variant: "destructive", title: "Error", description: "Could not sync academic terms." });
+      } finally {
+        setFetchingTerms(false);
       }
-    }).catch(() => {
-      toast({ variant: "destructive", title: "Error", description: "Could not sync academic terms." });
-    }).finally(() => setFetchingTerms(false));
-  }, [toast, termId]);
+    };
+    init();
+  }, [toast]);
 
   const handleScheduleChange = (index: number, field: keyof Schedule, value: string) => {
     const newSchedules = [...schedules];
@@ -141,13 +147,9 @@ export default function AddSubjectPage() {
                     <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
-                    {activeTerms.length === 0 ? (
-                        <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
-                    ) : (
-                        activeTerms.map(t => (
-                            <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>
-                        ))
-                    )}
+                    {activeTerms.map(t => (
+                        <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
