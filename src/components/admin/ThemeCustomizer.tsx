@@ -16,7 +16,6 @@ import {
   Sparkles,
   Loader2,
   Maximize,
-  Circle,
   Smartphone,
   Monitor,
   ChevronRight,
@@ -32,20 +31,63 @@ import {
   FileText,
   BarChart3,
   FileCheck,
-  MapPin
+  MapPin,
+  Image as ImageIcon,
+  Type,
+  Droplets,
+  Layers
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-type PreviewView = 'student-dash' | 'student-subjects' | 'teacher-hub' | 'library-scan';
+type Role = 'student' | 'teacher' | 'admin' | 'library';
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: any;
+}
+
+const ROLE_NAV: Record<Role, NavItem[]> = {
+  student: [
+    { id: 'home', label: 'Dashboard', icon: Home },
+    { id: 'chat', label: 'Messages', icon: MessageCircle },
+    { id: 'grades', label: 'Grade Slip', icon: GraduationCap },
+    { id: 'subjects', label: 'My Subjects', icon: BookOpen },
+    { id: 'classwork', label: 'Classwork', icon: FileCheck },
+    { id: 'request', label: 'Make Request', icon: FileText },
+  ],
+  teacher: [
+    { id: 'home', label: 'Dashboard', icon: Home },
+    { id: 'chat', label: 'Messages', icon: MessageCircle },
+    { id: 'scanner', label: 'QR Scanner', icon: Scan },
+    { id: 'grading', label: 'Grading Console', icon: BarChart3 },
+    { id: 'reservations', label: 'Reservations', icon: MapPin },
+    { id: 'attendance', label: 'Records', icon: FileCheck },
+  ],
+  admin: [
+    { id: 'home', label: 'Dashboard', icon: Home },
+    { id: 'design', label: 'Design Lab', icon: Palette },
+    { id: 'security', label: 'Security Center', icon: ShieldAlert },
+    { id: 'terms', label: 'Term Management', icon: School },
+    { id: 'users', label: 'Manage Users', icon: Users },
+    { id: 'settings', label: 'System Settings', icon: Settings },
+  ],
+  library: [
+    { id: 'home', label: 'Dashboard', icon: Home },
+    { id: 'books', label: 'Manage Books', icon: BookOpen },
+    { id: 'scan-lend', label: 'Scan & Lend', icon: Scan },
+    { id: 'requests', label: 'Borrow Requests', icon: FileText },
+  ]
+};
 
 export default function ThemeCustomizer() {
   const { config, updateConfig, saveConfig, resetToDefault } = useDesign();
   const [saving, setSaving] = useState(false);
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<Role>('student');
+  const [activePage, setActivePage] = useState('home');
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
-  const [currentView, setCurrentView] = useState<PreviewView>('student-dash');
   const [isMobileView, setIsMobileView] = useState(false);
 
   const handleSave = async () => {
@@ -57,55 +99,14 @@ export default function ThemeCustomizer() {
     });
   };
 
-  const sidebarItems = useMemo(() => {
-    switch(currentView) {
-      case 'student-dash':
-      case 'student-subjects':
-        return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'grades', label: 'Grade Slip', icon: GraduationCap },
-          { id: 'subjects', label: 'My Subjects', icon: BookOpen },
-          { id: 'classwork', label: 'Classwork', icon: FileCheck },
-          { id: 'request', label: 'Make Request', icon: FileText },
-        ];
-      case 'teacher-hub':
-        return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'scanner', label: 'QR Scanner', icon: Scan },
-          { id: 'grading', label: 'Grading Console', icon: BarChart3 },
-          { id: 'reservations', label: 'Reservations', icon: MapPin },
-          { id: 'attendance', label: 'Records', icon: FileCheck },
-        ];
-      case 'library-scan':
-        return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'books', label: 'Manage Books', icon: BookOpen },
-          { id: 'scan-lend', label: 'Scan & Lend', icon: Scan },
-          { id: 'requests', label: 'Borrow Requests', icon: FileText },
-        ];
-      default: return [];
-    }
-  }, [currentView]);
-
   const ColorInput = ({ label, value, field, description }: { label: string, value: string, field: string, description: string }) => (
-    <div 
-      className={cn(
-        "space-y-4 p-6 rounded-[2.5rem] border transition-all cursor-pointer",
-        selectedElement === field ? "border-primary bg-primary/5 shadow-inner" : "border-primary/5 bg-white shadow-xl"
-      )}
-      onClick={() => setSelectedElement(field)}
-    >
+    <div className="space-y-4 p-6 rounded-[2rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all">
       <div className="flex justify-between items-start">
         <div>
           <Label className="font-black uppercase text-[10px] tracking-widest text-primary">{label}</Label>
           <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1">{description}</p>
         </div>
-        <div 
-          className="h-10 w-10 rounded-xl border-2 border-white shadow-xl" 
-          style={{ backgroundColor: value }}
-        />
+        <div className="h-10 w-10 rounded-xl border-2 border-white shadow-xl" style={{ backgroundColor: value }} />
       </div>
       <div className="relative pt-2">
         <div className="h-14 w-full rounded-2xl overflow-hidden border-2 border-primary/10 flex items-center px-4 bg-white">
@@ -121,9 +122,9 @@ export default function ThemeCustomizer() {
     </div>
   );
 
-  const renderPreviewContent = () => {
-    switch(currentView) {
-      case 'student-dash':
+  const renderPreviewPage = () => {
+    switch(activePage) {
+      case 'home':
         return (
           <div className="space-y-8 w-full p-8">
             <div className="flex justify-between items-center">
@@ -148,7 +149,8 @@ export default function ThemeCustomizer() {
             </Card>
           </div>
         );
-      case 'student-subjects':
+      case 'subjects':
+      case 'books':
         return (
           <div className="space-y-8 w-full p-8">
             <div className="h-10 w-64 bg-primary/10 rounded-full" style={{ backgroundColor: `${config.primary}10` }} />
@@ -168,29 +170,10 @@ export default function ThemeCustomizer() {
             </div>
           </div>
         );
-      case 'teacher-hub':
+      case 'scanner':
+      case 'scan-lend':
         return (
           <div className="space-y-8 w-full p-8">
-            <div className="grid grid-cols-2 gap-4">
-              {[1,2,3,4].map(i => (
-                <Card key={i} className="p-6 border-none shadow-xl text-white" style={{ backgroundColor: config.primary, borderRadius: `${config.radius}rem` }}>
-                  <div className="h-10 w-10 rounded-xl bg-white/10 mb-4" />
-                  <div className="h-8 w-12 bg-white/20 rounded-lg" />
-                </Card>
-              ))}
-            </div>
-            <div className="h-64 w-full rounded-[2.5rem] border-4 border-dashed border-primary/10 flex items-center justify-center" style={{ borderColor: `${config.primary}10` }}>
-              <Scan className="text-primary/20" size={48} style={{ color: `${config.primary}20` }} />
-            </div>
-          </div>
-        );
-      case 'library-scan':
-        return (
-          <div className="space-y-8 w-full p-8">
-            <div className="flex gap-2">
-              <div className="h-10 flex-1 bg-white rounded-full border border-primary/10" style={{ borderColor: `${config.primary}10` }} />
-              <div className="h-10 w-10 rounded-full" style={{ backgroundColor: config.primary }} />
-            </div>
             <div className="p-10 border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-center gap-4" style={{ backgroundColor: `${config.accent}05`, borderColor: `${config.accent}20` }}>
               <div className="h-20 w-20 rounded-[2rem] flex items-center justify-center text-white shadow-xl" style={{ backgroundColor: config.accent }}>
                 <Scan size={32} />
@@ -202,155 +185,127 @@ export default function ThemeCustomizer() {
             </div>
           </div>
         );
+      case 'grades':
+        return (
+          <div className="p-8">
+            <Card className="p-10 border-none shadow-2xl bg-white space-y-8" style={{ borderRadius: `${config.radius * 2}rem` }}>
+              <div className="flex justify-center border-b pb-8"><div className="h-12 w-48 bg-primary/10 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} /></div>
+              <div className="space-y-4">
+                {[1,2,3,4,5].map(i => (
+                  <div key={i} className="flex justify-between items-center py-3 border-b border-primary/5">
+                    <div className="h-3 w-32 bg-muted/40 rounded-full" />
+                    <div className="h-4 w-10 bg-primary/20 rounded-md" style={{ backgroundColor: `${config.primary}20` }} />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        );
+      default:
+        return (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center opacity-20">
+              <Layers size={64} className="mx-auto mb-4" />
+              <p className="font-black uppercase tracking-widest text-[10px]">Page View Not Rendered</p>
+            </div>
+          </div>
+        );
     }
   };
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500 h-full relative pb-32">
-      {/* Top Header Controls */}
+      {/* HEADER SECTION */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
-          <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Design Lab</h2>
-          <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Wix-style real-time engine</p>
+          <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Universal Lab</h2>
+          <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Prototype Engine v2.0</p>
         </div>
 
         <div className="flex gap-4">
-          <Button 
-            variant="outline" 
-            onClick={resetToDefault}
-            className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted"
-          >
+          <Button variant="outline" onClick={resetToDefault} className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted">
             <RotateCcw size={18} />
           </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={saving}
-            className="h-16 px-12 rounded-[1.5rem] bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3"
-          >
+          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
             {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
             Publish Design
           </Button>
         </div>
       </div>
 
-      {/* THE IMAGE-LIKE ACTION BAR (View Switcher) */}
+      {/* PIC 1: ROLE SWITCHER PILL BAR */}
       <div className="flex justify-center w-full">
         <div className="flex items-center bg-white p-2 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-primary/5 gap-2 max-w-fit px-10">
-          <button 
-            onClick={() => setCurrentView('student-dash')}
-            className={cn(
-              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
-              currentView === 'student-dash' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
-            )}
-          >
-            <GraduationCap size={20} className={cn(currentView === 'student-dash' ? "text-white" : "group-hover:text-primary")} />
-            <span className="font-black uppercase text-[10px] tracking-widest">Student Dash</span>
-          </button>
-
-          <button 
-            onClick={() => setCurrentView('student-subjects')}
-            className={cn(
-              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
-              currentView === 'student-subjects' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
-            )}
-          >
-            <BookOpen size={20} className={cn(currentView === 'student-subjects' ? "text-white" : "group-hover:text-primary")} />
-            <span className="font-black uppercase text-[10px] tracking-widest">My Subjects</span>
-          </button>
-
-          <button 
-            onClick={() => setCurrentView('teacher-hub')}
-            className={cn(
-              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
-              currentView === 'teacher-hub' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
-            )}
-          >
-            <Users size={20} className={cn(currentView === 'teacher-hub' ? "text-white" : "group-hover:text-primary")} />
-            <span className="font-black uppercase text-[10px] tracking-widest">Teacher Hub</span>
-          </button>
-
-          <button 
-            onClick={() => setCurrentView('library-scan')}
-            className={cn(
-              "flex items-center gap-3 px-8 py-4 rounded-full transition-all group",
-              currentView === 'library-scan' ? "bg-primary text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
-            )}
-          >
-            <Scan size={20} className={cn(currentView === 'library-scan' ? "text-white" : "group-hover:text-primary")} />
-            <span className="font-black uppercase text-[10px] tracking-widest">Library Scan</span>
-          </button>
+          {(['student', 'teacher', 'admin', 'library'] as Role[]).map(role => (
+            <button 
+              key={role}
+              onClick={() => { setActiveRole(role); setActivePage('home'); }}
+              className={cn(
+                "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
+                activeRole === role ? "bg-primary text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
+              )}
+            >
+              {role === 'student' && <GraduationCap size={20} />}
+              {role === 'teacher' && <Users size={20} />}
+              {role === 'admin' && <ShieldAlert size={20} />}
+              {role === 'library' && <BookOpen size={20} />}
+              <span className="font-black uppercase text-[10px] tracking-widest">{role} Dash</span>
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
-        {/* Visual Controls (Left Sidebar) */}
+        {/* LEFT SIDEBAR CONTROLS */}
         <div className="lg:col-span-4 space-y-10 h-[calc(100vh-280px)] overflow-y-auto no-scrollbar pr-4">
           
-          <section className="space-y-6">
-             <ColorInput 
-                label="Primary Brand" 
-                value={config.primary} 
-                field="primary" 
-                description="Headers, Main Buttons & Active Icons"
-              />
-              <ColorInput 
-                label="Secondary Canvas" 
-                value={config.secondary} 
-                field="secondary" 
-                description="Sidebar & Background Textures"
-              />
-              <ColorInput 
-                label="Accent Variable" 
-                value={config.accent} 
-                field="accent" 
-                description="Interactive Highlights & Special Badges"
-              />
-          </section>
+          {/* BRANDING SECTION */}
+          <Section label="Branding" icon={Palette}>
+             <ColorInput label="Primary Brand" value={config.primary} field="primary" description="Headers, Main Buttons & Active Icons" />
+             <ColorInput label="Secondary Canvas" value={config.secondary} field="secondary" description="Sidebar & Background Textures" />
+             <ColorInput label="Accent Variable" value={config.accent} field="accent" description="Interactive Highlights" />
+          </Section>
 
-          <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 p-10">
-              <div className="flex items-center gap-5">
-                <div className="h-12 w-12 rounded-[1.25rem] bg-primary/10 flex items-center justify-center text-primary"><Shapes size={24}/></div>
-                <div>
-                  <CardTitle className="text-2xl font-black uppercase tracking-tight text-primary">Geometry</CardTitle>
-                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Component architecture</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-10 space-y-12">
+          {/* PIC 4: CHROMATICS & BRAND VARIABLES */}
+          <Section label="Chromatics" icon={Droplets}>
+            <div className="space-y-8 p-8 bg-white rounded-[2.5rem] shadow-xl border border-primary/5">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <Label className="font-black uppercase text-[11px] tracking-[0.2em]">Border Radius</Label>
-                  <span className="text-[10px] font-black text-primary bg-primary/5 px-4 py-1.5 rounded-full border border-primary/10">{config.radius}rem</span>
+                  <Label className="font-black uppercase text-[10px] tracking-widest">Glass Intensity</Label>
+                  <Sparkles size={14} className="text-primary" />
                 </div>
-                <Slider 
-                  value={[config.radius * 10]} 
-                  max={40} 
-                  step={1} 
-                  onValueChange={(val) => updateConfig({ radius: val[0] / 10 })}
-                  className="py-4"
-                />
+                <Slider value={[config.glassIntensity]} max={100} step={5} onValueChange={(val) => updateConfig({ glassIntensity: val[0] })} />
               </div>
-
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <Label className="font-black uppercase text-[11px] tracking-[0.2em]">Glass Intensity</Label>
-                  <Sparkles size={16} className="text-primary" />
+                  <Label className="font-black uppercase text-[10px] tracking-widest">Corner Geometry</Label>
+                  <Shapes size={14} className="text-primary" />
                 </div>
-                <Slider 
-                  value={[config.glassIntensity]} 
-                  max={100} 
-                  step={5} 
-                  onValueChange={(val) => updateConfig({ glassIntensity: val[0] })}
-                  className="py-4"
+                <Slider value={[config.radius * 10]} max={40} step={1} onValueChange={(val) => updateConfig({ radius: val[0] / 10 })} />
+              </div>
+            </div>
+          </Section>
+
+          <Section label="Brand Variables" icon={Type}>
+            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Campus Label</Label>
+                <input 
+                  type="text" 
+                  defaultValue="AMACC - LIPA"
+                  className="w-full h-12 bg-muted/20 border-none rounded-xl px-4 font-black uppercase text-xs focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
-            </CardContent>
-          </Card>
+              <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Logo Scale</Label>
+                <Slider defaultValue={[100]} max={150} min={50} step={5} />
+              </div>
+            </Card>
+          </Section>
         </div>
 
-        {/* Live Workspace Emulator (Right Side) */}
+        {/* RIGHT SIDE EMULATOR */}
         <div className={cn(
           "lg:col-span-8 relative transition-all duration-700",
           isPreviewFullscreen ? "fixed inset-0 z-[100] p-12 bg-black/95 backdrop-blur-2xl" : "h-[calc(100vh-280px)]"
@@ -361,10 +316,9 @@ export default function ThemeCustomizer() {
             isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
           )}>
             
-            {/* THE EMULATED CONTENT */}
             <div className="relative w-full h-full flex">
               
-              {/* LIVE SIDEBAR EMULATOR */}
+              {/* PIC 2: INTERACTIVE SIDEBAR EMULATOR */}
               {!isMobileView && (
                 <motion.div 
                   initial={{ x: -100, opacity: 0 }}
@@ -375,20 +329,24 @@ export default function ThemeCustomizer() {
                   <div className="flex items-center gap-3 px-2">
                     <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
                     <div className="space-y-1">
-                      <div className="h-3 w-20 bg-white/20 rounded-full" />
-                      <div className="h-2 w-12 bg-white/10 rounded-full" />
+                      <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">AMACC</p>
+                      <p className="text-[8px] font-bold text-white/40 uppercase tracking-tighter">Student Portal</p>
                     </div>
                   </div>
 
                   <div className="flex-1 space-y-1">
-                    {sidebarItems.map((item, i) => (
-                      <div key={i} className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-xl transition-all",
-                        i === 0 ? "bg-white/10 text-white" : "text-white/40"
-                      )}>
-                        <item.icon size={18} />
+                    {ROLE_NAV[activeRole].map((item) => (
+                      <button 
+                        key={item.id} 
+                        onClick={() => setActivePage(item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group",
+                          activePage === item.id ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
+                        )}
+                      >
+                        <item.icon size={18} className={cn(activePage === item.id ? "text-accent" : "text-white/20 group-hover:text-white")} />
                         <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
 
@@ -402,9 +360,8 @@ export default function ThemeCustomizer() {
                 </motion.div>
               )}
 
-              {/* VIEW CONTENT AREA */}
+              {/* LIVE WORKSPACE CONTENT */}
               <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/5">
-                {/* Global Header Emulator */}
                 <div className="h-20 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-10" style={{ borderBottomColor: `${config.primary}10` }}>
                   <div className="h-10 w-32 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} />
                   <div className="flex items-center gap-4">
@@ -413,46 +370,30 @@ export default function ThemeCustomizer() {
                   </div>
                 </div>
 
-                {/* Switchable View Content */}
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={currentView}
+                    key={`${activeRole}-${activePage}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     className="flex-1"
                   >
-                    {renderPreviewContent()}
+                    {renderPreviewPage()}
                   </motion.div>
                 </AnimatePresence>
               </div>
             </div>
 
-            {/* FLOATING DEVICE ACTION OVERLAY */}
+            {/* FLOATING ACTION BAR OVERLAY */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-8 duration-700 z-30">
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsMobileView(false)}
-                className={cn("rounded-full h-14 w-14 p-0 transition-all", !isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}
-              >
+              <Button variant="ghost" onClick={() => setIsMobileView(false)} className={cn("rounded-full h-14 w-14 p-0 transition-all", !isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}>
                 <Monitor size={20}/>
               </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsMobileView(true)}
-                className={cn("rounded-full h-14 w-14 p-0 transition-all", isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}
-              >
+              <Button variant="ghost" onClick={() => setIsMobileView(true)} className={cn("rounded-full h-14 w-14 p-0 transition-all", isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}>
                 <Smartphone size={20}/>
               </Button>
               <div className="h-8 w-px bg-primary/10" />
-              <Button 
-                variant={isPreviewFullscreen ? "default" : "ghost"}
-                onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)}
-                className={cn(
-                  "rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all",
-                  isPreviewFullscreen ? "bg-primary text-white scale-105 shadow-xl shadow-primary/30" : "text-muted-foreground"
-                )}
-              >
+              <Button variant={isPreviewFullscreen ? "default" : "ghost"} onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)} className={cn("rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all", isPreviewFullscreen ? "bg-primary text-white scale-105 shadow-xl shadow-primary/30" : "text-muted-foreground")}>
                 <Maximize size={18}/> {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN"}
               </Button>
             </div>
@@ -462,5 +403,19 @@ export default function ThemeCustomizer() {
 
       </div>
     </div>
+  );
+}
+
+function Section({ label, icon: Icon, children }: { label: string, icon: any, children: React.ReactNode }) {
+  return (
+    <section className="space-y-6">
+      <div className="flex items-center gap-3 px-2">
+        <Icon size={16} className="text-primary" />
+        <h3 className="font-black uppercase text-[11px] tracking-[0.3em] text-muted-foreground">{label}</h3>
+      </div>
+      <div className="space-y-6">
+        {children}
+      </div>
+    </section>
   );
 }
