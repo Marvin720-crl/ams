@@ -1,23 +1,87 @@
-
 'use server';
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
 import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
 
 /**
- * SECURITY PROTOCOL: VALIDATION & SANITIZATION
+ * IRON WALL SECURITY PROTOCOL
+ * Automated Banning & Input Sanitization
  */
-function sanitizeInput(input: any): any {
+
+const SECURITY_LIMITS = {
+    MAX_TEXT_LENGTH: 15000,
+    MAX_SIGNATURE_LENGTH: 300000, // 300KB limit for signatures
+    SUSPICIOUS_PATTERNS: [
+        /<script.*?>.*?<\/script>/gi,
+        /javascript:/gi,
+        /onload=/gi,
+        /onerror=/gi,
+        /eval\(/gi,
+        /document\.cookie/gi,
+        /localStorage/gi,
+        /union select/gi,
+        /drop table/gi,
+        /truncate/gi
+    ]
+};
+
+async function detectAndBan(userId: string, reason: string) {
+    if (!userId || userId === 'admin') return;
+    
+    const users: User[] = await readDb('users');
+    const idx = users.findIndex(u => u.id === userId);
+    
+    if (idx !== -1) {
+        users[idx].isBanned = true;
+        users[idx].banReason = reason;
+        await writeDb('users', users);
+        
+        await addAuditLogAction({
+            userId: 'SYSTEM_SECURITY',
+            userName: 'IRON_WALL_CORE',
+            action: 'AUTO_BAN_EXECUTED',
+            details: `User ${userId} was automatically banned. Reason: ${reason}`
+        });
+    }
+}
+
+function sanitizeInput(input: any, userId?: string): any {
     if (typeof input === 'string') {
-        // Remove scripts or dangerous tags
+        let isViolation = false;
+        let violationReason = "";
+
+        // Check for suspicious patterns
+        for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
+            if (pattern.test(input)) {
+                isViolation = true;
+                violationReason = `Malisyosong pattern detected: ${pattern.source}`;
+                break;
+            }
+        }
+
+        // Check for excessive length
+        if (input.length > SECURITY_LIMITS.MAX_TEXT_LENGTH) {
+            isViolation = true;
+            violationReason = "Excessive payload length (DoS attempt)";
+        }
+
+        if (isViolation && userId) {
+            // Trigger ban asynchronously
+            detectAndBan(userId, violationReason);
+            throw new Error(`SECURITY_BREACH: ${violationReason}`);
+        }
+
         return input.replace(/<script.*?>.*?<\/script>/gi, '').trim();
     }
-    if (Array.isArray(input)) return input.map(sanitizeInput);
+    
+    if (Array.isArray(input)) return input.map(i => sanitizeInput(i, userId));
+    
     if (typeof input === 'object' && input !== null) {
         const sanitized: any = {};
-        for (const key in input) sanitized[key] = sanitizeInput(input[key]);
+        for (const key in input) sanitized[key] = sanitizeInput(input[key], userId);
         return sanitized;
     }
+    
     return input;
 }
 
@@ -32,19 +96,7 @@ async function checkSecurity(userId?: string) {
 
 export async function banUserAction(adminId: string, userId: string, reason: string) {
     if (adminId !== 'admin') throw new Error('UNAUTHORIZED');
-    const users: User[] = await readDb('users');
-    const idx = users.findIndex(u => u.id === userId);
-    if (idx !== -1) {
-        users[idx].isBanned = true;
-        users[idx].banReason = reason;
-        await writeDb('users', users);
-        await addAuditLogAction({
-            userId: 'admin',
-            userName: 'SYSTEM_SECURITY',
-            action: 'USER_BANNED',
-            details: `User ${users[idx].name} (${userId}) banned. Reason: ${reason}`
-        });
-    }
+    await detectAndBan(userId, reason);
 }
 
 // SYSTEM ACTIONS
@@ -70,7 +122,7 @@ export async function getUserByIdAction(id: string): Promise<User | null> {
 
 export async function addUserAction(user: User) {
   const users = await readDb('users');
-  const sanitized = sanitizeInput(user);
+  const sanitized = sanitizeInput(user, user.id);
   if (users.some((u: User) => u.id === sanitized.id)) throw new Error('User already exists');
   users.push(sanitized);
   await writeDb('users', users);
@@ -82,11 +134,11 @@ export async function updateUserAction(id: string, updates: Partial<User>) {
   const users = await getUsersAction();
   const index = users.findIndex((u: User) => u.id === id);
   if (index !== -1) {
-    const sanitized = sanitizeInput(updates);
+    const sanitized = sanitizeInput(updates, id);
     
-    // Size check for digital signature or large strings to prevent DB corruption
-    if (sanitized.signature && sanitized.signature.length > 500000) {
-        await banUserAction('admin', id, 'Malicious payload: Excessively large signature data.');
+    // Specific check for digital signature size
+    if (sanitized.signature && sanitized.signature.length > SECURITY_LIMITS.MAX_SIGNATURE_LENGTH) {
+        await detectAndBan(id, "Suspicious signature size (Payload over 300KB)");
         throw new Error('SECURITY_BREACH: PAYLOAD_TOO_LARGE');
     }
 
@@ -114,17 +166,19 @@ export async function getSubjectsAction(): Promise<Subject[]> {
 }
 
 export async function addSubjectAction(subject: Subject) {
+  const sanitized = sanitizeInput(subject, subject.teacherId);
   const subjects = await readDb('subjects');
-  subjects.push(sanitizeInput(subject));
+  subjects.push(sanitized);
   await writeDb('subjects', subjects);
   return subject;
 }
 
 export async function updateSubjectAction(subject: Subject) {
+    const sanitized = sanitizeInput(subject, subject.teacherId);
     const subjects = await getSubjectsAction();
     const index = subjects.findIndex((s: Subject) => s.id === subject.id);
     if (index !== -1) {
-        subjects[index] = sanitizeInput(subject);
+        subjects[index] = sanitized;
         await writeDb('subjects', subjects);
         return subjects[index];
     }
@@ -143,8 +197,9 @@ export async function getEnrollmentsAction(): Promise<Enrollment[]> {
 }
 
 export async function addEnrollmentAction(enrollment: Enrollment) {
+  const sanitized = sanitizeInput(enrollment, enrollment.studentId);
   const enrollments = await readDb('enrollments');
-  enrollments.push(sanitizeInput(enrollment));
+  enrollments.push(sanitized);
   await writeDb('enrollments', enrollments);
   return enrollment;
 }
@@ -166,8 +221,9 @@ export async function getAttendancesAction(): Promise<Attendance[]> {
 }
 
 export async function addAttendanceAction(attendance: Omit<Attendance, 'id'>) {
+    const sanitized = sanitizeInput(attendance, attendance.studentId);
     const allAttendances = await readDb('attendance');
-    const newAttendance = { ...sanitizeInput(attendance), id: `ATT-${Date.now()}` };
+    const newAttendance = { ...sanitized, id: `ATT-${Date.now()}` };
     allAttendances.push(newAttendance);
     await writeDb('attendance', allAttendances);
     if (newAttendance.pcId) {
@@ -177,11 +233,12 @@ export async function addAttendanceAction(attendance: Omit<Attendance, 'id'>) {
 }
 
 export async function updateAttendanceAction(id: string, updates: Partial<Attendance>) {
+  const sanitized = sanitizeInput(updates);
   const attendances = await getAttendancesAction();
   const index = attendances.findIndex((a: Attendance) => a.id === id);
   if (index !== -1) {
     const originalAttendance = { ...attendances[index] };
-    attendances[index] = { ...originalAttendance, ...sanitizeInput(updates) };
+    attendances[index] = { ...originalAttendance, ...sanitized };
     await writeDb('attendance', attendances);
     if (updates.timeOut && originalAttendance.pcId) {
         await updatePcAction(originalAttendance.pcId, { status: 'available' });
@@ -277,7 +334,7 @@ export async function getReservationsAction(): Promise<Reservation[]> {
 
 export async function addReservationAction(reservation: Omit<Reservation, 'id'>) {
     const res = await getReservationsAction();
-    const newRes = { ...sanitizeInput(reservation), id: `RES-${Date.now()}` };
+    const newRes = { ...sanitizeInput(reservation, reservation.teacherId), id: `RES-${Date.now()}` };
     res.push(newRes);
     await writeDb('reservations', res);
     return newRes;
@@ -296,7 +353,7 @@ export async function getLabRequestsAction(): Promise<LabRequest[]> {
 
 export async function addLabRequestAction(request: Omit<LabRequest, 'id'>) {
     const requests = await getLabRequestsAction();
-    const newRequest = { ...sanitizeInput(request), id: `REQ-${Date.now()}` };
+    const newRequest = { ...sanitizeInput(request, request.studentId), id: `REQ-${Date.now()}` };
     requests.push(newRequest);
     await writeDb('labrequests', requests);
     return newRequest;
@@ -349,7 +406,7 @@ export async function getLibraryBorrowingsAction(): Promise<LibraryBorrowing[]> 
 
 export async function addLibraryBorrowingAction(borrowing: Omit<LibraryBorrowing, 'id'>) {
     const borrowings = await getLibraryBorrowingsAction();
-    const newBorrowing = { ...sanitizeInput(borrowing), id: `BOR-${Date.now()}` };
+    const newBorrowing = { ...sanitizeInput(borrowing, borrowing.studentId), id: `BOR-${Date.now()}` };
     borrowings.push(newBorrowing);
     await writeDb('libraryborrowings', borrowings);
     return newBorrowing;
@@ -372,7 +429,7 @@ export async function getBorrowRequestsAction(): Promise<BorrowRequest[]> {
 
 export async function addBorrowRequestAction(request: Omit<BorrowRequest, 'id'>) {
     const requests = await getBorrowRequestsAction();
-    const newRequest = { ...sanitizeInput(request), id: `BREQ-${Date.now()}` };
+    const newRequest = { ...sanitizeInput(request, request.studentId), id: `BREQ-${Date.now()}` };
     requests.push(newRequest);
     await writeDb('borrowrequests', requests);
     return newRequest;
@@ -405,7 +462,7 @@ export async function addClassworkAction(classwork: Omit<Classwork, 'id' | 'crea
         }
     }
     const newClasswork = {
-        ...sanitizeInput(classwork),
+        ...sanitizeInput(classwork, classwork.teacherId),
         id,
         createdAt: new Date().toISOString(),
         attachments
@@ -442,7 +499,7 @@ export async function addSubmissionAction(submission: Omit<Submission, 'id' | 's
         }
     }
     const newSubmission = {
-        ...sanitizeInput(submission),
+        ...sanitizeInput(submission, submission.studentId),
         id,
         submittedAt: new Date().toISOString(),
         files
@@ -537,7 +594,7 @@ export async function endTermAction(termId: string) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
             const studentAttendances = attendances.filter(a => a.studentId === enrollment.studentId && a.subjectId === subject.id);
             
-            // Calculate components... (Simplified for this action)
+            // Calculate components
             const getCompScore = (type: string) => {
                 const tasks = subjectClassworks.filter(cw => cw.type === type);
                 if (tasks.length === 0) return 100;
@@ -678,7 +735,7 @@ export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'times
         fileUrl = await saveChatFile(message.fileName, message.fileData);
     }
     const newMessage = { 
-        ...sanitizeInput(message), 
+        ...sanitizeInput(message, message.senderId), 
         id: `MSG-${Date.now()}`, 
         timestamp: new Date().toISOString(),
         fileUrl 

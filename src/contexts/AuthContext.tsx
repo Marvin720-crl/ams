@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -46,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     const currentUser = await getUserByIdAction(currentUserId);
                     if (currentUser) {
                         if (currentUser.isBanned) {
-                            toast.error("SYSTEM ALERT: Your account has been suspended for security reasons.");
+                            toast.error("SECURITY PROTOCOL: Your account has been permanently terminated due to suspicious activity.");
                             logout();
                             return;
                         }
@@ -56,8 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         logout();
                     }
                 } catch (e: any) {
-                    if (e.message?.includes('BANNED')) {
-                        toast.error("SECURITY BREACH: Account Suspended.");
+                    if (e.message?.includes('BANNED') || e.message?.includes('BREACH')) {
+                        toast.error("SECURITY ALERT: Session Terminated & Account Locked.");
                         logout();
                     }
                 }
@@ -77,27 +76,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Real-time presence heartbeat
+  // Real-time presence heartbeat + Security check
   useEffect(() => {
     if (!user || user.id === 'admin') return;
 
     const interval = setInterval(async () => {
       try {
+          const freshUser = await getUserByIdAction(user.id);
+          if (freshUser?.isBanned) {
+              toast.error("IRON WALL: Account access revoked.");
+              logout();
+              return;
+          }
           await updateLastSeenAction(user.id);
       } catch (e: any) {
-          if (e.message?.includes('BANNED')) {
-              toast.error("SECURITY BREACH: Persistent Session Blocked.");
+          if (e.message?.includes('BANNED') || e.message?.includes('BREACH')) {
+              toast.error("IRON WALL: Malicious behavior detected. Session locked.");
               logout();
           }
       }
-    }, 30000);
+    }, 20000); // More frequent check (20s) for aggressive security
 
     return () => clearInterval(interval);
   }, [user]);
 
   const login = (userToLogin: User) => {
     if (userToLogin.isBanned) {
-        toast.error("ACCESS DENIED: Account is permanently banned.");
+        toast.error("ACCESS DENIED: Account is permanently blacklisted.");
         return;
     }
     localStorage.setItem('currentUserId', userToLogin.id);
