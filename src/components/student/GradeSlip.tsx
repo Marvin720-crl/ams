@@ -389,8 +389,9 @@ export default function GradeSlip() {
               </p>
 
               <div className="max-w-xs">
-                <div className="border-b-2 border-primary" />
-                <p className="text-[11px] font-black uppercase tracking-[0.1em] mt-3 text-primary">
+                {/* Horizontal line changed to black (text-foreground) */}
+                <div className="border-b-2 border-foreground" />
+                <p className="text-[11px] font-black uppercase tracking-[0.1em] mt-3 text-foreground">
                   AUTHORIZED ACADEMIC SIGNATURE
                 </p>
               </div>
