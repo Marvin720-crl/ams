@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../utils/storage';
 import { getUserByIdAction, updateLastSeenAction } from '@/app/actions/dbActions';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
@@ -19,17 +20,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('currentUserId');
+    localStorage.removeItem('cached_user_profile');
+    setUser(null);
+    window.location.href = '/';
+  };
+
   useEffect(() => {
     const checkUser = async () => {
-        // 1. QUICK LOAD: Check localStorage first for instant access
-        const cachedUser = localStorage.getItem('cached_user_profile');
         const currentUserId = localStorage.getItem('currentUserId');
         
-        if (cachedUser) {
-            setUser(JSON.parse(cachedUser));
-            setLoading(false); // Disable loading immediately if we have a cache
-        }
-
         if (currentUserId) {
             if (currentUserId === 'admin') {
                 const admin = {
@@ -40,17 +41,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   role: 'admin' as const
                 };
                 setUser(admin);
-                localStorage.setItem('cached_user_profile', JSON.stringify(admin));
             } else {
                 try {
-                    // 2. BACKGROUND SYNC: Refresh data from server in background
                     const currentUser = await getUserByIdAction(currentUserId);
                     if (currentUser) {
+                        if (currentUser.isBanned) {
+                            toast.error("SYSTEM ALERT: Your account has been suspended for security reasons.");
+                            logout();
+                            return;
+                        }
                         setUser(currentUser);
                         localStorage.setItem('cached_user_profile', JSON.stringify(currentUser));
+                    } else {
+                        logout();
                     }
-                } catch (e) {
-                    console.warn("Network weak, using cached profile.");
+                } catch (e: any) {
+                    if (e.message?.includes('BANNED')) {
+                        toast.error("SECURITY BREACH: Account Suspended.");
+                        logout();
+                    }
                 }
             }
         }
@@ -72,27 +81,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user || user.id === 'admin') return;
 
-    // Initial heartbeat
-    updateLastSeenAction(user.id);
-
-    const interval = setInterval(() => {
-      updateLastSeenAction(user.id);
-    }, 30000); // 30 seconds heartbeat
+    const interval = setInterval(async () => {
+      try {
+          await updateLastSeenAction(user.id);
+      } catch (e: any) {
+          if (e.message?.includes('BANNED')) {
+              toast.error("SECURITY BREACH: Persistent Session Blocked.");
+              logout();
+          }
+      }
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [user]);
 
   const login = (userToLogin: User) => {
+    if (userToLogin.isBanned) {
+        toast.error("ACCESS DENIED: Account is permanently banned.");
+        return;
+    }
     localStorage.setItem('currentUserId', userToLogin.id);
     localStorage.setItem('cached_user_profile', JSON.stringify(userToLogin));
     setUser(userToLogin);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('currentUserId');
-    localStorage.removeItem('cached_user_profile');
-    setUser(null);
-    window.location.href = '/';
   };
 
   const updateCurrentUser = (updates: Partial<User>) => {
@@ -110,7 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             <div className="animate-pulse flex flex-col items-center">
                 <div className="w-16 h-16 bg-primary rounded-2xl mb-4" />
                 <p className="text-muted-foreground font-black uppercase tracking-widest">AMS:AMACC</p>
-                <p className="text-[8px] font-bold text-primary/40 mt-2 tracking-[0.3em]">OPTIMIZING CONNECTION...</p>
+                <p className="text-[8px] font-bold text-primary/40 mt-2 tracking-[0.3em]">SECURE CHANNEL ESTABLISHING...</p>
             </div>
         </div>
       ) : (

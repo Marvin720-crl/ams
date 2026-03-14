@@ -9,14 +9,18 @@ export interface User {
   email: string;
   password: string;
   role: UserRole;
-  department?: Department; // New: College or SHS
-  program?: string; // For students
-  year?: number; // For students
+  department?: Department;
+  program?: string;
+  year?: number;
   profilePic?: string;
   emergencyContactName?: string;
   emergencyContactAddress?: string;
   emergencyContactPhone?: string;
-  lastSeen?: string; // For online status tracking
+  signature?: string; // New: For digital signatures
+  lastSeen?: string;
+  isBanned?: boolean; // Security: Ban flag
+  deviceFingerprint?: string; // Security: Track device
+  banReason?: string;
 }
 
 export interface Schedule {
@@ -46,8 +50,8 @@ export interface Subject {
   name: string;
   teacherId: string;
   teacherName: string;
-  termId: string; // Linked to a specific term
-  department?: Department; // New: To identify if SHS or College subject
+  termId: string;
+  department?: Department;
   schedules: Schedule[];
   description?: string;
   units?: number;
@@ -202,8 +206,8 @@ export interface AcademicRecord {
   subjectCode: string;
   termId: string;
   termName: string;
-  grade: number; // Numerical 1.0 - 5.0
-  score: number; // Raw percentage
+  grade: number;
+  score: number;
   units: number;
   recordedAt: string;
 }
