@@ -134,36 +134,40 @@ export default function ChatSidebar({
               <DialogTrigger asChild>
                 <Plus size={14} className="cursor-pointer hover:text-white transition" />
               </DialogTrigger>
-              <DialogContent className="bg-[#313338] border-none text-white rounded-[2rem] p-8 shadow-2xl md:translate-x-[144px]">
+              <DialogContent className="bg-[#313338] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg md:left-[calc(50%+144px)]">
                 <DialogHeader>
-                  <DialogTitle className="font-black text-2xl uppercase tracking-tighter mb-4">Start a Conversation</DialogTitle>
+                  <DialogTitle className="font-black text-3xl uppercase tracking-tighter mb-8 text-white">START A CONVERSATION</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-6 mt-2">
+                <div className="space-y-8">
                   <div className="relative group">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-red-500 transition-colors" />
+                    <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-red-500 transition-colors" />
                     <Input 
                       placeholder="Search name or ID..." 
-                      className="bg-black/40 border-2 border-red-600 focus:border-red-500 rounded-2xl pl-12 h-16 text-white text-lg font-bold transition-all shadow-inner" 
+                      className="bg-black/20 border-2 border-red-600 focus:ring-0 focus:border-red-500 rounded-2xl pl-14 h-16 text-white text-lg font-bold transition-all shadow-xl placeholder:text-white/10" 
                       value={dmSearch} 
                       onChange={(e)=>setDmSearch(e.target.value)} 
                     />
                   </div>
-                  <div className="max-h-[400px] overflow-y-auto space-y-2 no-scrollbar pr-2">
+                  <div className="max-h-[450px] overflow-y-auto space-y-3 no-scrollbar pr-2">
                     {filteredUsers.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Search size={40} className="mx-auto text-white/5 mb-3" />
-                        <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No users found in database</p>
+                      <div className="text-center py-16">
+                        <Search size={48} className="mx-auto text-white/5 mb-4" />
+                        <p className="text-white/20 text-xs font-black uppercase tracking-widest">No matching identities found</p>
                       </div>
                     ) : (
                       filteredUsers.map(u => (
-                        <button key={u.id} onClick={() => { onStartDM(u.id); setDmSearch(''); }} className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all group active:scale-[0.98]">
-                          <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-red-500/50 transition-colors">
+                        <button 
+                          key={u.id} 
+                          onClick={() => { onStartDM(u.id); setDmSearch(''); }} 
+                          className="w-full flex items-center gap-5 p-4 rounded-2xl hover:bg-white/5 transition-all group active:scale-[0.98]"
+                        >
+                          <Avatar className="h-14 w-14 border-2 border-white/5 group-hover:border-red-600 transition-colors">
                             <AvatarImage src={u.profilePic}/>
-                            <AvatarFallback className="bg-primary text-white font-black text-sm">{u.name?.[0]}</AvatarFallback>
+                            <AvatarFallback className="bg-primary text-white font-black text-lg">{u.name?.[0]}</AvatarFallback>
                           </Avatar>
                           <div className="text-left flex-1 overflow-hidden">
-                            <p className="text-base font-black truncate group-hover:text-red-500 transition-colors">{u.name}</p>
-                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">{u.role.replace('_', ' ')} • {u.id}</p>
+                            <p className="text-lg font-black text-white truncate group-hover:text-red-500 transition-colors">{u.name}</p>
+                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mt-0.5">{u.role.replace('_', ' ')} • {u.id}</p>
                           </div>
                         </button>
                       ))
