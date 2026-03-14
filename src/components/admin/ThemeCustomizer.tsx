@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useDesign } from '@/contexts/DesignContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,6 @@ import {
   BarChart3,
   FileCheck,
   MapPin,
-  Image as ImageIcon,
   Type,
   Droplets,
   Layers,
@@ -41,6 +40,7 @@ import {
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 type Role = 'student' | 'teacher' | 'admin' | 'library';
 
@@ -83,6 +83,84 @@ const ROLE_NAV: Record<Role, NavItem[]> = {
   ]
 };
 
+// Memoized Color Input component to prevent re-renders of the whole panel while picking colors
+const ColorInput = React.memo(({ label, value, field, description, onChange }: { 
+  label: string, 
+  value: string, 
+  field: string, 
+  description: string,
+  onChange: (field: string, val: string) => void 
+}) => {
+  const [localColor, setLocalColor] = useState(value);
+
+  // Sync local state when external value changes (e.g. reset)
+  useEffect(() => {
+    setLocalColor(value);
+  }, [value]);
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVal = e.target.value;
+    setLocalColor(newVal);
+    onChange(field, newVal);
+  };
+
+  return (
+    <div className="space-y-4 p-6 rounded-[2.5rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all group">
+      <div className="flex justify-between items-start">
+        <div>
+          <Label className="font-black uppercase text-[10px] tracking-widest text-primary">{label}</Label>
+          <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1 leading-tight">{description}</p>
+        </div>
+        <div 
+          className="h-12 w-12 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110" 
+          style={{ backgroundColor: localColor }} 
+        />
+      </div>
+      
+      <div className="relative">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="h-14 w-full rounded-2xl border-2 border-primary/10 flex items-center px-5 bg-muted/10 hover:bg-muted/30 transition-colors">
+              <div className="flex-1 font-mono text-xs font-black text-muted-foreground tracking-tighter">
+                {localColor?.toUpperCase()}
+              </div>
+              <Palette size={16} className="text-primary/40" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0 border-none rounded-[2rem] shadow-3xl overflow-hidden z-[120]">
+            <div className="bg-white p-6 space-y-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Precision Palette</span>
+                <button className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
+                  <X size={14} className="text-primary" />
+                </button>
+              </div>
+              <div className="relative h-40 w-full rounded-xl overflow-hidden border-2 border-primary/5">
+                <input 
+                  type="color" 
+                  value={localColor} 
+                  onInput={handleInput}
+                  className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-crosshair border-none bg-transparent"
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1 h-12 bg-muted/30 rounded-xl flex items-center px-4 font-mono font-bold text-sm">
+                  {localColor.toUpperCase()}
+                </div>
+                <Button size="icon" className="h-12 w-12 rounded-xl bg-primary text-white">
+                  <X size={18} />
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  );
+});
+
+ColorInput.displayName = 'ColorInput';
+
 export default function ThemeCustomizer() {
   const { config, updateConfig, saveConfig, resetToDefault } = useDesign();
   const [saving, setSaving] = useState(false);
@@ -103,29 +181,6 @@ export default function ThemeCustomizer() {
   const onColorChange = useCallback((field: string, val: string) => {
     updateConfig({ [field]: val });
   }, [updateConfig]);
-
-  const ColorInput = ({ label, value, field, description }: { label: string, value: string, field: string, description: string }) => (
-    <div className="space-y-4 p-6 rounded-[2rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all">
-      <div className="flex justify-between items-start">
-        <div>
-          <Label className="font-black uppercase text-[10px] tracking-widest text-primary">{label}</Label>
-          <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1">{description}</p>
-        </div>
-        <div className="h-10 w-10 rounded-xl border-2 border-white shadow-xl" style={{ backgroundColor: value }} />
-      </div>
-      <div className="relative pt-2">
-        <div className="h-14 w-full rounded-2xl overflow-hidden border-2 border-primary/10 flex items-center px-4 bg-white">
-            <div className="flex-1 font-mono text-[11px] font-bold text-muted-foreground">{value?.toUpperCase()}</div>
-            <input 
-                type="color" 
-                value={value} 
-                onInput={(e) => onColorChange(field, e.currentTarget.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none appearance-none"
-            />
-        </div>
-      </div>
-    </div>
-  );
 
   const renderPreviewPage = () => {
     switch(activePage) {
@@ -154,42 +209,6 @@ export default function ThemeCustomizer() {
             </Card>
           </div>
         );
-      case 'subjects':
-      case 'books':
-        return (
-          <div className="space-y-8 w-full p-8">
-            <div className="h-10 w-64 bg-primary/10 rounded-full" style={{ backgroundColor: `${config.primary}10` }} />
-            <div className="grid grid-cols-1 gap-6">
-              {[1,2,3].map(i => (
-                <Card key={i} className="p-8 border-none shadow-xl flex items-center justify-between" style={{ borderRadius: `${config.radius * 2}rem` }}>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10" style={{ backgroundColor: `${config.primary}10` }} />
-                    <div className="space-y-2">
-                      <div className="h-4 w-40 bg-primary/20 rounded-full" style={{ backgroundColor: `${config.primary}20` }} />
-                      <div className="h-2 w-24 bg-muted-foreground/20 rounded-full" />
-                    </div>
-                  </div>
-                  <ChevronRight className="text-primary/20" style={{ color: `${config.primary}20` }} />
-                </Card>
-              ))}
-            </div>
-          </div>
-        );
-      case 'scanner':
-      case 'scan-lend':
-        return (
-          <div className="space-y-8 w-full p-8">
-            <div className="p-10 border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-center gap-4" style={{ backgroundColor: `${config.accent}05`, borderColor: `${config.accent}20` }}>
-              <div className="h-20 w-20 rounded-[2rem] flex items-center justify-center text-white shadow-xl" style={{ backgroundColor: config.accent }}>
-                <Scan size={32} />
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 w-32 bg-accent/20 mx-auto rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
-                <div className="h-2 w-48 bg-muted-foreground/10 mx-auto rounded-full" />
-              </div>
-            </div>
-          </div>
-        );
       case 'grades':
         return (
           <div className="p-8">
@@ -208,11 +227,12 @@ export default function ThemeCustomizer() {
         );
       default:
         return (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center opacity-20">
-              <Layers size={64} className="mx-auto mb-4" />
-              <p className="font-black uppercase tracking-widest text-[10px]">Page View Not Rendered</p>
+          <div className="h-full flex flex-col items-center justify-center p-12 text-center">
+            <div className="h-24 w-24 rounded-[2.5rem] bg-white/10 flex items-center justify-center mb-6 text-white/20">
+              <Layers size={48} />
             </div>
+            <h4 className="text-white/40 font-black uppercase text-xs tracking-widest">Workspace Emulator</h4>
+            <p className="text-white/20 text-[10px] mt-2 font-bold uppercase tracking-widest">Select an item from the sidebar to preview layout</p>
           </div>
         );
     }
@@ -263,18 +283,18 @@ export default function ThemeCustomizer() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
         {/* LEFT SIDEBAR CONTROLS */}
-        <div className="lg:col-span-4 space-y-10 h-[calc(100vh-280px)] overflow-y-auto no-scrollbar pr-4">
+        <div className="lg:col-span-4 space-y-10 h-[calc(100vh-280px)] overflow-y-auto no-scrollbar pr-4 pb-20">
           
-          {/* BRANDING SECTION */}
           <Section label="Branding" icon={Palette}>
-             <ColorInput label="Primary Brand" value={config.primary} field="primary" description="Action Buttons & Active Elements" />
-             <ColorInput label="Navigation Sidebar" value={config.sidebar} field="sidebar" description="Left Menu Background" />
-             <ColorInput label="Top Header" value={config.header} field="header" description="Top Banner Background" />
-             <ColorInput label="Accent Variable" value={config.accent} field="accent" description="Interactive Highlights" />
-             <ColorInput label="Secondary Canvas" value={config.secondary} field="secondary" description="Page Background Textures" />
+             <div className="grid grid-cols-1 gap-6">
+               <ColorInput label="Primary Brand" value={config.primary} field="primary" description="Main buttons and branding elements" onChange={onColorChange} />
+               <ColorInput label="Navigation Sidebar" value={config.sidebar} field="sidebar" description="Background for the left menu panel" onChange={onColorChange} />
+               <ColorInput label="Top Header" value={config.header} field="header" description="Background for the top navigation bar" onChange={onColorChange} />
+               <ColorInput label="Interactive Accent" value={config.accent} field="accent" description="Highlights and secondary action buttons" onChange={onColorChange} />
+               <ColorInput label="Secondary Canvas" value={config.secondary} field="secondary" description="Page background color behind cards" onChange={onColorChange} />
+             </div>
           </Section>
 
-          {/* CHROMATICS & BRAND VARIABLES */}
           <Section label="Chromatics" icon={Droplets}>
             <div className="space-y-8 p-8 bg-white rounded-[2.5rem] shadow-xl border border-primary/5">
               <div className="space-y-6">
@@ -424,7 +444,9 @@ function Section({ label, icon: Icon, children }: { label: string, icon: any, ch
   return (
     <section className="space-y-6">
       <div className="flex items-center gap-3 px-2">
-        <Icon size={16} className="text-primary" />
+        <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+          <Icon size={16} />
+        </div>
         <h3 className="font-black uppercase text-[11px] tracking-[0.3em] text-muted-foreground">{label}</h3>
       </div>
       <div className="space-y-6">
