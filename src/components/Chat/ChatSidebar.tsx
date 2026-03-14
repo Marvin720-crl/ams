@@ -134,7 +134,7 @@ export default function ChatSidebar({
               <DialogTrigger asChild>
                 <Plus size={14} className="cursor-pointer hover:text-white transition" />
               </DialogTrigger>
-              <DialogContent className="bg-[#313338] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg md:left-[calc(50%+144px)] md:-translate-x-1/2 lg:left-[calc(50%+200px)] xl:left-[calc(50%+240px)]">
+              <DialogContent className="bg-[#313338] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg z-[100] md:left-[calc(50%+144px)] md:-translate-x-1/2 lg:left-[calc(50%+200px)] xl:left-[calc(50%+240px)]">
                 <DialogHeader>
                   <DialogTitle className="font-black text-3xl uppercase tracking-tighter mb-8 text-white">START A CONVERSATION</DialogTitle>
                 </DialogHeader>
