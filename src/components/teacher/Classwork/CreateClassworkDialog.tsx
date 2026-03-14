@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -133,7 +134,7 @@ export default function CreateClassworkDialog({ subjectId, onClose, onCreated }:
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="totalPoints" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Points</Label>
+              <Label htmlFor="totalPoints" className="text-[10px) font-black uppercase tracking-widest text-muted-foreground ml-1">Total Points</Label>
               <Input id="totalPoints" type="number" value={totalPoints} onChange={e => setTotalPoints(e.target.value)} required min="1" className="h-12 rounded-xl border-primary/10 font-bold" />
             </div>
             <div className="space-y-2">
@@ -154,7 +155,14 @@ export default function CreateClassworkDialog({ subjectId, onClose, onCreated }:
 
           <div className="space-y-2 p-6 border-2 border-dashed rounded-2xl border-primary/5 bg-primary/[0.02]">
             <Label htmlFor="attachments" className="text-[10px] font-black uppercase tracking-widest text-primary mb-2 block">Instructional Materials (Attachments)</Label>
-            <Input id="attachments" type="file" multiple onChange={handleFileChange} className="h-auto py-2 bg-white" />
+            <Input 
+              id="attachments" 
+              type="file" 
+              multiple 
+              onChange={handleFileChange} 
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx"
+              className="h-auto py-2 bg-white" 
+            />
             {files.length > 0 && (
                 <div className="mt-2 text-xs font-bold text-muted-foreground">
                     Selected Files: {files.map(f => f.name).join(', ')}

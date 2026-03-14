@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Conversation, ChatMessage, User } from '@/utils/storage';
-import { Hash, MoreVertical, PlusCircle, Smile, Gift, Send, User as UserIcon, FileIcon, Download, Zap, Gem, Loader2, Menu } from 'lucide-react';
+import { Hash, MoreVertical, PlusCircle, Smile, Send, User as UserIcon, FileIcon, FileText, FileImage, Download, Zap, Gem, Loader2, Menu, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -81,11 +81,27 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
         setInputText(prev => prev + emoji);
     };
 
+    const isImage = (fileName?: string) => {
+        if (!fileName) return false;
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '');
+    };
+
+    const getFileIcon = (fileName?: string) => {
+        if (!fileName) return <FileIcon size={20} />;
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) return <FileImage size={20} />;
+        if (ext === 'pdf') return <FileText size={20} />;
+        if (['doc', 'docx'].includes(ext || '')) return <FileText size={20} />;
+        return <FileIcon size={20} />;
+    };
+
     const renderedMessages = useMemo(() => {
         return messages.map((msg) => {
             const isMe = msg.senderId === user?.id;
             const isOptimistic = msg.id.startsWith('TEMP-');
             const senderProfile = users.find(u => u.id === msg.senderId);
+            const msgIsImage = isImage(msg.fileName);
             
             return (
                 <div 
@@ -128,29 +144,48 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                             {msg.text}
 
                             {msg.fileUrl && (
-                                <div className={cn(
-                                    "rounded-xl p-3 border inline-flex items-center gap-3 mt-2 w-full",
-                                    isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
-                                )}>
+                                <div className="mt-2 min-w-[200px]">
                                     {msg.fileUrl === 'pending' ? (
-                                        <div className="h-10 w-10 flex items-center justify-center"><Loader2 className="animate-spin text-white/40 h-5 w-5"/></div>
-                                    ) : (
-                                        <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                                            <FileIcon size={20} />
+                                        <div className="flex items-center gap-3 p-3 bg-black/20 rounded-xl border border-white/5">
+                                            <Loader2 className="animate-spin text-white/40 h-5 w-5"/>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Encrypting File...</span>
                                         </div>
-                                    )}
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
-                                        <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">
-                                            {msg.fileUrl === 'pending' ? 'Encrypting...' : 'Download'}
-                                        </p>
-                                    </div>
-                                    {msg.fileUrl !== 'pending' && (
-                                        <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full text-white/40 hover:text-white hover:bg-white/10">
-                                            <a href={msg.fileUrl} download={msg.fileName}>
-                                                <Download size={14} />
-                                            </a>
-                                        </Button>
+                                    ) : msgIsImage ? (
+                                        <div className="relative group">
+                                            <img 
+                                                src={msg.fileUrl} 
+                                                alt="uploaded" 
+                                                className="max-w-full rounded-lg shadow-sm max-h-60 object-cover border border-white/10" 
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
+                                                <Button size="icon" variant="ghost" className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white" onClick={() => window.open(msg.fileUrl!, '_blank')}>
+                                                    <Eye size={18} />
+                                                </Button>
+                                                <Button size="icon" variant="ghost" className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white" asChild>
+                                                    <a href={msg.fileUrl} download={msg.fileName}><Download size={18} /></a>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className={cn(
+                                            "rounded-xl p-3 border inline-flex items-center gap-3 w-full",
+                                            isMe ? "bg-white/10 border-white/10" : "bg-black/20 border-white/5"
+                                        )}>
+                                            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                                                {getFileIcon(msg.fileName)}
+                                            </div>
+                                            <div className="flex-1 overflow-hidden">
+                                                <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
+                                                <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">
+                                                    Click to download
+                                                </p>
+                                            </div>
+                                            <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-full text-white/40 hover:text-white hover:bg-white/10">
+                                                <a href={msg.fileUrl} download={msg.fileName}>
+                                                    <Download size={14} />
+                                                </a>
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -227,6 +262,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                         type="file" 
                         ref={fileInputRef} 
                         onChange={handleFileChange} 
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp,.xls,.xlsx,.ppt,.pptx"
                         className="hidden" 
                     />
                     

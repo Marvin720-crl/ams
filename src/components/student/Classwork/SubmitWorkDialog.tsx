@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -72,37 +73,45 @@ export default function SubmitWorkDialog({ classwork, onClose, onSubmitted }: Su
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="rounded-[2rem]">
         <DialogHeader>
-          <DialogTitle>Submit Work for "{classwork.title}"</DialogTitle>
-          <DialogDescription>
-            Attach your files or provide a text answer below.
+          <DialogTitle className="text-xl font-black uppercase tracking-tight text-primary">Submit Work for "{classwork.title}"</DialogTitle>
+          <DialogDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Attach PDF, Word, Images, or Excel files below.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="files">Attach Files</Label>
-            <Input id="files" type="file" multiple onChange={handleFileChange} />
+            <Label htmlFor="files" className="text-[10px] font-black uppercase tracking-widest ml-1">Attach Files (DOCX, PDF, PIC, etc.)</Label>
+            <Input 
+              id="files" 
+              type="file" 
+              multiple 
+              onChange={handleFileChange} 
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx"
+              className="h-auto py-2 bg-muted/20 border-primary/10 rounded-xl"
+            />
              {files.length > 0 && (
-                <div className="text-xs text-muted-foreground pt-2">
+                <div className="text-[10px] font-bold text-primary uppercase tracking-widest pt-2">
                     Selected: {files.map(f => f.name).join(', ')}
                 </div>
              )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="textAnswer">Text Answer</Label>
+            <Label htmlFor="textAnswer" className="text-[10px] font-black uppercase tracking-widest ml-1">Text Answer / Notes</Label>
             <Textarea 
               id="textAnswer" 
               value={textAnswer} 
               onChange={(e) => setTextAnswer(e.target.value)}
               placeholder="Type your answer here..."
+              className="rounded-xl border-primary/10 min-h-[120px]"
             />
           </div>
-          <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-            <Button type="submit" disabled={loading}>
+          <DialogFooter className="gap-3 sm:gap-0">
+            <DialogClose asChild><Button type="button" variant="ghost" className="rounded-full h-12 px-8 font-black uppercase text-xs tracking-widest">Cancel</Button></DialogClose>
+            <Button type="submit" disabled={loading} className="rounded-full h-12 px-10 bg-primary text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-primary/20">
               {loading ? <Loader2 className="animate-spin mr-2"/> : <Upload className="h-4 w-4 mr-2" />}
-              Submit
+              Submit Assignment
             </Button>
           </DialogFooter>
         </form>
