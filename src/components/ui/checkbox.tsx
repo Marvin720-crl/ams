@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -33,10 +32,11 @@ const Checkbox = React.forwardRef<
   return (
     <CheckboxPrimitive.Root
       ref={ref}
+      type="button"
       className={cn(
         "peer shrink-0 rounded-md border border-primary",
         "ring-offset-background",
-        "transition-colors duration-200",
+        "transition-all duration-200",
         "focus-visible:outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-50",

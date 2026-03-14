@@ -79,12 +79,12 @@ const [myTermEnrollments,setMyTermEnrollments] = useState<TermEnrollment[]>([]);
 
 const [loading,setLoading] = useState(true);
 
-// Extract stable ID for dependency
+// Use User ID string for stable dependency tracking
 const userId = user?.id;
 
 useEffect(()=>{
   if(userId) loadData();
-},[currentView, userId]);
+}, [currentView, userId]);
 
 const loadData = async ()=>{
 
