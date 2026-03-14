@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -114,7 +115,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                                 {msg.senderName}
                             </span>
                             <span className="text-[8px] font-bold text-white/20 uppercase">
-                                {isOptimistic ? 'Sending...' : format(new Date(msg.timestamp), 'h:mm a')}
+                                {isOptimistic ? 'Processing Payload...' : format(new Date(msg.timestamp), 'h:mm a')}
                             </span>
                         </div>
 
@@ -141,7 +142,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                                     <div className="flex-1 overflow-hidden">
                                         <p className="text-white font-bold text-[11px] truncate">{msg.fileName || 'Shared File'}</p>
                                         <p className="text-white/30 text-[8px] uppercase font-black tracking-widest">
-                                            {msg.fileUrl === 'pending' ? 'Sending...' : 'Download'}
+                                            {msg.fileUrl === 'pending' ? 'Encrypting...' : 'Download'}
                                         </p>
                                     </div>
                                     {msg.fileUrl !== 'pending' && (

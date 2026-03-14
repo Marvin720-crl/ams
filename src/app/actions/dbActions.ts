@@ -1,3 +1,4 @@
+
 'use server'
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
@@ -52,13 +53,19 @@ function sanitizeInput(input: any, userId?: string): any {
         let isViolation = false;
         let violationReason = "";
 
-        // 1. Check for malicious patterns (Injection/Virus-like code)
-        // We check even large files for script injections
-        for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
-            if (pattern.test(input)) {
-                isViolation = true;
-                violationReason = `Malisyosong pattern detected sa ${isDataUri ? 'file' : 'text'}: ${pattern.source}`;
-                break;
+        // PERFORMANCE OPTIMIZATION: 
+        // Skip heavy regex scanning for very large data URIs (files)
+        // Scanning MBs of base64 text with regex causes the server to hang.
+        const shouldSkipDeepScan = isDataUri && input.length > 100000;
+
+        if (!shouldSkipDeepScan) {
+            // 1. Check for malicious patterns (Injection/Virus-like code)
+            for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
+                if (pattern.test(input)) {
+                    isViolation = true;
+                    violationReason = `Malisyosong pattern detected sa ${isDataUri ? 'file' : 'text'}: ${pattern.source}`;
+                    break;
+                }
             }
         }
 
