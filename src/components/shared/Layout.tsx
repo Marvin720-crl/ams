@@ -36,8 +36,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'make-request', label: 'Make Request', icon: FileText },
           { id: 'my-requests', label: 'My Requests', icon: FileCheck },
-          { id: 'my-sessions', label: 'My Sessions', icon: Calendar },
-          { id: 'enroll', label: 'Enrollment', icon: Users },
           { id: 'library', label: 'Library', icon: BookOpen },
         ];
       case 'teacher':
@@ -50,9 +48,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           { id: 'manage-subjects', label: 'Manage Subjects', icon: Book },
           { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'reservations', label: 'Room Reservations', icon: MapPin },
-          { id: 'pending-requests', label: 'Pending Requests', icon: FileText },
-          { id: 'pending-enrollments', label: 'Pending Enrollments', icon: Users },
-          { id: 'enrolled-students', label: 'Enrolled Students', icon: Users },
           { id: 'lab-view', label: 'Lab View', icon: Monitor },
           { id: 'attendance-records', label: 'Attendance Records', icon: FileCheck },
         ];
@@ -98,7 +93,8 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-[#CED3D7]/20 flex flex-col">
-      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-lg print:hidden">
+      {/* HEADER: Controlled by Primary Color */}
+      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-xl print:hidden">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -121,7 +117,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setGuideOpen(true)}
-            className="hidden md:flex h-10 px-4 items-center gap-2 bg-accent text-white hover:bg-accent/90 rounded-full transition-all border border-accent/10"
+            className="hidden md:flex h-12 px-6 items-center gap-2 bg-accent text-white hover:bg-accent/90 rounded-full transition-all border border-accent/10 shadow-lg"
           >
             <HelpCircle size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest">Tutorial</span>
@@ -149,6 +145,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
+        {/* ASIDE: Controlled by Secondary Color */}
         <aside className={cn(
           "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-secondary border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -157,7 +154,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             onClick={() => handleNav('profile')}
             className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/10 to-transparent cursor-pointer group"
           >
-            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden border-4 border-accent/20">
+            <div className="w-24 h-24 rounded-[2rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden border-4 border-accent/20">
               {user?.profilePic ? (
                 <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover" />
               ) : (
@@ -183,7 +180,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                   className={cn(
                     "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all group",
                     isActive 
-                      ? "bg-white/5 text-accent border-l-4 border-accent shadow-lg scale-[1.02]" 
+                      ? "bg-white/10 text-accent border-l-4 border-accent shadow-lg scale-[1.02]" 
                       : "text-white/40 hover:bg-white/5 hover:text-white"
                   )}
                 >

@@ -17,8 +17,8 @@ const defaultConfig: ThemeConfig = {
   secondary: '#14343A', // Deep Teal
   accent: '#F17346', // Coral
   background: '#FFFFFF',
-  radius: 1.25,
-  glassIntensity: 10,
+  radius: 1.5,
+  glassIntensity: 15,
   fontFamily: 'Inter',
   layoutDensity: 'standard',
   componentStyles: {}
