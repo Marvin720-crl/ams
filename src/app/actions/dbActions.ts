@@ -1,4 +1,3 @@
-
 'use server'
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
@@ -379,7 +378,7 @@ export async function updatePcAction(id: string, updates: Partial<Pc>) {
     const index = pcs.findIndex(p => p.id === id);
     if (index !== -1) {
         pcs[index] = { ...pcs[index], ...sanitizeInput(updates) };
-        await writeDb('pcs', pcs);
+        await writeDb('pcs', masonry);
         return pcs[index];
     }
     return null;
@@ -645,7 +644,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.type === type);
+        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
