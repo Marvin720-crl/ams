@@ -14,10 +14,9 @@ import Link from 'next/link';
 import { addSubjectAction, getTermsAction } from '@/app/actions/dbActions';
 import { Schedule, Term } from '@/utils/storage';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
 
 export default function AddSubjectPage() {
   const [loading, setLoading] = useState(false);
@@ -36,9 +35,13 @@ export default function AddSubjectPage() {
     getTermsAction().then(data => {
       const active = data.filter(t => t.status === 'active');
       setActiveTerms(active);
-      if (active.length > 0) setTermId(active[0].id);
+      if (active.length > 0) {
+        setTermId(active[0].id);
+      }
+    }).catch(() => {
+      toast({ variant: "destructive", title: "Error", description: "Could not sync academic terms." });
     }).finally(() => setFetchingTerms(false));
-  }, []);
+  }, [toast]);
 
   const handleScheduleChange = (index: number, field: keyof Schedule, value: string) => {
     const newSchedules = [...schedules];
@@ -54,7 +57,6 @@ export default function AddSubjectPage() {
     if (schedules.length <= 1) return;
     setSchedules(schedules.filter((_, i) => i !== index));
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,18 +124,27 @@ export default function AddSubjectPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-muted-foreground ml-1"><School className="h-3 w-3 text-primary" /> Academic Term</Label>
-                <Select value={termId} onValueChange={setTermId} disabled={fetchingTerms}>
+                
+                {!fetchingTerms && activeTerms.length === 0 && (
+                  <Alert variant="destructive" className="rounded-2xl bg-red-50 border-red-100">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle className="font-black uppercase text-[10px]">System Locked</AlertTitle>
+                    <AlertDescription className="text-[10px] font-bold">
+                      Walang Active Academic Term sa system. Mangyaring kontakin ang Admin para mag-activate ng bagong Trimester.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <Select value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
                   <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
-                    <SelectValue placeholder={fetchingTerms ? "Loading..." : "Select Term"} />
+                    <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
                     <SelectGroup>
                         {activeTerms.length === 0 ? (
-                            <div className="p-4 text-center text-[10px] font-bold text-destructive uppercase flex items-center gap-2">
-                                <AlertCircle className="h-3 w-3" /> No active terms found
-                            </div>
+                            <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
                         ) : (
                             activeTerms.map(t => (
                                 <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>

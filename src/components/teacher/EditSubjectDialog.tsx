@@ -31,6 +31,7 @@ import { Edit, Plus, Trash2, School, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Subject, Schedule, Term } from '@/utils/storage';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DAYS = [
 'Monday',
@@ -63,13 +64,21 @@ const [activeTerms, setActiveTerms] = useState<Term[]>([]);
 const [loading, setLoading] = useState(false);
 const [fetchingTerms, setFetchingTerms] = useState(true);
 
-useEffect(() => {
+const loadTerms = async () => {
     setFetchingTerms(true);
-    getTermsAction().then(data => {
-        const active = data.filter(t => t.status === 'active');
+    try {
+        const data = await getTermsAction();
+        const active = data.filter((t: any) => t.status === 'active');
         setActiveTerms(active);
-    }).finally(() => setFetchingTerms(false));
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setFetchingTerms(false);
+    }
+};
 
+useEffect(() => {
+    loadTerms();
     if (!subject.schedules || subject.schedules.length === 0) {
         setFormData({
             ...subject,
@@ -153,6 +162,17 @@ Update subject details and schedule
 </div>
 
 <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[70vh] overflow-y-auto bg-white">
+
+{!fetchingTerms && activeTerms.length === 0 && (
+    <Alert variant="destructive" className="rounded-2xl border-none bg-red-50">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle className="font-black uppercase text-[10px]">Academic Lock</AlertTitle>
+        <AlertDescription className="text-[10px] font-bold">
+            Walang Active Academic Term sa system. Mangyaring kontakin ang Admin Dashboard para mag-activate ng trimester.
+        </AlertDescription>
+    </Alert>
+)}
+
 <div className="space-y-2">
 <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Subject Name *</Label>
 <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required className="h-14 rounded-2xl border-primary/10 font-bold px-6" placeholder="Course Title" />
@@ -160,16 +180,14 @@ Update subject details and schedule
 
 <div className="space-y-2">
 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
-<Select value={formData.termId} onValueChange={(v) => setFormData({...formData, termId: v})} disabled={fetchingTerms}>
+<Select value={formData.termId} onValueChange={(v) => setFormData({...formData, termId: v})} disabled={fetchingTerms || activeTerms.length === 0}>
 <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
-<SelectValue placeholder={fetchingTerms ? "Loading Terms..." : "Select Term"} />
+<SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
 </SelectTrigger>
 <SelectContent className="rounded-2xl">
 <SelectGroup>
 {activeTerms.length === 0 ? (
-    <div className="p-4 text-center text-[10px] font-bold text-destructive uppercase flex items-center gap-2">
-        <AlertCircle className="h-3 w-3" /> No active terms found
-    </div>
+    <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
 ) : (
     activeTerms.map(t => <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>)
 )}
