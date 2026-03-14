@@ -133,9 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   rel="noopener noreferrer"
                   className="w-16 h-16 bg-primary rounded-2xl mb-4 flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer"
                 >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
                   </svg>
                 </a>
                 <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-sm">AMS:AMACC</p>
