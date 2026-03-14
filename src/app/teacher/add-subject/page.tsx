@@ -136,7 +136,7 @@ export default function AddSubjectPage() {
                   </Alert>
                 )}
 
-                <Select key={activeTerms.length} value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
+                <Select value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
                   <SelectTrigger className="h-14 rounded-2xl border-2 border-primary font-bold px-6 bg-white">
                     <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                   </SelectTrigger>

@@ -179,7 +179,6 @@ Update subject details and schedule
 <div className="space-y-2">
 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
 <Select 
-    key={activeTerms.length} 
     value={formData.termId} 
     onValueChange={(v) => setFormData({...formData, termId: v})} 
     disabled={fetchingTerms || activeTerms.length === 0}

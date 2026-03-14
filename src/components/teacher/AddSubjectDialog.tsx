@@ -39,6 +39,8 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
             const data = await getTermsAction();
             const active = data.filter((t: any) => t.status === 'active');
             setActiveTerms(active);
+            
+            // Set initial termId if terms are found and no term is selected
             if (active.length > 0 && !termId) {
                 setTermId(active[0].id);
             }
@@ -67,7 +69,7 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || !termId || schedules.some(s => !s.day || !s.startTime || !s.dismissalTime)) {
-            toast.error('Please fill all mandatory fields.');
+            toast.error('Mangyaring punan ang lahat ng required fields.');
             return;
         }
         setLoading(true);
@@ -150,7 +152,6 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
                             <Select 
-                                key={activeTerms.length} 
                                 value={termId} 
                                 onValueChange={setTermId} 
                                 disabled={fetchingTerms || activeTerms.length === 0}
