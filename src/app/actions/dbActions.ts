@@ -57,7 +57,7 @@ function sanitizeInput(input: any, userId?: string): any {
         for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
             if (pattern.test(input)) {
                 isViolation = true;
-                violationReason = `Malisyosong pattern detected in ${isDataUri ? 'file' : 'text'}: ${pattern.source}`;
+                violationReason = `Malisyosong pattern detected sa ${isDataUri ? 'file' : 'text'}: ${pattern.source}`;
                 break;
             }
         }
@@ -101,6 +101,26 @@ async function checkSecurity(userId?: string) {
 export async function banUserAction(adminId: string, userId: string, reason: string) {
     if (adminId !== 'admin') throw new Error('UNAUTHORIZED');
     await detectAndBan(userId, reason);
+}
+
+export async function unbanUserAction(adminId: string, userId: string) {
+    if (adminId !== 'admin') throw new Error('UNAUTHORIZED');
+    
+    const users: User[] = await readDb('users');
+    const idx = users.findIndex(u => u.id === userId);
+    
+    if (idx !== -1) {
+        users[idx].isBanned = false;
+        users[idx].banReason = undefined;
+        await writeDb('users', users);
+        
+        await addAuditLogAction({
+            userId: 'SYSTEM_SECURITY',
+            userName: 'IRON_WALL_CORE',
+            action: 'USER_UNBANNED',
+            details: `User ${userId} security clearance restored by admin.`
+        });
+    }
 }
 
 // SYSTEM ACTIONS
@@ -586,7 +606,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
+        const subjectClassworks = classworks.filter(cw => cw.type === type);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);

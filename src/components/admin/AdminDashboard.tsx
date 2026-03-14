@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../shared/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList } from 'lucide-react';
+import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList, ShieldAlert } from 'lucide-react';
 import ManageUsers from './ManageUsers';
 import AllRequests from './AllRequests';
 import AttendanceReports from './AttendanceReports';
@@ -11,6 +11,7 @@ import LabManagement from './LabManagement';
 import AuditLog from './AuditLog';
 import SystemSettings from './SystemSettings';
 import TermManagement from './TermManagement';
+import SecurityCenter from './SecurityCenter';
 import ProfileView from '../shared/ProfileView';
 import { getUsersAction, getEnrollmentsAction, getLabRequestsAction, getTermsAction } from '@/app/actions/dbActions';
 
@@ -43,7 +44,8 @@ export default function AdminDashboard() {
     students: 0,
     enrollments: 0,
     activeSessions: 0,
-    activeTerms: 0
+    activeTerms: 0,
+    bannedUsers: 0
   });
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function AdminDashboard() {
       const totalUsers = users.length;
       const teachers = users.filter((u: any) => u.role === 'teacher').length;
       const students = users.filter((u: any) => u.role === 'student').length;
+      const bannedUsers = users.filter((u: any) => u.isBanned).length;
       const activeSessions = requests.filter(r => r.status === 'approved').length;
       const activeTermsCount = terms.filter(t => t.status === 'active').length;
 
@@ -73,7 +76,8 @@ export default function AdminDashboard() {
         students,
         enrollments: enrollments.length,
         activeSessions,
-        activeTerms: activeTermsCount
+        activeTerms: activeTermsCount,
+        bannedUsers
       });
     } catch (error) {
       console.error('Failed to load dashboard stats', error);
@@ -93,6 +97,12 @@ export default function AdminDashboard() {
           label="Active Trimesters"
           value={stats.activeTerms}
           onClick={() => setCurrentView('terms')}
+        />
+        <StatCard
+          icon={<ShieldAlert size={28} className="text-red-600" />}
+          label="Security Lockdown"
+          value={stats.bannedUsers}
+          onClick={() => setCurrentView('security')}
         />
         <StatCard
           icon={<Users size={28} />}
@@ -118,11 +128,6 @@ export default function AdminDashboard() {
           value={stats.students}
           onClick={() => setCurrentView('users')}
         />
-        <StatCard
-          icon={<ClipboardList size={28} className="text-orange-600" />}
-          label="Total Subject Enrollments"
-          value={stats.enrollments}
-        />
       </div>
     </div>
   );
@@ -135,6 +140,7 @@ export default function AdminDashboard() {
       case 'attendance': return <AttendanceReports />;
       case 'labs': return <LabManagement />;
       case 'terms': return <TermManagement />;
+      case 'security': return <SecurityCenter />;
       case 'audit': return <AuditLog />;
       case 'settings': return <SystemSettings />;
       case 'profile': return <ProfileView />;

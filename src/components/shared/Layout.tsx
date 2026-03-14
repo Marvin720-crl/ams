@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School
+  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -56,6 +56,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       case 'admin':
         return [
           { id: 'home', label: 'Dashboard', icon: Home },
+          { id: 'security', label: 'Security Center', icon: ShieldAlert },
           { id: 'terms', label: 'Term Management', icon: School },
           { id: 'users', label: 'Manage Users', icon: Users },
           { id: 'requests', label: 'All Requests', icon: FileText },
