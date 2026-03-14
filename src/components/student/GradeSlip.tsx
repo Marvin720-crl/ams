@@ -241,7 +241,7 @@ export default function GradeSlip() {
 
       <Card className="bg-white border-none p-6 sm:p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-[2.5rem]">
 
-        {/* Header - Matching Screenshot Precisely */}
+        {/* Header */}
 
         <div className="flex flex-col items-center text-center space-y-1 mb-8">
 
@@ -272,7 +272,7 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Student Info Grid - Inline Labels matching Screenshot */}
+        {/* Student Info Grid */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2 mb-10 text-sm">
 
@@ -283,7 +283,7 @@ export default function GradeSlip() {
 
           <div className="flex items-center gap-2 sm:justify-end">
             <span className="font-bold whitespace-nowrap text-foreground">Campus:</span>
-            <span className="text-foreground">AMACC – Lipa</span>
+            <span className="text-foreground uppercase">AMACC – Lipa</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -293,12 +293,12 @@ export default function GradeSlip() {
 
           <div className="flex items-center gap-2 sm:justify-end">
             <span className="font-bold whitespace-nowrap text-foreground">Academic Term:</span>
-            <span className="text-foreground">{currentTerm?.name || 'N/A'}</span>
+            <span className="text-foreground uppercase">{currentTerm?.name || 'N/A'}</span>
           </div>
 
         </div>
 
-        {/* Grade Table - Precise Headers and Styling */}
+        {/* Grade Table */}
 
         <div className="border-2 border-primary/5 rounded-2xl overflow-hidden bg-white shadow-sm min-h-[450px] flex flex-col">
 
@@ -324,12 +324,12 @@ export default function GradeSlip() {
                 <tr>
                   <td colSpan={5} className="p-10 sm:p-24 text-center">
                     <div className="flex flex-col items-center gap-6 py-10">
-                      <div className="h-24 w-24 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 border-4 border-amber-100 shadow-2xl shadow-amber-500/10 rotate-3">
+                      <div className="h-24 w-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center text-primary border-4 border-primary/10 shadow-2xl shadow-primary/10 rotate-3">
                         <Lock size={40} strokeWidth={2.5} />
                       </div>
                       <div className="space-y-3">
-                        <h3 className="text-2xl font-black uppercase tracking-tighter text-amber-900">Grades Not Yet Finalized</h3>
-                        <p className="text-[10px] text-amber-700 font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
+                        <h3 className="text-2xl font-black uppercase tracking-tighter text-primary">Grades Not Yet Finalized</h3>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
                           The current academic term is still active. <br/>
                           Final records will be available once the term <br/>
                           is officially closed.
@@ -389,9 +389,9 @@ export default function GradeSlip() {
               </p>
 
               <div className="max-w-xs">
-                <div className="border-b-2 border-primary shadow-sm" />
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] mt-3 text-primary">
-                  Authorized Academic Signature
+                <div className="border-b-2 border-primary" />
+                <p className="text-[11px] font-black uppercase tracking-[0.1em] mt-3 text-primary">
+                  AUTHORIZED ACADEMIC SIGNATURE
                 </p>
               </div>
             </div>
