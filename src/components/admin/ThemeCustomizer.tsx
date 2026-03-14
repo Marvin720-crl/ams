@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useDesign } from '@/contexts/DesignContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -35,7 +35,8 @@ import {
   Image as ImageIcon,
   Type,
   Droplets,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,6 +100,10 @@ export default function ThemeCustomizer() {
     });
   };
 
+  const onColorChange = useCallback((field: string, val: string) => {
+    updateConfig({ [field]: val });
+  }, [updateConfig]);
+
   const ColorInput = ({ label, value, field, description }: { label: string, value: string, field: string, description: string }) => (
     <div className="space-y-4 p-6 rounded-[2rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all">
       <div className="flex justify-between items-start">
@@ -114,7 +119,7 @@ export default function ThemeCustomizer() {
             <input 
                 type="color" 
                 value={value} 
-                onChange={(e) => updateConfig({ [field]: e.target.value })}
+                onInput={(e) => onColorChange(field, e.currentTarget.value)}
                 className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none appearance-none"
             />
         </div>
@@ -233,7 +238,7 @@ export default function ThemeCustomizer() {
         </div>
       </div>
 
-      {/* PIC 1: ROLE SWITCHER PILL BAR */}
+      {/* ROLE SWITCHER PILL BAR */}
       <div className="flex justify-center w-full">
         <div className="flex items-center bg-white p-2 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-primary/5 gap-2 max-w-fit px-10">
           {(['student', 'teacher', 'admin', 'library'] as Role[]).map(role => (
@@ -267,7 +272,7 @@ export default function ThemeCustomizer() {
              <ColorInput label="Accent Variable" value={config.accent} field="accent" description="Interactive Highlights" />
           </Section>
 
-          {/* PIC 4: CHROMATICS & BRAND VARIABLES */}
+          {/* CHROMATICS & BRAND VARIABLES */}
           <Section label="Chromatics" icon={Droplets}>
             <div className="space-y-8 p-8 bg-white rounded-[2.5rem] shadow-xl border border-primary/5">
               <div className="space-y-6">
@@ -275,7 +280,7 @@ export default function ThemeCustomizer() {
                   <Label className="font-black uppercase text-[10px] tracking-widest">Glass Intensity</Label>
                   <Sparkles size={14} className="text-primary" />
                 </div>
-                <Slider value={[config.glassIntensity]} max={100} step={5} onValueChange={(val) => updateConfig({ glassIntensity: val[0] })} />
+                <Slider value={[config.glassIntensity]} max={100} step={1} onValueChange={(val) => updateConfig({ glassIntensity: val[0] })} />
               </div>
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
@@ -293,13 +298,17 @@ export default function ThemeCustomizer() {
                 <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Campus Label</Label>
                 <input 
                   type="text" 
-                  defaultValue="AMACC - LIPA"
+                  value={config.campusLabel || ''}
+                  onChange={(e) => updateConfig({ campusLabel: e.target.value })}
                   className="w-full h-12 bg-muted/20 border-none rounded-xl px-4 font-black uppercase text-xs focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Logo Scale</Label>
-                <Slider defaultValue={[100]} max={150} min={50} step={5} />
+                <div className="flex justify-between items-center">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Logo Scale</Label>
+                  <span className="text-[10px] font-bold text-primary">{config.logoScale}%</span>
+                </div>
+                <Slider value={[config.logoScale || 100]} max={150} min={50} step={5} onValueChange={(val) => updateConfig({ logoScale: val[0] })} />
               </div>
             </Card>
           </Section>
@@ -318,7 +327,7 @@ export default function ThemeCustomizer() {
             
             <div className="relative w-full h-full flex">
               
-              {/* PIC 2: INTERACTIVE SIDEBAR EMULATOR */}
+              {/* INTERACTIVE SIDEBAR EMULATOR */}
               {!isMobileView && (
                 <motion.div 
                   initial={{ x: -100, opacity: 0 }}
@@ -329,7 +338,7 @@ export default function ThemeCustomizer() {
                   <div className="flex items-center gap-3 px-2">
                     <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">AMACC</p>
+                      <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{config.campusLabel?.split(' ')[0] || 'AMACC'}</p>
                       <p className="text-[8px] font-bold text-white/40 uppercase tracking-tighter">Student Portal</p>
                     </div>
                   </div>
@@ -363,7 +372,11 @@ export default function ThemeCustomizer() {
               {/* LIVE WORKSPACE CONTENT */}
               <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/5">
                 <div className="h-20 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-10" style={{ borderBottomColor: `${config.primary}10` }}>
-                  <div className="h-10 w-32 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} />
+                  <div className="flex items-center gap-2">
+                    <div className="h-10 rounded-lg bg-primary/10 flex items-center px-4" style={{ backgroundColor: `${config.primary}10` }}>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">{config.campusLabel}</span>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
                     <div className="h-10 w-10 rounded-full bg-muted" />
@@ -394,7 +407,8 @@ export default function ThemeCustomizer() {
               </Button>
               <div className="h-8 w-px bg-primary/10" />
               <Button variant={isPreviewFullscreen ? "default" : "ghost"} onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)} className={cn("rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all", isPreviewFullscreen ? "bg-primary text-white scale-105 shadow-xl shadow-primary/30" : "text-muted-foreground")}>
-                <Maximize size={18}/> {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN"}
+                {isPreviewFullscreen ? <X size={18}/> : <Maximize size={18}/>} 
+                {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN"}
               </Button>
             </div>
 

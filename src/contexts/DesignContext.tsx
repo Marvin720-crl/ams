@@ -21,6 +21,8 @@ const defaultConfig: ThemeConfig = {
   glassIntensity: 15,
   fontFamily: 'Inter',
   layoutDensity: 'standard',
+  campusLabel: 'AMACC - LIPA',
+  logoScale: 100,
   componentStyles: {}
 };
 

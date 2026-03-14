@@ -12,6 +12,8 @@ export interface ThemeConfig {
   glassIntensity: number;
   fontFamily: string;
   layoutDensity: 'compact' | 'standard' | 'spacious';
+  campusLabel?: string;
+  logoScale?: number;
   componentStyles?: {
     [key: string]: {
       bg?: string;
