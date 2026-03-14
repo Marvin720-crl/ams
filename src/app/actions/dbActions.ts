@@ -378,7 +378,7 @@ export async function updatePcAction(id: string, updates: Partial<Pc>) {
     const index = pcs.findIndex(p => p.id === id);
     if (index !== -1) {
         pcs[index] = { ...pcs[index], ...sanitizeInput(updates) };
-        await writeDb('pcs', masonry);
+        await writeDb('pcs', pcs);
         return pcs[index];
     }
     return null;
