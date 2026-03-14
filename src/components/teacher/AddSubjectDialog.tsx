@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, BookOpen, Trash2, Loader2, School, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -40,7 +40,7 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
             const data = await getTermsAction();
             const active = data.filter((t: any) => t.status === 'active');
             setActiveTerms(active);
-            if (active.length > 0 && !termId) {
+            if (active.length > 0) {
                 setTermId(active[0].id);
             }
         } catch (e) {
@@ -150,22 +150,20 @@ export default function AddSubjectDialog({ onSubjectAdded }: AddSubjectDialogPro
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
-                            <Select value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
+                            <Select key={activeTerms.length} value={termId} onValueChange={setTermId} disabled={fetchingTerms || activeTerms.length === 0}>
                                 <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
                                     <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl">
-                                    <SelectGroup>
-                                        {activeTerms.length === 0 ? (
-                                            <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
-                                        ) : (
-                                            activeTerms.map(t => (
-                                                <SelectItem key={t.id} value={t.id} className="font-bold">
-                                                    {t.name}
-                                                </SelectItem>
-                                            ))
-                                        )}
-                                    </SelectGroup>
+                                    {activeTerms.length === 0 ? (
+                                        <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
+                                    ) : (
+                                        activeTerms.map(t => (
+                                            <SelectItem key={t.id} value={t.id} className="font-bold">
+                                                {t.name}
+                                            </SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>

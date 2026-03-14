@@ -19,7 +19,6 @@ import { Label } from '@/components/ui/label';
 import {
 Select,
 SelectContent,
-SelectGroup,
 SelectItem,
 SelectTrigger,
 SelectValue
@@ -180,18 +179,16 @@ Update subject details and schedule
 
 <div className="space-y-2">
 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Term *</Label>
-<Select value={formData.termId} onValueChange={(v) => setFormData({...formData, termId: v})} disabled={fetchingTerms || activeTerms.length === 0}>
+<Select key={activeTerms.length} value={formData.termId} onValueChange={(v) => setFormData({...formData, termId: v})} disabled={fetchingTerms || activeTerms.length === 0}>
 <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
 <SelectValue placeholder={fetchingTerms ? "Syncing Database..." : "Select Active Term"} />
 </SelectTrigger>
 <SelectContent className="rounded-2xl">
-<SelectGroup>
 {activeTerms.length === 0 ? (
     <SelectItem value="none" disabled className="font-bold text-destructive">NO ACTIVE TERMS FOUND</SelectItem>
 ) : (
     activeTerms.map(t => <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>)
 )}
-</SelectGroup>
 </SelectContent>
 </Select>
 </div>
