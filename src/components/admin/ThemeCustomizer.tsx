@@ -19,7 +19,9 @@ import {
   CheckCircle2,
   Move,
   Type,
-  Maximize
+  Maximize,
+  Grid3X3,
+  Monitor
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -29,6 +31,7 @@ export default function ThemeCustomizer() {
   const { config, updateConfig, saveConfig, resetToDefault } = useDesign();
   const [saving, setSaving] = useState(false);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -68,7 +71,7 @@ export default function ThemeCustomizer() {
   );
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500 h-full">
+    <div className="space-y-10 animate-in fade-in duration-500 h-full relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-4xl font-black text-primary tracking-tighter uppercase leading-none">Design Lab</h2>
@@ -171,8 +174,14 @@ export default function ThemeCustomizer() {
         </div>
 
         {/* Live Interactive Workspace (Center/Right) */}
-        <div className="lg:col-span-8">
-          <div className="relative h-[calc(100vh-250px)] bg-muted/20 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center p-10 overflow-hidden group">
+        <div className={cn(
+          "lg:col-span-8 relative transition-all duration-500",
+          isPreviewFullscreen ? "fixed inset-0 z-[100] p-10 bg-black/90 backdrop-blur-xl" : ""
+        )}>
+          <div className={cn(
+            "relative h-full bg-muted/20 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden group",
+            isPreviewFullscreen ? "bg-white/10 rounded-[2rem] border-none" : ""
+          )}>
             
             <div className="absolute top-8 left-10 flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white"><Move size={14}/></div>
@@ -261,14 +270,24 @@ export default function ThemeCustomizer() {
 
             </div>
 
-            {/* FLOATING ACTION OVERLAY */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/80 backdrop-blur-xl p-3 rounded-full border border-primary/10 shadow-2xl">
-              <Button variant="ghost" className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2">
+            {/* FLOATING ACTION OVERLAY (Matching Screenshot) */}
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/95 backdrop-blur-2xl p-3 rounded-full border border-primary/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)]">
+              <Button 
+                variant="ghost" 
+                className="rounded-full h-12 px-8 font-black uppercase text-[9px] tracking-widest gap-2 hover:bg-muted"
+              >
                 <Type size={14}/> Text Styling
               </Button>
               <div className="h-6 w-px bg-primary/10" />
-              <Button variant="ghost" className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2">
-                <Maximize size={14}/> Fullscreen Preview
+              <Button 
+                variant={isPreviewFullscreen ? "default" : "ghost"}
+                onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)}
+                className={cn(
+                  "rounded-full h-12 px-8 font-black uppercase text-[9px] tracking-widest gap-2 transition-all",
+                  isPreviewFullscreen ? "bg-primary text-white" : ""
+                )}
+              >
+                <Maximize size={14}/> {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN PREVIEW"}
               </Button>
             </div>
 
