@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Clock, Calendar, ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Clock, Calendar, ArrowLeft, Loader2, Plus, Trash2, School } from 'lucide-react';
 import Link from 'next/link';
-import { addSubjectAction } from '@/app/actions/dbActions';
-import { Schedule } from '@/utils/storage';
+import { addSubjectAction, getTermsAction } from '@/app/actions/dbActions';
+import { Schedule, Term } from '@/utils/storage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
@@ -26,8 +26,17 @@ export default function AddSubjectPage() {
   const { toast } = useToast();
 
   const [title, setTitle] = useState('');
+  const [termId, setTermId] = useState('');
+  const [activeTerms, setActiveTerms] = useState<Term[]>([]);
   const [schedules, setSchedules] = useState<Partial<Schedule>[]>([{ day: '', startTime: '', dismissalTime: '' }]);
 
+  useEffect(() => {
+    getTermsAction().then(data => {
+      const active = data.filter(t => t.status === 'active');
+      setActiveTerms(active);
+      if (active.length > 0) setTermId(active[0].id);
+    });
+  }, []);
 
   const handleScheduleChange = (index: number, field: keyof Schedule, value: string) => {
     const newSchedules = [...schedules];
@@ -50,8 +59,8 @@ export default function AddSubjectPage() {
     if (!user) return;
     setLoading(true);
 
-    if (!title || schedules.some(s => !s.day || !s.startTime || !s.dismissalTime)) {
-        toast({ variant: "destructive", title: "Missing Fields", description: "Please fill out subject title and all schedule fields." });
+    if (!title || !termId || schedules.some(s => !s.day || !s.startTime || !s.dismissalTime)) {
+        toast({ variant: "destructive", title: "Missing Fields", description: "Please fill out subject title, academic term, and all schedule fields." });
         setLoading(false);
         return;
     }
@@ -62,6 +71,7 @@ export default function AddSubjectPage() {
         name: title,
         teacherId: user.id,
         teacherName: user.name,
+        termId: termId,
         schedules: schedules as Schedule[],
         description: '',
       };
@@ -109,12 +119,26 @@ export default function AddSubjectPage() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 font-bold"><School className="h-4 w-4 text-primary" /> Academic Term</Label>
+                <Select value={termId} onValueChange={setTermId}>
+                  <SelectTrigger className="h-12 border-primary/10 font-bold">
+                    <SelectValue placeholder="Select active term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeTerms.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
                <div className="space-y-4">
-                <Label className="font-bold">Schedules</Label>
+                <Label className="font-bold flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" /> Schedules</Label>
                 {schedules.map((schedule, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border rounded-xl">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border rounded-xl bg-muted/5">
                      <div className="space-y-2">
-                      <Label htmlFor={`day-${index}`} className="text-xs">Day</Label>
+                      <Label htmlFor={`day-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Day</Label>
                        <Select value={schedule.day} onValueChange={(v) => handleScheduleChange(index, 'day', v)}>
                           <SelectTrigger className="h-12">
                             <SelectValue placeholder="Day" />
@@ -125,7 +149,7 @@ export default function AddSubjectPage() {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`time-${index}`} className="text-xs">Start Time</Label>
+                      <Label htmlFor={`time-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Start Time</Label>
                       <Input 
                         id={`time-${index}`}
                         type="time"
@@ -135,7 +159,7 @@ export default function AddSubjectPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`dismissal-${index}`} className="text-xs">Dismissal Time</Label>
+                      <Label htmlFor={`dismissal-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Dismissal Time</Label>
                       <Input
                         id={`dismissal-${index}`}
                         type="time"
@@ -149,14 +173,14 @@ export default function AddSubjectPage() {
                     </Button>
                   </div>
                 ))}
-                 <Button type="button" variant="outline" className="w-full" onClick={addSchedule}>
-                  <Plus className="h-4 w-4 mr-2"/> Add Schedule
+                 <Button type="button" variant="outline" className="w-full h-12 border-dashed border-2 rounded-xl" onClick={addSchedule}>
+                  <Plus className="h-4 w-4 mr-2"/> Add Schedule Block
                 </Button>
               </div>
 
 
               <div className="pt-6">
-                <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 text-lg font-black rounded-2xl shadow-xl shadow-primary/20" disabled={loading}>
+                <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 uppercase tracking-widest text-xs" disabled={loading}>
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publish Subject"}
                 </Button>
               </div>

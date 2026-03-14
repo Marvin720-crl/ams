@@ -1,4 +1,4 @@
-'use server';
+'use server'
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
 import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
@@ -606,7 +606,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.type === type);
+        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
@@ -898,3 +898,4 @@ export async function forceResetAllLabsAction() {
 
     return { success: true, closedSessions: closedCount };
 }
+''
