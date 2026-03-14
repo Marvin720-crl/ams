@@ -202,9 +202,9 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
     }, [conversation, users, user?.id]);
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#0F1322] overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-[#334047] overflow-hidden">
             {/* Chat Header */}
-            <div className="h-16 px-4 md:px-6 shadow-md border-b border-white/5 flex items-center justify-between bg-[#0F1322]/95 backdrop-blur-md sticky top-0 z-10">
+            <div className="h-16 px-4 md:px-6 shadow-md border-b border-white/5 flex items-center justify-between bg-[#334047]/95 backdrop-blur-md sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar}
@@ -255,7 +255,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
             </div>
 
             {/* Input Area */}
-            <div className="p-4 md:p-8 bg-[#0F1322]">
+            <div className="p-4 md:p-8 bg-[#334047]">
                 <div className="bg-white/5 rounded-[1.5rem] px-4 py-2 flex items-center gap-3 md:gap-4 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xl">
                     <input 
                         type="file" 
@@ -296,7 +296,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                                     <Smile size={22}/>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[300px] md:w-96 bg-[#0E2131] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
+                            <PopoverContent className="w-[300px] md:w-96 bg-[#334047] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
                                 <div className="grid grid-cols-6 md:grid-cols-8 gap-3 max-h-72 overflow-y-auto pr-2 no-scrollbar">
                                     {EMOJIS.map((emoji, index) => (
                                         <button 
@@ -327,7 +327,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
 
             {/* Nitro Perks Dialog */}
             <Dialog open={showNitro} onOpenChange={setShowNitro}>
-                <DialogContent className="bg-[#0E2131] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
+                <DialogContent className="bg-[#334047] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
                     <div className="flex flex-col items-center text-center">
                         <div className="h-24 w-24 bg-accent rounded-[2.5rem] mb-8 flex items-center justify-center text-secondary shadow-2xl shadow-accent/30 rotate-3">
                             <Zap size={48} fill="currentColor" />
@@ -359,7 +359,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                     </div>
 
                     <div className="mt-10">
-                        <Button className="w-full h-16 bg-accent hover:bg-accent/90 text-secondary font-black uppercase text-sm tracking-[0.2em] rounded-2xl shadow-2xl shadow-accent/20 transition-transform active:scale-95">
+                        <Button className="w-full h-16 bg-accent hover:bg-accent/90 text-white font-black uppercase text-sm tracking-[0.2em] rounded-2xl shadow-2xl shadow-accent/20 transition-transform active:scale-95">
                             UPGRADE WORKSPACE
                         </Button>
                     </div>

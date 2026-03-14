@@ -80,7 +80,7 @@ export default function ChatSidebar({
 
   return (
     <div className={cn(
-      "w-72 bg-[#0E2131] flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ease-in-out",
+      "w-72 bg-[#334047] flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ease-in-out",
       "fixed inset-y-0 left-0 z-[70] md:relative md:translate-x-0 md:w-72",
       isOpen ? "translate-x-0" : "-translate-x-full"
     )}>
@@ -134,7 +134,7 @@ export default function ChatSidebar({
               <DialogTrigger asChild>
                 <Plus size={14} className="cursor-pointer hover:text-white transition" />
               </DialogTrigger>
-              <DialogContent className="bg-[#0F1322] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg z-[110]">
+              <DialogContent className="bg-[#334047] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg z-[110]">
                 <DialogHeader>
                   <DialogTitle className="font-black text-3xl uppercase tracking-tighter mb-8 text-white">START A CONVERSATION</DialogTitle>
                 </DialogHeader>
@@ -207,7 +207,7 @@ export default function ChatSidebar({
       </div>
 
       {/* USER FOOTER */}
-      <div className="bg-[#0F1322] p-2 h-16 flex items-center gap-2 border-t border-white/5">
+      <div className="bg-[#334047] p-2 h-16 flex items-center gap-2 border-t border-white/5">
         <div className="flex-1 flex items-center gap-3 p-1.5 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
           <div className="relative">
             <Avatar className="h-9 w-9 border border-white/10">

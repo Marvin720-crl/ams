@@ -95,7 +95,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col">
+    <div className="min-h-screen bg-[#CED3D7]/20 flex flex-col">
       <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-lg print:hidden">
         <div className="flex items-center gap-3">
           <button 
@@ -119,7 +119,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setGuideOpen(true)}
-            className="hidden md:flex h-10 px-4 items-center gap-2 bg-accent text-secondary hover:bg-accent/90 rounded-full transition-all border border-accent/10"
+            className="hidden md:flex h-10 px-4 items-center gap-2 bg-accent text-white hover:bg-accent/90 rounded-full transition-all border border-accent/10"
           >
             <HelpCircle size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest">Tutorial</span>
@@ -148,7 +148,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         </AnimatePresence>
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#0F1322] border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#334047] border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div 
