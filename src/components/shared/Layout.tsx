@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert
+  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert, HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import ChatContainer from '../Chat/ChatContainer';
 import { cn } from '@/lib/utils';
+import UserGuide from './UserGuide';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ interface LayoutProps {
 export default function Layout({ children, currentView, onNavigate }: LayoutProps) {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const getMenuItems = () => {
     if (!user) return [];
@@ -94,7 +96,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-muted/10 flex flex-col">
-      {/* Header - Increased height to h-24 */}
       <header className="bg-primary text-white h-24 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-md print:hidden">
         <div className="flex items-center gap-3">
           <button 
@@ -108,13 +109,22 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </div>
         </div>
         
-        <button 
-          onClick={logout}
-          className="p-2 hover:bg-white/10 rounded-full transition-all group"
-          title="Logout"
-        >
-          <LogOut size={28} className="opacity-70 group-hover:opacity-100" />
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setGuideOpen(true)}
+            className="hidden md:flex h-10 px-4 items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full transition-all border border-white/10"
+          >
+            <HelpCircle size={18} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Tutorial</span>
+          </button>
+          <button 
+            onClick={logout}
+            className="p-2 hover:bg-white/10 rounded-full transition-all group"
+            title="Logout"
+          >
+            <LogOut size={28} className="opacity-70 group-hover:opacity-100" />
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-1 relative">
@@ -130,19 +140,17 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* Sidebar - Adjusted top-24 and height calculation */}
         <aside className={cn(
           "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
-          {/* Profile Header - Clickable Avatar Section */}
           <div 
             onClick={() => handleNav('profile')}
             className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent cursor-pointer group"
           >
-            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0">
+            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden">
               {user?.profilePic ? (
-                <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover rounded-[1.75rem]" />
+                <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover" />
               ) : (
                 user?.name?.charAt(0) || 'S'
               )}
@@ -178,6 +186,16 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                 </button>
               );
             })}
+
+            <div className="pt-6 mt-6 border-t border-primary/5">
+              <button
+                onClick={() => setGuideOpen(true)}
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all"
+              >
+                <HelpCircle size={18} />
+                User Guide
+              </button>
+            </div>
           </nav>
         </aside>
 
@@ -195,6 +213,8 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </div>
         </main>
       </div>
+
+      <UserGuide open={guideOpen} onOpenChange={setGuideOpen} />
     </div>
   );
 }
