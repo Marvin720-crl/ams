@@ -19,7 +19,9 @@ const defaultConfig: ThemeConfig = {
   background: '#FFFFFF',
   radius: 1.25,
   glassIntensity: 10,
-  fontFamily: 'Inter'
+  fontFamily: 'Inter',
+  layoutDensity: 'standard',
+  componentStyles: {}
 };
 
 const DesignContext = createContext<DesignContextType | undefined>(undefined);
@@ -32,7 +34,7 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const settings = await getSettingsAction();
         if (settings.theme) {
-          setConfig(settings.theme);
+          setConfig({ ...defaultConfig, ...settings.theme });
         }
       } catch (e) {
         console.error("Theme load error", e);
@@ -41,14 +43,15 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
     loadTheme();
   }, []);
 
-  // Helper to convert Hex to HSL for Tailwind CSS variable injection
   const hexToHsl = (hex: string) => {
     let r = 0, g = 0, b = 0;
+    if (!hex || typeof hex !== 'string') return '0 0% 0%';
+    
     if (hex.length === 4) {
       r = parseInt(hex[1] + hex[1], 16);
       g = parseInt(hex[2] + hex[2], 16);
       b = parseInt(hex[3] + hex[3], 16);
-    } else {
+    } else if (hex.length === 7) {
       r = parseInt(hex.substring(1, 3), 16);
       g = parseInt(hex.substring(3, 5), 16);
       b = parseInt(hex.substring(5, 7), 16);
@@ -85,7 +88,6 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
     setConfig(defaultConfig);
   };
 
-  // Inject variables into document
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const root = document.documentElement;
@@ -94,6 +96,10 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
       root.style.setProperty('--accent', hexToHsl(config.accent));
       root.style.setProperty('--background', hexToHsl(config.background));
       root.style.setProperty('--radius', `${config.radius}rem`);
+      
+      // Glassmorphism intensity
+      root.style.setProperty('--glass-opacity', `${config.glassIntensity / 100}`);
+      root.style.setProperty('--glass-blur', `${(config.glassIntensity / 100) * 20}px`);
     }
   }, [config]);
 

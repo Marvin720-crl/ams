@@ -11,6 +11,15 @@ export interface ThemeConfig {
   radius: number; // in rem or px
   glassIntensity: number;
   fontFamily: string;
+  layoutDensity: 'compact' | 'standard' | 'spacious';
+  componentStyles?: {
+    [key: string]: {
+      bg?: string;
+      text?: string;
+      radius?: number;
+      shadow?: string;
+    }
+  }
 }
 
 export interface User {
