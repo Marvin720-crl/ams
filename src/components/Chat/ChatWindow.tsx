@@ -138,7 +138,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                             "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-xl",
                             isMe 
                                 ? "bg-primary text-white rounded-tr-none" 
-                                : "bg-[#161b2e] text-white/90 rounded-tl-none border border-white/5"
+                                : "bg-white/10 text-white/90 rounded-tl-none border border-white/5"
                         )}>
                             {msg.text}
 
@@ -202,9 +202,9 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
     }, [conversation, users, user?.id]);
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#0a0f1e] overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-[#14343A] overflow-hidden">
             {/* Chat Header */}
-            <div className="h-16 px-4 md:px-6 shadow-md border-b border-white/5 flex items-center justify-between bg-[#0a0f1e]/95 backdrop-blur-md sticky top-0 z-10">
+            <div className="h-16 px-4 md:px-6 shadow-md border-b border-white/5 flex items-center justify-between bg-[#14343A]/95 backdrop-blur-md sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar}
@@ -255,8 +255,8 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
             </div>
 
             {/* Input Area */}
-            <div className="p-4 md:p-8 bg-[#0a0f1e]">
-                <div className="bg-[#1c233a] rounded-[1.5rem] px-4 py-2 flex items-center gap-3 md:gap-4 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xl">
+            <div className="p-4 md:p-8 bg-[#14343A]">
+                <div className="bg-white/5 rounded-[1.5rem] px-4 py-2 flex items-center gap-3 md:gap-4 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xl">
                     <input 
                         type="file" 
                         ref={fileInputRef} 
@@ -268,7 +268,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                     <div className="flex items-center gap-1">
                         <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-primary hover:bg-primary/10 transition-all"
+                            className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-accent hover:bg-accent/10 transition-all"
                         >
                             <PlusCircle size={22}/>
                         </button>
@@ -296,7 +296,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                                     <Smile size={22}/>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[300px] md:w-96 bg-[#050810] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
+                            <PopoverContent className="w-[300px] md:w-96 bg-[#171716] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
                                 <div className="grid grid-cols-6 md:grid-cols-8 gap-3 max-h-72 overflow-y-auto pr-2 no-scrollbar">
                                     {EMOJIS.map((emoji, index) => (
                                         <button 
@@ -316,7 +316,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                             disabled={!inputText.trim()}
                             className={cn(
                                 "h-10 w-10 rounded-full flex items-center justify-center transition-all",
-                                inputText.trim() ? "text-primary scale-110 shadow-lg shadow-primary/20" : "text-white/10"
+                                inputText.trim() ? "text-accent scale-110 shadow-lg shadow-accent/20" : "text-white/10"
                             )}
                         >
                             <Send size={22} className={cn(inputText.trim() && "animate-in zoom-in")} />
@@ -327,7 +327,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
 
             {/* Nitro Perks Dialog */}
             <Dialog open={showNitro} onOpenChange={setShowNitro}>
-                <DialogContent className="bg-[#050810] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
+                <DialogContent className="bg-[#171716] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
                     <div className="flex flex-col items-center text-center">
                         <div className="h-24 w-24 bg-accent rounded-[2.5rem] mb-8 flex items-center justify-center text-secondary shadow-2xl shadow-accent/30 rotate-3">
                             <Zap size={48} fill="currentColor" />
