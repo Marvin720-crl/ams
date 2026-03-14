@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 import {
@@ -46,20 +46,7 @@ export default function EnrollSubject() {
      LOAD INITIAL DATA
   ----------------------------- */
 
-  useEffect(() => {
-    if (user) loadInitialData();
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedTeacher) {
-      loadSubjectsForTeacher(selectedTeacher);
-    } else {
-      setSubjects([]);
-      setSelectedSubjectIds([]);
-    }
-  }, [selectedTeacher, myApprovedTerms]);
-
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     if (!user) return;
     setInitialLoading(true);
 
@@ -83,7 +70,6 @@ export default function EnrollSubject() {
       setMyApprovedTerms(approvedTerms);
       setExistingEnrollments(enrollments.filter(e => e.studentId === user.id));
 
-      // Filter teachers by student department
       const teacherUsers = users.filter(u => 
         u.role === 'teacher' && 
         u.department === user.department
@@ -102,25 +88,40 @@ export default function EnrollSubject() {
     } finally {
       setInitialLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   /* -----------------------------
      LOAD SUBJECTS BY TEACHER
   ----------------------------- */
 
-  const loadSubjectsForTeacher = async (teacherId: string) => {
+  const loadSubjectsForTeacher = useCallback(async (teacherId: string) => {
     if (!user) return;
     const allSubjects = await getSubjectsAction();
 
     const filtered = allSubjects.filter(s =>
       s.teacherId === teacherId &&
       myApprovedTerms.includes(s.termId) &&
-      s.department === user.department // New: Filter subjects by department too
+      s.department === user.department
     );
 
     setSubjects(filtered);
-    setSelectedSubjectIds([]); // Reset selection when teacher changes
-  };
+    setSelectedSubjectIds([]);
+  }, [user, myApprovedTerms]);
+
+  const approvedTermsKey = myApprovedTerms.join(',');
+
+  useEffect(() => {
+    if (selectedTeacher) {
+      loadSubjectsForTeacher(selectedTeacher);
+    } else {
+      setSubjects([]);
+      setSelectedSubjectIds([]);
+    }
+  }, [selectedTeacher, loadSubjectsForTeacher, approvedTermsKey]);
 
   /* -----------------------------
      SELECTION HANDLER
@@ -181,7 +182,7 @@ export default function EnrollSubject() {
 
       setSelectedTeacher('');
       setSelectedSubjectIds([]);
-      loadInitialData(); // Refresh list
+      loadInitialData();
 
     } catch (e) {
       toast.error("Submission failed.");
@@ -218,7 +219,7 @@ export default function EnrollSubject() {
     <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
         <h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
-          ENROLL IN SUBJECT ({user.department?.toUpperCase()})
+          ENROLL IN SUBJECT ({user?.department?.toUpperCase()})
         </h2>
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
           Only showing instructors and subjects for your department
@@ -235,7 +236,7 @@ export default function EnrollSubject() {
       <form onSubmit={handleSubmit} className="bg-white border-2 border-primary/5 rounded-[2rem] shadow-xl p-10 space-y-8">
         <div className="space-y-2">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-            {user.department === 'shs' ? 'SHS Instructor' : 'College Instructor'}
+            {user?.department === 'shs' ? 'SHS Instructor' : 'College Instructor'}
           </Label>
           <select
             value={selectedTeacher}
@@ -294,7 +295,7 @@ export default function EnrollSubject() {
                         <Checkbox 
                           checked={isSelected}
                           onCheckedChange={() => toggleSubject(s.id)}
-                          className="rounded-lg h-6 w-6 border-2 border-primary/20 data-[state=checked]:bg-primary"
+                          className="rounded-lg h-6 w-6 border-2 border-primary/20 data-[state=checked]:bg-primary pointer-events-none"
                         />
                       )}
                     </div>
@@ -319,7 +320,7 @@ export default function EnrollSubject() {
 
       <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl text-center">
         <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-relaxed">
-          Protocol: You are currently assigned to the <span className="underline">{user.department?.toUpperCase()}</span> department. Only related academic records are visible.
+          Protocol: You are currently assigned to the <span className="underline">{user?.department?.toUpperCase()}</span> department. Only related academic records are visible.
         </p>
       </div>
     </div>
