@@ -244,103 +244,96 @@ export default function GradeSlip() {
 
       <Card className="bg-white border-none p-6 sm:p-14 print:p-10 relative overflow-hidden shadow-2xl rounded-[3rem]">
 
-        {/* Watermark */}
+        {/* Header - Matching Pic 2 */}
 
-        <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center pointer-events-none">
+        <div className="flex flex-col items-center text-center space-y-2 border-b-2 border-primary/5 pb-10">
 
-          <Image
-            src="/logo.png"
-            alt="watermark"
-            width={400}
-            height={400}
-          />
-
-        </div>
-
-        {/* Header */}
-
-         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 border-b-2 border-primary/5 pb-10">
-
-              <Image
-                src="/logo.png"
-                alt="logo"
-                width={80}
-                height={80}
-                className="grayscale brightness-0 opacity-80"
-              />
-              <div className="text-center sm:text-left">
-
-                <h1 className="text-2xl font-black uppercase tracking-widest text-primary leading-none">
-                  AMA Education System
-                </h1>
-                  <p className="text-sm font-bold tracking-tight uppercase mt-1 text-muted-foreground">
-                    Official Academic Grade Report
-                </p>
-
-                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-2">
-                  AMA Computer College – Lipa Campus
-                </p>
-
-              </div>
-
-               </div>
-
-        {/* Student Info */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mt-12 text-[11px] font-bold uppercase tracking-wider">
-
-          <div className="space-y-3 bg-muted/20 p-6 rounded-2xl">
-
-            <p><span className="text-muted-foreground opacity-60">Student Name:</span> <br/><span className="text-base font-black text-primary">{user?.name}</span></p>
-
-            <p><span className="text-muted-foreground opacity-60">Student ID:</span> <br/><span className="text-foreground">{user?.id}</span></p>
-
-          </div>
-
-          <div className="space-y-3 bg-muted/20 p-6 rounded-2xl text-left sm:text-right">
-
-            <p><span className="text-muted-foreground opacity-60">Campus Location:</span> <br/><span className="text-foreground">AMACC – Lipa</span></p>
-
-            <p><span className="text-muted-foreground opacity-60">Academic Period:</span> <br/><span className="text-primary">{currentTerm?.name || 'N/A'}</span></p>
-
+          <div className="flex items-center gap-4">
+            <Image
+              src="/logocard.png"
+              alt="logo"
+              width={60}
+              height={60}
+              className="object-contain"
+            />
+            <div className="text-left">
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-primary leading-none">
+                AMA EDUCATION SYSTEM
+              </h1>
+              <p className="text-[11px] font-black uppercase tracking-widest text-foreground mt-1">
+                Official Academic Grade Report
+              </p>
+              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                AMA Computer College – Lipa Campus
+              </p>
+            </div>
           </div>
 
         </div>
 
-        {/* Table / Status View */}
+        {/* Student Info Blocks - Matching Pic 2 */}
 
-        <div className="mt-12 border-2 border-primary/5 rounded-[2rem] overflow-hidden bg-white shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12">
 
-          <table className="w-full text-[10px] sm:text-sm min-w-[600px] sm:min-w-0">
+          <div className="bg-primary/[0.02] border border-primary/5 p-8 rounded-[2rem] space-y-4">
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Student Name:</p>
+              <p className="text-xl font-black text-primary uppercase leading-tight">{user?.name}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Student ID:</p>
+              <p className="text-sm font-black text-foreground uppercase tracking-widest">{user?.id}</p>
+            </div>
+          </div>
 
-            <thead className="bg-primary/5">
+          <div className="bg-primary/[0.02] border border-primary/5 p-8 rounded-[2rem] space-y-4 text-left sm:text-right">
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Campus Location:</p>
+              <p className="text-sm font-black text-foreground uppercase tracking-widest">AMACC – LIPA</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Academic Period:</p>
+              <p className="text-sm font-black text-primary uppercase leading-tight">{currentTerm?.name || 'N/A'}</p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Table / Status View - Matching Pic 2 */}
+
+        <div className="mt-12 border-2 border-primary/5 rounded-[2.5rem] overflow-hidden bg-white shadow-sm min-h-[400px] flex flex-col">
+
+          <table className="w-full text-[10px] sm:text-sm">
+
+            <thead className="bg-primary/5 border-b-2 border-primary/5">
 
               <tr>
 
-                <th className="p-5 text-left font-black uppercase tracking-widest text-[9px] text-muted-foreground">Course Code</th>
-                <th className="p-5 text-left font-black uppercase tracking-widest text-[9px] text-muted-foreground">Course Description</th>
-                <th className="p-5 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Units</th>
-                <th className="p-5 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Final Grade</th>
-                <th className="p-5 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Equivalent</th>
+                <th className="p-6 text-left font-black uppercase tracking-widest text-[9px] text-muted-foreground">Course Code</th>
+                <th className="p-6 text-left font-black uppercase tracking-widest text-[9px] text-muted-foreground">Course Description</th>
+                <th className="p-6 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Units</th>
+                <th className="p-6 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Final Grade</th>
+                <th className="p-6 text-center font-black uppercase tracking-widest text-[9px] text-muted-foreground">Equivalent</th>
 
               </tr>
 
             </thead>
 
-            <tbody>
+            <tbody className="flex-1">
 
               {isTermActive ? (
                 <tr>
                   <td colSpan={5} className="p-10 sm:p-24 text-center">
-                    <div className="flex flex-col items-center gap-6">
-                      <div className="h-20 w-20 bg-amber-50 rounded-[2rem] flex items-center justify-center text-amber-600 border-2 border-amber-100 shadow-xl shadow-amber-500/10 rotate-3">
-                        <Lock size={32} />
+                    <div className="flex flex-col items-center gap-6 py-10">
+                      <div className="h-24 w-24 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 border-4 border-amber-100 shadow-2xl shadow-amber-500/10 rotate-3">
+                        <Lock size={40} strokeWidth={2.5} />
                       </div>
-                      <div className="px-4">
-                        <h3 className="text-xl font-black uppercase tracking-tighter text-amber-900">Grades Not Yet Finalized</h3>
-                        <p className="text-[10px] text-amber-700/70 max-w-xs mx-auto mt-2 font-black uppercase tracking-widest leading-relaxed">
-                          The current academic term is still active. 
-                          Final records will be available once the term is officially closed.
+                      <div className="space-y-3">
+                        <h3 className="text-2xl font-black uppercase tracking-tighter text-amber-900">Grades Not Yet Finalized</h3>
+                        <p className="text-[10px] text-amber-700 font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
+                          The current academic term is still active. <br/>
+                          Final records will be available once the term <br/>
+                          is officially closed.
                         </p>
                       </div>
                     </div>
@@ -366,11 +359,11 @@ export default function GradeSlip() {
 
                   <tr key={i} className="border-t border-primary/5 hover:bg-primary/[0.02] transition-colors group">
 
-                    <td className="p-5 font-black text-primary uppercase tracking-tighter">{record.code}</td>
-                    <td className="p-5 font-bold text-foreground/80 uppercase text-[11px]">{record.description}</td>
-                    <td className="p-5 text-center font-black">{record.units}</td>
-                    <td className="p-5 text-center font-black text-lg text-primary">{record.grade}</td>
-                    <td className="p-5 text-center">
+                    <td className="p-6 font-black text-primary uppercase tracking-tighter">{record.code}</td>
+                    <td className="p-6 font-bold text-foreground uppercase text-[11px]">{record.description}</td>
+                    <td className="p-6 text-center font-black">{record.units}</td>
+                    <td className="p-6 text-center font-black text-xl text-primary">{record.grade}</td>
+                    <td className="p-6 text-center">
                       <span className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-primary text-white font-black text-xs shadow-lg shadow-primary/20">{record.letter}</span>
                     </td>
 
@@ -386,35 +379,37 @@ export default function GradeSlip() {
 
         </div>
 
-        {/* Footer */}
+        {/* Footer - Matching Pic 2 */}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-16 border-t-2 border-primary/5 pt-12 gap-10 sm:gap-0">
+        <div className="mt-20 pt-10">
 
-          <div className="w-full sm:w-auto">
-
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-12">Office of the Registrar</p>
-
-            <div className="border-b-4 border-primary w-full sm:w-72 shadow-xl shadow-primary/10" />
-
-            <p className="text-[10px] font-black uppercase tracking-widest mt-4 text-center text-primary/60">
-              Authorized Signature
-            </p>
-
-          </div>
-
-          {!isTermActive && records.length > 0 && (
-            <div className="text-left sm:text-right w-full sm:w-auto bg-primary text-white p-8 rounded-[2rem] shadow-2xl shadow-primary/30 rotate-1">
-
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">
-                Weighted Average
+          <div className="space-y-8">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-16">
+                Office of the Registrar
               </p>
 
-              <p className="text-6xl font-black tracking-tighter leading-none">
-                {calculateGWA()}
-              </p>
-
+              <div className="max-w-sm">
+                <div className="border-b-[3px] border-primary shadow-sm" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-4 text-primary">
+                  Authorized Signature
+                </p>
+              </div>
             </div>
-          )}
+
+            {!isTermActive && records.length > 0 && (
+              <div className="flex justify-end">
+                <div className="bg-primary text-white p-8 px-12 rounded-[2.5rem] shadow-2xl shadow-primary/30 rotate-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">
+                    Weighted Average
+                  </p>
+                  <p className="text-6xl font-black tracking-tighter leading-none">
+                    {calculateGWA()}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
         </div>
 
