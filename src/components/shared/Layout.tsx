@@ -96,7 +96,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-muted/10 flex flex-col">
-      <header className="bg-primary text-white h-24 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-md print:hidden">
+      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-md print:hidden">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -105,7 +105,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <div className="flex items-center">
-            <Image src="/logo.png" alt="AMA Student Portal" width={160} height={42} className="h-12 w-auto" />
+            <Image src="/logo.png" alt="AMA Student Portal" width={200} height={52} className="h-14 w-auto" />
           </div>
         </div>
         
@@ -141,7 +141,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         </AnimatePresence>
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div 
