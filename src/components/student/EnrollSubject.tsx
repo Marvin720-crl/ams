@@ -43,9 +43,9 @@ export default function EnrollSubject() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // Extract stable primitives for dependencies
+  // Use string primitives for stable dependency tracking
   const userId = user?.id;
-  const userDepartment = user?.department || 'college'; // Fallback to college if missing
+  const userDepartment = user?.department || 'college';
 
   /* -----------------------------
      LOAD INITIAL DATA
@@ -75,7 +75,6 @@ export default function EnrollSubject() {
       setExistingEnrollments(enrollments.filter((e: Enrollment) => e.studentId === userId));
       setAllAvailableSubjects(subjects);
 
-      // Load teachers from the same department OR those with subjects in approved terms
       const teacherUsers = users.filter(u => 
         u.role === 'teacher' && 
         (!u.department || u.department === userDepartment)
@@ -107,7 +106,6 @@ export default function EnrollSubject() {
   const displayedSubjects = useMemo(() => {
     if (!selectedTeacher || !userId) return [];
     
-    // resilient filtering: if userDepartment is missing, show based on teacher only
     return allAvailableSubjects.filter(s =>
       s.teacherId === selectedTeacher &&
       myApprovedTerms.includes(s.termId) &&
@@ -298,10 +296,11 @@ export default function EnrollSubject() {
                           Pending
                         </div>
                       ) : (
-                        <div className="flex items-center h-full pointer-events-none">
+                        <div className="flex items-center h-full">
                           <Checkbox 
                             checked={isSelected}
-                            className="rounded-lg h-6 w-6 border-2 border-primary/20 data-[state=checked]:bg-primary"
+                            onCheckedChange={() => toggleSubject(s.id)}
+                            className="rounded-lg h-6 w-6 border-2 border-primary/20 data-[state=checked]:bg-primary pointer-events-none"
                           />
                         </div>
                       )}
