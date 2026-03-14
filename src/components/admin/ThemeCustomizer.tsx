@@ -83,7 +83,6 @@ const ROLE_NAV: Record<Role, NavItem[]> = {
   ]
 };
 
-// Memoized Color Input component to prevent re-renders of the whole panel while picking colors
 const ColorInput = React.memo(({ label, value, field, description, onChange }: { 
   label: string, 
   value: string, 
@@ -92,8 +91,8 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   onChange: (field: string, val: string) => void 
 }) => {
   const [localColor, setLocalColor] = useState(value);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Sync local state when external value changes (e.g. reset)
   useEffect(() => {
     setLocalColor(value);
   }, [value]);
@@ -118,38 +117,62 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
       </div>
       
       <div className="relative">
-        <Popover>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <button className="h-14 w-full rounded-2xl border-2 border-primary/10 flex items-center px-5 bg-muted/10 hover:bg-muted/30 transition-colors">
-              <div className="flex-1 font-mono text-xs font-black text-muted-foreground tracking-tighter">
+            <button 
+              onClick={() => setIsOpen(true)}
+              className="h-14 w-full rounded-2xl border-2 border-primary/10 flex items-center px-5 bg-muted/10 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex-1 font-mono text-xs font-black text-muted-foreground tracking-tighter text-left">
                 {localColor?.toUpperCase()}
               </div>
               <Palette size={16} className="text-primary/40" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-0 border-none rounded-[2rem] shadow-3xl overflow-hidden z-[120]">
-            <div className="bg-white p-6 space-y-4">
+          <PopoverContent 
+            onInteractOutside={(e) => e.preventDefault()} 
+            className="w-[340px] p-0 border-none rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.4)] overflow-hidden z-[120] animate-in zoom-in duration-200"
+          >
+            <div className="bg-white p-8 space-y-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Precision Palette</span>
-                <button className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
-                  <X size={14} className="text-primary" />
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Precision Palette</span>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="h-10 w-10 rounded-full bg-[#E5EEF0] flex items-center justify-center hover:bg-muted transition-colors"
+                >
+                  <X size={16} className="text-primary" />
                 </button>
               </div>
-              <div className="relative h-40 w-full rounded-xl overflow-hidden border-2 border-primary/5">
+              
+              <div className="relative aspect-square w-full rounded-[2rem] overflow-hidden border-4 border-primary/5 shadow-inner group">
+                <div 
+                  className="absolute inset-0 transition-colors duration-150" 
+                  style={{ backgroundColor: localColor }}
+                />
                 <input 
                   type="color" 
                   value={localColor} 
                   onInput={handleInput}
-                  className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-crosshair border-none bg-transparent"
+                  className="absolute inset-0 w-full h-full cursor-crosshair opacity-0"
                 />
+                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/5 transition-all">
+                   <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border-2 border-white/40">
+                      <Droplets size={24} className="text-white drop-shadow-md" />
+                   </div>
+                   <p className="text-[9px] font-black text-white uppercase tracking-widest mt-2 drop-shadow-md opacity-0 group-hover:opacity-100">Tap to tune</p>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <div className="flex-1 h-12 bg-muted/30 rounded-xl flex items-center px-4 font-mono font-bold text-sm">
+
+              <div className="flex items-center gap-3 bg-muted/20 p-2 rounded-full border border-primary/5">
+                <div className="flex-1 h-12 bg-white rounded-full flex items-center px-6 font-mono font-black text-primary tracking-tighter text-sm">
                   {localColor.toUpperCase()}
                 </div>
-                <Button size="icon" className="h-12 w-12 rounded-xl bg-primary text-white">
-                  <X size={18} />
-                </Button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                >
+                  <X size={20} strokeWidth={3} />
+                </button>
               </div>
             </div>
           </PopoverContent>
