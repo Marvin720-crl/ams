@@ -90,10 +90,8 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   description: string,
   onChange: (field: string, val: string) => void 
 }) => {
-  // Use local state to handle the immediate input without triggering full parent re-renders too fast
   const [localColor, setLocalColor] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setLocalColor(value);
@@ -102,86 +100,85 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
     setLocalColor(newVal);
-    
-    // Smooth update: update parent context immediately but handle internal state locally
     onChange(field, newVal);
   };
 
   return (
-    <div className="space-y-4 p-6 rounded-[2.5rem] border border-primary/5 bg-white shadow-xl hover:border-primary/20 transition-all group">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <Label className="font-black uppercase text-[10px] tracking-widest text-primary leading-none">{label}</Label>
-          <p className="text-[9px] font-bold text-muted-foreground uppercase mt-1 leading-tight">{description}</p>
+    <div className="relative bg-white rounded-[2.5rem] p-8 shadow-[0_15px_40px_-5px_rgba(0,0,0,0.05)] border border-primary/5 hover:border-primary/20 transition-all group overflow-hidden">
+      {/* Header Info */}
+      <div className="flex justify-between items-start mb-8">
+        <div className="space-y-1.5">
+          <Label className="font-black uppercase text-sm tracking-widest text-[#6D1B0A] leading-none block">{label}</Label>
+          <p className="text-[10px] font-black text-[#3D797F] uppercase tracking-wider leading-tight">{description}</p>
         </div>
         <div 
-          className="h-14 w-14 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
+          className="h-16 w-16 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
           style={{ backgroundColor: localColor }} 
         />
       </div>
       
-      <div className="relative">
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger asChild>
-            <button 
-              onClick={() => setIsOpen(true)}
-              className="h-16 w-full rounded-full border-2 border-primary/10 flex items-center px-8 bg-muted/10 hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex-1 font-mono text-sm font-black text-primary tracking-tighter text-center">
-                {localColor?.toUpperCase()}
-              </div>
-              <Palette size={18} className="text-primary/40" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent 
-            onInteractOutside={(e) => e.preventDefault()} 
-            className="w-[340px] p-0 border-none rounded-[3rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.4)] overflow-hidden z-[120] animate-in zoom-in duration-200"
+      {/* Main Interactive Pill - Matches Image */}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <button 
+            className="h-24 w-full rounded-full bg-[#E5EEF0]/60 border-2 border-transparent hover:border-primary/10 flex items-center px-10 transition-all active:scale-[0.98]"
           >
-            <div className="bg-white p-8 space-y-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Precision Palette</span>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              
-              <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden border-4 border-primary/5 shadow-inner group">
-                <div 
-                  className="absolute inset-0 transition-colors duration-75" 
-                  style={{ backgroundColor: localColor }}
-                />
-                <input 
-                  type="color" 
-                  value={localColor} 
-                  onInput={handleInput}
-                  className="absolute inset-0 w-full h-full cursor-crosshair opacity-0"
-                />
-                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/5 transition-all">
-                   <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border-2 border-white/40">
-                      <Droplets size={28} className="text-white drop-shadow-md" />
-                   </div>
-                   <p className="text-[10px] font-black text-white uppercase tracking-widest mt-3 drop-shadow-md opacity-0 group-hover:opacity-100">Hold & Drag Spectrum</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 bg-muted/20 p-2 rounded-full border border-primary/5">
-                <div className="flex-1 h-12 bg-white rounded-full flex items-center px-6 font-mono font-black text-primary tracking-tighter text-sm">
-                  {localColor.toUpperCase()}
-                </div>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
-                >
-                  <Save size={20} strokeWidth={3} />
-                </button>
+            <div className="flex-1 text-center font-black text-2xl text-[#6D1B0A] tracking-tighter">
+              {localColor?.toUpperCase()}
+            </div>
+            <div className="h-10 w-10 bg-white/40 rounded-full flex items-center justify-center text-[#6D1B0A]/40">
+              <Palette size={22} />
+            </div>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent 
+          onInteractOutside={(e) => e.preventDefault()} 
+          className="w-[360px] p-0 border-none rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden z-[120] animate-in zoom-in-95 duration-200"
+        >
+          <div className="bg-white p-10 space-y-8">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-black uppercase tracking-[0.3em] text-[#6D1B0A]">Precision Palette</span>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="h-12 w-12 rounded-full bg-[#E5EEF0] flex items-center justify-center text-[#6D1B0A] hover:bg-[#6D1B0A] hover:text-white transition-all shadow-sm"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="relative aspect-square w-full rounded-[3rem] overflow-hidden border-8 border-[#E5EEF0] shadow-inner group">
+              <div 
+                className="absolute inset-0 transition-colors duration-75" 
+                style={{ backgroundColor: localColor }}
+              />
+              <input 
+                type="color" 
+                value={localColor} 
+                onInput={handleInput}
+                className="absolute inset-0 w-full h-full cursor-crosshair opacity-0"
+              />
+              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/5 transition-all">
+                 <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-xl flex items-center justify-center border-2 border-white/40 shadow-2xl">
+                    <Droplets size={32} className="text-white drop-shadow-md" />
+                 </div>
+                 <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] mt-4 drop-shadow-md opacity-0 group-hover:opacity-100">Live Spectrum Tuning</p>
               </div>
             </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+
+            <div className="flex items-center gap-4 bg-[#E5EEF0]/50 p-3 rounded-full border border-primary/5">
+              <div className="flex-1 h-14 bg-white rounded-full flex items-center px-8 font-black text-[#6D1B0A] tracking-tighter text-xl">
+                {localColor.toUpperCase()}
+              </div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="h-14 w-14 rounded-full bg-[#6D1B0A] flex items-center justify-center text-white shadow-xl hover:scale-105 active:scale-95 transition-all"
+              >
+                <Save size={24} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 });
@@ -270,7 +267,7 @@ export default function ThemeCustomizer() {
       {/* HEADER SECTION */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
-          <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Universal Lab</h2>
+          <h2 className="text-[3.5rem] font-black text-[#6D1B0A] tracking-tighter uppercase leading-none">Universal Lab</h2>
           <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Prototype Engine v2.0</p>
         </div>
 
@@ -278,7 +275,7 @@ export default function ThemeCustomizer() {
           <Button variant="outline" onClick={resetToDefault} className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted">
             <RotateCcw size={18} />
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
+          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-[#6D1B0A] text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
             {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
             Publish Design
           </Button>
@@ -294,7 +291,7 @@ export default function ThemeCustomizer() {
               onClick={() => { setActiveRole(role); setActivePage('home'); }}
               className={cn(
                 "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
-                activeRole === role ? "bg-primary text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
+                activeRole === role ? "bg-[#6D1B0A] text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
               )}
             >
               {role === 'student' && <GraduationCap size={20} />}
