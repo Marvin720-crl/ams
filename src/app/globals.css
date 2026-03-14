@@ -5,35 +5,35 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 245 17% 15%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 245 17% 15%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 245 17% 15%;
+    --popover-foreground: 222 47% 11%;
     
-    /* Primary Red #B32132 */
-    --primary: 353 69% 42%;
+    /* Primary Vibrant Red #D6133A */
+    --primary: 348 84% 46%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary Dark Slate #38364C */
-    --secondary: 245 17% 25%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary Dark Navy #0E2131 */
+    --secondary: 206 55% 12%;
+    --secondary-foreground: 205 93% 78%;
     
-    /* Muted Pink/Purple #965B77 */
-    --muted: 332 25% 47%;
-    --muted-foreground: 245 5% 45%;
+    /* Muted Steel Blue #1A465F */
+    --muted: 201 57% 24%;
+    --muted-foreground: 205 20% 65%;
     
-    /* Accent Orange #F16A48 */
-    --accent: 12 86% 61%;
-    --accent-foreground: 245 17% 25%;
+    /* Accent Sky Blue #92CFFB */
+    --accent: 205 93% 78%;
+    --accent-foreground: 206 55% 12%;
     
-    /* Deep Burgundy #6C192A for destructive/intense actions */
-    --destructive: 348 62% 26%;
+    /* Deep Burgundy #542E3A for intense actions */
+    --destructive: 341 29% 25%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 245 10% 90%;
-    --input: 245 10% 90%;
-    --ring: 353 69% 42%;
+    --border: 201 57% 90%;
+    --input: 201 57% 90%;
+    --ring: 348 84% 46%;
     --radius: 1.25rem;
   }
 }
@@ -62,7 +62,7 @@
 
 .hero-landscape {
   @apply relative overflow-hidden rounded-[2.5rem] text-white shadow-2xl;
-  background-image: linear-gradient(135deg, #B32132 0%, #6C192A 100%);
+  background-image: linear-gradient(135deg, #D6133A 0%, #542E3A 100%);
 }
 
 .glass-card {

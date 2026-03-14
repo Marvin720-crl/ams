@@ -148,12 +148,12 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         </AnimatePresence>
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-white border-r border-secondary/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#0F1322] border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div 
             onClick={() => handleNav('profile')}
-            className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent cursor-pointer group"
+            className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/10 to-transparent cursor-pointer group"
           >
             <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden border-4 border-accent/20">
               {user?.profilePic ? (
@@ -162,10 +162,10 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                 user?.name?.charAt(0) || 'S'
               )}
             </div>
-            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-secondary px-4 group-hover:text-primary transition-colors">
+            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-white px-4 group-hover:text-accent transition-colors">
               {user?.name}
             </h2>
-            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground text-center">
+            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-white/40 text-center">
               {user?.role === 'admin' ? 'SYSTEM ADMINISTRATOR' : user?.role?.replace('_', ' ')}
             </p>
           </div>
@@ -181,23 +181,23 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                   className={cn(
                     "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all group",
                     isActive 
-                      ? "bg-secondary text-accent border-l-4 border-accent shadow-lg scale-[1.02]" 
-                      : "text-secondary/60 hover:bg-primary/5 hover:text-primary"
+                      ? "bg-white/5 text-accent border-l-4 border-accent shadow-lg scale-[1.02]" 
+                      : "text-white/40 hover:bg-white/5 hover:text-white"
                   )}
                 >
                   <Icon size={18} className={cn(
                     "transition-colors",
-                    isActive ? "text-accent" : "text-secondary/40 group-hover:text-primary"
+                    isActive ? "text-accent" : "text-white/20 group-hover:text-white"
                   )} />
                   {item.label}
                 </button>
               );
             })}
 
-            <div className="pt-6 mt-6 border-t border-secondary/5">
+            <div className="pt-6 mt-6 border-t border-white/5">
               <button
                 onClick={() => setGuideOpen(true)}
-                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all"
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-accent hover:bg-white/5 transition-all"
               >
                 <HelpCircle size={18} />
                 User Guide
