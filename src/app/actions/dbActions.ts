@@ -622,6 +622,17 @@ export async function addTermAction(name: string) {
     return newTerm;
 }
 
+export async function updateTermAction(id: string, name: string) {
+    const terms = await getTermsAction();
+    const index = terms.findIndex(t => t.id === id);
+    if (index !== -1) {
+        terms[index].name = sanitizeInput(name);
+        await writeDb('terms', terms);
+        return terms[index];
+    }
+    return null;
+}
+
 export async function endTermAction(termId: string) {
     const terms = await getTermsAction();
     const termIndex = terms.findIndex(t => t.id === termId);
@@ -651,7 +662,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
+        const subjectClassworks = classworks.filter(cw => cw.type === type);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);

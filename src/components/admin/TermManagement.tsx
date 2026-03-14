@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, CheckCircle, XCircle, Trash2, Loader2, Archive, School, UserCheck } from 'lucide-react';
-import { getTermsAction, addTermAction, endTermAction, getTermEnrollmentsAction, updateTermEnrollmentAction, getUsersAction } from '@/app/actions/dbActions';
+import { Calendar, Plus, CheckCircle, XCircle, Trash2, Loader2, Archive, School, UserCheck, Pencil } from 'lucide-react';
+import { getTermsAction, addTermAction, endTermAction, updateTermAction, getTermEnrollmentsAction, updateTermEnrollmentAction, getUsersAction } from '@/app/actions/dbActions';
 import { Term, TermEnrollment, User } from '@/utils/storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 export default function TermManagement() {
     const [terms, setTerms] = useState<Term[]>([]);
@@ -20,6 +22,11 @@ export default function TermManagement() {
     const [newTermName, setNewTermName] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [termToEnd, setTermToEnd] = useState<Term | null>(null);
+
+    // Edit Term States
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editingTerm, setEditingTerm] = useState<Term | null>(null);
+    const [editTermName, setEditTermName] = useState('');
 
     const fetchData = async () => {
         setLoading(true);
@@ -58,6 +65,22 @@ export default function TermManagement() {
             fetchData();
         } catch (e) {
             toast.error("Failed to create term.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleUpdateTerm = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingTerm || !editTermName.trim()) return;
+        setIsSaving(true);
+        try {
+            await updateTermAction(editingTerm.id, editTermName);
+            toast.success("Term label updated.");
+            setIsEditDialogOpen(false);
+            fetchData();
+        } catch (e) {
+            toast.error("Failed to update term.");
         } finally {
             setIsSaving(false);
         }
@@ -119,36 +142,50 @@ export default function TermManagement() {
 
                     <Card className="rounded-[2.5rem] bg-primary/5 border-0">
                         <CardHeader>
-                            <CardTitle className="text-sm flex items-center gap-2"><School className="h-4 w-4 text-primary" /> Active Trimesters</CardTitle>
+                            <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-widest text-primary"><School className="h-4 w-4 text-primary" /> Active Trimesters</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {terms.filter(t => t.status === 'active').map(term => (
-                                <div key={term.id} className="p-4 rounded-2xl bg-white border border-primary/10 flex justify-between items-center">
-                                    <span className="font-bold text-sm truncate mr-2">{term.name}</span>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="sm" className="rounded-full h-8 px-4" onClick={() => setTermToEnd(term)}>End Term</Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent className="rounded-[2.5rem]">
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle className="font-black">END ACADEMIC TERM?</AlertDialogTitle>
-                                                <AlertDialogDescription className="text-base font-bold text-muted-foreground mt-4" asChild>
-                                                    <div>
-                                                        Ending <strong>"{termToEnd?.name}"</strong> will:
-                                                        <ul className="list-disc ml-6 mt-2 space-y-1">
-                                                            <li>Finalize all student grades.</li>
-                                                            <li>Archive data to permanent history.</li>
-                                                            <li>Clear active subjects for teachers.</li>
-                                                        </ul>
-                                                    </div>
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={handleEndTerm} className="rounded-full bg-destructive text-white">Finalize & End Term</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                <div key={term.id} className="p-4 rounded-2xl bg-white border border-primary/10 flex items-center justify-between gap-2 shadow-sm group">
+                                    <span className="font-bold text-sm truncate flex-1">{term.name}</span>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary transition-colors"
+                                            onClick={() => {
+                                                setEditingTerm(term);
+                                                setEditTermName(term.name);
+                                                setIsEditDialogOpen(true);
+                                            }}
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" size="sm" className="rounded-full h-8 px-4" onClick={() => setTermToEnd(term)}>End Term</Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="rounded-[2.5rem]">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle className="font-black">END ACADEMIC TERM?</AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-base font-bold text-muted-foreground mt-4" asChild>
+                                                        <div>
+                                                            Ending <strong>"{termToEnd?.name}"</strong> will:
+                                                            <ul className="list-disc ml-6 mt-2 space-y-1">
+                                                                <li>Finalize all student grades.</li>
+                                                                <li>Archive data to permanent history.</li>
+                                                                <li>Clear active subjects for teachers.</li>
+                                                            </ul>
+                                                        </div>
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleEndTerm} className="rounded-full bg-destructive text-white">Finalize & End Term</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
                             ))}
                         </CardContent>
@@ -199,6 +236,33 @@ export default function TermManagement() {
                     </Tabs>
                 </div>
             </div>
+
+            {/* Edit Term Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent className="rounded-[2.5rem]">
+                    <DialogHeader>
+                        <DialogTitle className="font-black uppercase tracking-tight">Edit Term Label</DialogTitle>
+                        <DialogDescription className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Modify the identification for this trimester</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleUpdateTerm} className="space-y-6 pt-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">New Label</Label>
+                            <Input 
+                                value={editTermName} 
+                                onChange={e => setEditTermName(e.target.value)} 
+                                required 
+                                className="h-14 rounded-2xl border-primary/10 font-bold px-6"
+                            />
+                        </div>
+                        <DialogFooter className="gap-2">
+                            <DialogClose asChild><Button variant="ghost" className="h-12 rounded-xl">Cancel</Button></DialogClose>
+                            <Button type="submit" disabled={isSaving} className="h-12 rounded-xl bg-primary text-white font-black uppercase text-[10px] tracking-widest px-8 shadow-lg shadow-primary/20">
+                                {isSaving ? <Loader2 className="animate-spin" /> : "Save Changes"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
