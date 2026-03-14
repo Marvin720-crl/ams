@@ -256,7 +256,7 @@ export default function GradeSlip() {
               />
             </div>
             <div className="text-center">
-              <h1 className="text-3xl font-black uppercase tracking-tighter text-primary leading-none">
+              <h1 className="text-3xl font-black uppercase tracking-tighter text-foreground leading-none">
                 AMA EDUCATION SYSTEM
               </h1>
               <p className="text-sm font-bold text-foreground mt-1">
@@ -328,7 +328,7 @@ export default function GradeSlip() {
                         <Lock size={40} strokeWidth={2.5} />
                       </div>
                       <div className="space-y-3">
-                        <h3 className="text-2xl font-black uppercase tracking-tighter text-primary">Grades Not Yet Finalized</h3>
+                        <h3 className="text-2xl font-black uppercase tracking-tighter text-primary">GRADES NOT YET FINALIZED</h3>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
                           The current academic term is still active. <br/>
                           Final records will be available once the term <br/>
