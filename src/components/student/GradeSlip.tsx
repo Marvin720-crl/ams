@@ -384,15 +384,18 @@ export default function GradeSlip() {
 
           <div className="space-y-10">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-16">
-                Office of the Registrar
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground mb-16">
+                AUTHORIZED ACADEMIC SIGNATURE
               </p>
 
               <div className="max-w-xs">
                 {/* Horizontal line changed to black (text-foreground) */}
                 <div className="border-b-2 border-foreground" />
                 <p className="text-[11px] font-black uppercase tracking-[0.1em] mt-3 text-foreground">
-                  AUTHORIZED ACADEMIC SIGNATURE
+                  Ms. Fatima L. Layyo
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                  School Registrar
                 </p>
               </div>
             </div>
