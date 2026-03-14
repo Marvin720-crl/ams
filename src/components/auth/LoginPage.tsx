@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { getUsersAction, addAuditLogAction } from '@/app/actions/dbActions';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -29,7 +29,8 @@ export default function LoginPage() {
           name: 'System Administrator',
           email: 'admin@school.edu',
           password: 'ADMIN@2026',
-          role: 'admin' as const
+          role: 'admin' as const,
+          isApproved: true
         };
         login(adminUser);
         await addAuditLogAction({ userId: adminUser.id, userName: adminUser.name, action: 'login', details: 'Admin user logged in' });
@@ -43,12 +44,22 @@ export default function LoginPage() {
       const user = users.find(u => u.id === id && u.password === password);
       
       if (user) {
+        // Security Check: Approval
+        if (user.role === 'student' && user.isApproved === false) {
+          toast.error('ACCESS DENIED', {
+            description: 'Your account is pending admin approval. Please contact the registrar.',
+            icon: <Lock className="h-4 w-4" />
+          });
+          setLoading(false);
+          return;
+        }
+
         login(user);
         await addAuditLogAction({ userId: user.id, userName: user.name, action: 'login', details: `User ${user.name} logged in.` });
         localStorage.setItem('currentUserId', user.id);
         toast.success(`Welcome back, ${user.name}!`);
       } else {
-        toast.error('Invalid USN/EMP or password');
+        toast.error('Invalid ID or password');
       }
     } catch (error) {
       toast.error('An error occurred during login');
@@ -69,9 +80,9 @@ export default function LoginPage() {
         <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
           
           <div className="w-full md:w-2/5 bg-primary text-white p-12 flex flex-col justify-center items-start">
-            <h1 className="text-4xl font-bold mb-4">WELCOME TO STUDENT PORTAL</h1>
-            <p className="text-white/80 leading-relaxed">
-              A wise man will hear, and will increase learning; and a man of understanding shall attain unto wise counsels.
+            <h1 className="text-4xl font-bold mb-4 uppercase">WELCOME TO STUDENT PORTAL</h1>
+            <p className="text-white/80 leading-relaxed italic">
+              "A wise man will hear, and will increase learning; and a man of understanding shall attain unto wise counsels."
             </p>
           </div>
 
@@ -80,15 +91,15 @@ export default function LoginPage() {
             <p className="text-muted-foreground mb-8">Please sign in to continue</p>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="id">USN/EMP</Label>
+                <Label htmlFor="id">Universal ID (USN/EMP)</Label>
                 <Input
                   id="id"
                   type="text"
                   value={id}
                   onChange={(e) => setId(e.target.value)}
                   required
-                  className="h-12 rounded-lg"
-                  placeholder=""
+                  className="h-14 rounded-xl font-bold text-lg px-6"
+                  placeholder="ID Number"
                 />
               </div>
               <div className="space-y-2">
@@ -99,29 +110,29 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12 rounded-lg"
-                  placeholder=""
+                  className="h-14 rounded-xl px-6"
+                  placeholder="••••••••"
                 />
                 <div className="text-right pt-1">
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                  <Link href="/forgot-password" className="text-xs font-bold text-primary hover:underline uppercase tracking-widest">
                     Forgot password?
                   </Link>
                 </div>
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-lg gap-2" 
+                className="w-full h-14 text-sm font-black uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 rounded-2xl gap-2 transition-all active:scale-95" 
                 disabled={loading}
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'AUTHENTICATING...' : 'Sign In'}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </form>
-            <div className="text-center mt-6">
+            <div className="text-center mt-8">
               <p className="text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
-                <Link href="/register" className="font-bold text-primary hover:underline">
-                  Sign up
+                <Link href="/register" className="font-black text-primary hover:underline uppercase tracking-widest ml-1">
+                  Sign up now
                 </Link>
               </p>
             </div>

@@ -20,6 +20,7 @@ export interface User {
   signature?: string; // New: For digital signatures
   lastSeen?: string;
   isBanned?: boolean; // Security: Ban flag
+  isApproved?: boolean; // Security: Admin approval flag
   deviceFingerprint?: string; // Security: Track device
   banReason?: string;
 }

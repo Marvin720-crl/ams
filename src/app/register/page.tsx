@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select'
 
 import { toast } from 'sonner'
-import { UserPlus, Loader2 } from 'lucide-react'
+import { UserPlus, Loader2, AlertCircle } from 'lucide-react'
 
 import {
   addUserAction,
@@ -72,8 +72,24 @@ export default function RegisterPage() {
     }))
   }
 
+  const validateID = () => {
+    if (formData.role === 'student' && formData.id.length !== 11) {
+      return "Student USN must be exactly 11 digits.";
+    }
+    if (formData.role === 'teacher' && formData.id.length !== 8) {
+      return "Employee ID must be exactly 8 digits.";
+    }
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const idError = validateID();
+    if (idError) {
+      toast.error(idError);
+      return;
+    }
 
     if (loading) return
     setLoading(true)
@@ -109,17 +125,22 @@ export default function RegisterPage() {
         emergencyContactName: formData.role === 'student' ? formData.emergencyContactName : undefined,
         emergencyContactAddress: formData.role === 'student' ? formData.emergencyContactAddress : undefined,
         emergencyContactPhone: formData.role === 'student' ? formData.emergencyContactPhone : undefined,
-        profilePic: ''
+        profilePic: '',
+        isApproved: formData.role !== 'student' // Admin approval required for students
       }
 
       await addUserAction(newUser as any)
 
-      toast.success('Registration successful! Please login.')
+      if (formData.role === 'student') {
+        toast.success('Registration successful! Please wait for admin approval before logging in.');
+      } else {
+        toast.success('Registration successful! Please login.');
+      }
 
       router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      toast.error('Registration failed.')
+      toast.error(error.message || 'Registration failed.')
     }
 
     setLoading(false)
@@ -154,20 +175,19 @@ export default function RegisterPage() {
 
           <div className="w-full md:w-2/5 bg-primary text-white p-10 md:p-12 flex flex-col justify-center">
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              CREATE ACCOUNT
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 uppercase">
+              Join Academic Hub
             </h1>
 
             <p className="text-white/80 text-sm leading-relaxed">
-              Join the AMA Academic Management System and access
-              all student and faculty features.
+              Create your account to access the AMA Student Portal. Student accounts require manual verification by the registrar.
             </p>
 
           </div>
 
           {/* RIGHT PANEL */}
 
-          <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto max-h-[80vh]">
+          <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto max-h-[85vh] no-scrollbar">
 
             <h2 className="text-2xl font-bold mb-2">
               Registration
@@ -186,35 +206,18 @@ export default function RegisterPage() {
 
                 <Select
                   value={formData.role}
-                  onValueChange={(v: Role) => updateField('role', v)}
+                  onValueChange={(v: Role) => {
+                    updateField('role', v);
+                    updateField('id', ''); // Reset ID when role changes
+                  }}
                 >
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-12 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* DEPARTMENT */}
-
-              <div className="space-y-2">
-                <Label>Department</Label>
-
-                <Select
-                  value={formData.department}
-                  onValueChange={(v: Department) => updateField('department', v)}
-                >
-                  <SelectTrigger className="h-12">
-                    <SelectValue />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectItem value="college">College</SelectItem>
-                    <SelectItem value="shs">Senior High School</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -222,16 +225,27 @@ export default function RegisterPage() {
               {/* ID */}
 
               <div className="space-y-2">
-                <Label>
-                  {formData.role === 'student' ? 'Student ID / USN' : 'Employee ID'}
-                </Label>
+                <div className="flex justify-between items-end">
+                  <Label>
+                    {formData.role === 'student' ? 'Student ID / USN (11 digits)' : 'Employee ID (8 digits)'}
+                  </Label>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                    formData.role === 'student' 
+                      ? (formData.id.length === 11 ? 'text-green-500' : 'text-primary')
+                      : (formData.id.length === 8 ? 'text-green-500' : 'text-primary')
+                  }`}>
+                    {formData.id.length} / {formData.role === 'student' ? '11' : '8'}
+                  </span>
+                </div>
 
                 <Input
                   value={formData.id}
                   onChange={e => updateField('id', e.target.value)}
                   required
+                  maxLength={formData.role === 'student' ? 11 : 8}
                   disabled={loading}
-                  className="h-12"
+                  className="h-12 rounded-xl font-bold text-lg"
+                  placeholder={formData.role === 'student' ? "e.g. 25001198310" : "e.g. 12345678"}
                 />
               </div>
 
@@ -245,7 +259,7 @@ export default function RegisterPage() {
                   onChange={e => updateField('name', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12"
+                  className="h-12 rounded-xl"
                 />
               </div>
 
@@ -260,7 +274,7 @@ export default function RegisterPage() {
                   onChange={e => updateField('email', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12"
+                  className="h-12 rounded-xl"
                 />
               </div>
 
@@ -275,7 +289,7 @@ export default function RegisterPage() {
                   onChange={e => updateField('password', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12"
+                  className="h-12 rounded-xl"
                 />
               </div>
 
@@ -294,7 +308,7 @@ export default function RegisterPage() {
                         onChange={e => updateField('program', e.target.value)}
                         required
                         disabled={loading}
-                        className="h-12"
+                        className="h-12 rounded-xl"
                       />
                     </div>
 
@@ -305,11 +319,11 @@ export default function RegisterPage() {
                         value={String(formData.year)}
                         onValueChange={v => updateField('year', Number(v))}
                       >
-                        <SelectTrigger className="h-12">
+                        <SelectTrigger className="h-12 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
 
-                        <SelectContent>
+                        <SelectContent className="rounded-xl">
                           {formData.department === 'shs' ? (
                             <>
                               <SelectItem value="11">Grade 11</SelectItem>
@@ -329,20 +343,20 @@ export default function RegisterPage() {
 
                   </div>
 
-                  <div className="border-t pt-5 mt-5">
-                    <h3 className="text-lg font-semibold mb-4">Emergency Contact</h3>
-                    <div className="space-y-5">
+                  <div className="border-t pt-5 mt-5 space-y-4">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary">Emergency Contact</h3>
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Contact Person Name</Label>
-                        <Input value={formData.emergencyContactName} onChange={e => updateField('emergencyContactName', e.target.value)} disabled={loading} className="h-12" />
+                        <Label className="text-[10px] font-bold uppercase">Name</Label>
+                        <Input value={formData.emergencyContactName} onChange={e => updateField('emergencyContactName', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Address</Label>
-                        <Input value={formData.emergencyContactAddress} onChange={e => updateField('emergencyContactAddress', e.target.value)} disabled={loading} className="h-12" />
+                        <Label className="text-[10px] font-bold uppercase">Address</Label>
+                        <Input value={formData.emergencyContactAddress} onChange={e => updateField('emergencyContactAddress', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
                       </div>
                       <div className="space-y-2">
-                        <Label>Phone Number</Label>
-                        <Input value={formData.emergencyContactPhone} onChange={e => updateField('emergencyContactPhone', e.target.value)} disabled={loading} className="h-12" />
+                        <Label className="text-[10px] font-bold uppercase">Phone Number</Label>
+                        <Input value={formData.emergencyContactPhone} onChange={e => updateField('emergencyContactPhone', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
                       </div>
                     </div>
                   </div>
@@ -361,7 +375,7 @@ export default function RegisterPage() {
                     onChange={e => updateField('teacherSecret', e.target.value)}
                     required
                     disabled={loading}
-                    className="h-12"
+                    className="h-12 rounded-xl"
                   />
                 </div>
               )}
@@ -370,13 +384,13 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-semibold gap-2"
+                className="w-full h-14 text-sm font-black uppercase tracking-widest gap-2 rounded-2xl shadow-xl shadow-primary/20"
                 disabled={loading}
               >
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin" />
-                    Registering...
+                    REGISTERING...
                   </>
                 ) : (
                   <>

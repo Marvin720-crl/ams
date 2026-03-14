@@ -1,3 +1,4 @@
+
 'use server'
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
@@ -123,6 +124,25 @@ export async function unbanUserAction(adminId: string, userId: string) {
     }
 }
 
+export async function approveUserAction(adminId: string, userId: string) {
+    if (adminId !== 'admin') throw new Error('UNAUTHORIZED');
+    
+    const users: User[] = await readDb('users');
+    const idx = users.findIndex(u => u.id === userId);
+    
+    if (idx !== -1) {
+        users[idx].isApproved = true;
+        await writeDb('users', users);
+        
+        await addAuditLogAction({
+            userId: 'admin',
+            userName: 'Admin',
+            action: 'USER_APPROVED',
+            details: `User ${userId} was approved by admin.`
+        });
+    }
+}
+
 // SYSTEM ACTIONS
 export async function updateLastSeenAction(userId: string) {
     await checkSecurity(userId);
@@ -147,7 +167,26 @@ export async function getUserByIdAction(id: string): Promise<User | null> {
 export async function addUserAction(user: User) {
   const users = await readDb('users');
   const sanitized = sanitizeInput(user, user.id);
-  if (users.some((u: User) => u.id === sanitized.id)) throw new Error('User already exists');
+  
+  // Strict ID Length Validation
+  if (user.role === 'student' && user.id.length !== 11) {
+    throw new Error('USN must be exactly 11 digits.');
+  }
+  if (user.role === 'teacher' && user.id.length !== 8) {
+    throw new Error('EMP ID must be exactly 8 digits.');
+  }
+
+  if (users.some((u: User) => u.id === sanitized.id)) throw new Error('User already exists with this ID.');
+  
+  // Default approval status
+  // Students always require approval. Teachers added via secret might also need it.
+  if (user.role === 'student') {
+    sanitized.isApproved = false;
+  } else {
+    // Admins and Library admins added by admin are pre-approved
+    sanitized.isApproved = true;
+  }
+
   users.push(sanitized);
   await writeDb('users', users);
   return sanitized;
@@ -606,7 +645,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
+        const subjectClassworks = classworks.filter(cw => cw.type === type);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
@@ -898,4 +937,3 @@ export async function forceResetAllLabsAction() {
 
     return { success: true, closedSessions: closedCount };
 }
-''
