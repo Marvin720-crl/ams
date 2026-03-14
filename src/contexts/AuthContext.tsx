@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { User } from '../utils/storage';
 import { getUserByIdAction, updateLastSeenAction } from '@/app/actions/dbActions';
 import { toast } from 'sonner';
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               logout();
           }
       }
-    }, 20000); // More frequent check (20s) for aggressive security
+    }, 20000);
 
     return () => clearInterval(interval);
   }, [user]);
@@ -118,8 +118,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const contextValue = useMemo(() => ({
+    user, login, logout, updateCurrentUser, loading
+  }), [user, loading]);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateCurrentUser, loading }}>
+    <AuthContext.Provider value={contextValue}>
       {loading && !user ? (
         <div className="flex flex-col items-center justify-center min-h-screen bg-muted/10 p-4">
             <div className="animate-pulse flex flex-col items-center">
