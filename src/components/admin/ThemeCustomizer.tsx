@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDesign } from '@/contexts/DesignContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -15,19 +15,24 @@ import {
   Shapes, 
   Sparkles,
   Loader2,
-  Move,
-  Type,
   Maximize,
   Circle,
   Smartphone,
   Monitor,
-  Eye,
   ChevronRight,
   GraduationCap,
   BookOpen,
   Users,
   Scan,
-  MessageCircle
+  Home,
+  MessageCircle,
+  ShieldAlert,
+  School,
+  Settings,
+  FileText,
+  BarChart3,
+  FileCheck,
+  MapPin
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,9 +53,41 @@ export default function ThemeCustomizer() {
     await saveConfig();
     setSaving(false);
     toast.success("UI preferences published successfully!", {
-      description: "Ang bagong design ay lilitaw na sa lahat ng users."
+      description: "Ang bagong disenyo ay makikita na ng lahat ng users."
     });
   };
+
+  const sidebarItems = useMemo(() => {
+    switch(currentView) {
+      case 'student-dash':
+      case 'student-subjects':
+        return [
+          { id: 'home', label: 'Dashboard', icon: Home },
+          { id: 'chat', label: 'Messages', icon: MessageCircle },
+          { id: 'grades', label: 'Grade Slip', icon: GraduationCap },
+          { id: 'subjects', label: 'My Subjects', icon: BookOpen },
+          { id: 'classwork', label: 'Classwork', icon: FileCheck },
+          { id: 'request', label: 'Make Request', icon: FileText },
+        ];
+      case 'teacher-hub':
+        return [
+          { id: 'home', label: 'Dashboard', icon: Home },
+          { id: 'chat', label: 'Messages', icon: MessageCircle },
+          { id: 'scanner', label: 'QR Scanner', icon: Scan },
+          { id: 'grading', label: 'Grading Console', icon: BarChart3 },
+          { id: 'reservations', label: 'Reservations', icon: MapPin },
+          { id: 'attendance', label: 'Records', icon: FileCheck },
+        ];
+      case 'library-scan':
+        return [
+          { id: 'home', label: 'Dashboard', icon: Home },
+          { id: 'books', label: 'Manage Books', icon: BookOpen },
+          { id: 'scan-lend', label: 'Scan & Lend', icon: Scan },
+          { id: 'requests', label: 'Borrow Requests', icon: FileText },
+        ];
+      default: return [];
+    }
+  }, [currentView]);
 
   const ColorInput = ({ label, value, field, description }: { label: string, value: string, field: string, description: string }) => (
     <div 
@@ -90,19 +127,19 @@ export default function ThemeCustomizer() {
         return (
           <div className="space-y-8 w-full p-8">
             <div className="flex justify-between items-center">
-              <div className="h-8 w-48 rounded-lg bg-primary/10" style={{ backgroundColor: `${config.primary}20` }} />
-              <div className="h-10 w-10 rounded-full bg-primary/10" />
+              <div className="h-8 w-48 rounded-lg" style={{ backgroundColor: `${config.primary}20` }} />
+              <div className="h-10 w-10 rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[1,2,3,4].map(i => (
                 <Card key={i} className="p-6 border-none shadow-xl" style={{ borderRadius: `${config.radius}rem` }}>
-                  <div className="h-8 w-8 rounded-xl bg-primary/10 mb-4" />
+                  <div className="h-8 w-8 rounded-xl mb-4" style={{ backgroundColor: `${config.primary}10` }} />
                   <div className="h-2 w-20 bg-muted-foreground/20 rounded-full" />
                 </Card>
               ))}
             </div>
             <Card className="p-8 border-none shadow-2xl" style={{ borderRadius: `${config.radius * 1.5}rem` }}>
-              <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" />
+              <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" style={{ backgroundColor: `${config.primary}10` }} />
               <div className="space-y-4">
                 {[1,2].map(i => (
                   <div key={i} className="h-12 w-full bg-muted/30 rounded-xl" />
@@ -114,18 +151,18 @@ export default function ThemeCustomizer() {
       case 'student-subjects':
         return (
           <div className="space-y-8 w-full p-8">
-            <div className="h-10 w-64 bg-primary/10 rounded-full" />
+            <div className="h-10 w-64 bg-primary/10 rounded-full" style={{ backgroundColor: `${config.primary}10` }} />
             <div className="grid grid-cols-1 gap-6">
               {[1,2,3].map(i => (
                 <Card key={i} className="p-8 border-none shadow-xl flex items-center justify-between" style={{ borderRadius: `${config.radius * 2}rem` }}>
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10" />
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10" style={{ backgroundColor: `${config.primary}10` }} />
                     <div className="space-y-2">
-                      <div className="h-4 w-40 bg-primary/20 rounded-full" />
+                      <div className="h-4 w-40 bg-primary/20 rounded-full" style={{ backgroundColor: `${config.primary}20` }} />
                       <div className="h-2 w-24 bg-muted-foreground/20 rounded-full" />
                     </div>
                   </div>
-                  <ChevronRight className="text-primary/20" />
+                  <ChevronRight className="text-primary/20" style={{ color: `${config.primary}20` }} />
                 </Card>
               ))}
             </div>
@@ -136,14 +173,14 @@ export default function ThemeCustomizer() {
           <div className="space-y-8 w-full p-8">
             <div className="grid grid-cols-2 gap-4">
               {[1,2,3,4].map(i => (
-                <Card key={i} className="p-6 border-none shadow-xl bg-primary text-white" style={{ backgroundColor: config.primary, borderRadius: `${config.radius}rem` }}>
+                <Card key={i} className="p-6 border-none shadow-xl text-white" style={{ backgroundColor: config.primary, borderRadius: `${config.radius}rem` }}>
                   <div className="h-10 w-10 rounded-xl bg-white/10 mb-4" />
                   <div className="h-8 w-12 bg-white/20 rounded-lg" />
                 </Card>
               ))}
             </div>
-            <div className="h-64 w-full rounded-[2.5rem] border-4 border-dashed border-primary/10 flex items-center justify-center">
-              <Scan className="text-primary/20" size={48} />
+            <div className="h-64 w-full rounded-[2.5rem] border-4 border-dashed border-primary/10 flex items-center justify-center" style={{ borderColor: `${config.primary}10` }}>
+              <Scan className="text-primary/20" size={48} style={{ color: `${config.primary}20` }} />
             </div>
           </div>
         );
@@ -151,15 +188,15 @@ export default function ThemeCustomizer() {
         return (
           <div className="space-y-8 w-full p-8">
             <div className="flex gap-2">
-              <div className="h-10 flex-1 bg-white rounded-full border border-primary/10" />
-              <div className="h-10 w-10 bg-primary rounded-full" style={{ backgroundColor: config.primary }} />
+              <div className="h-10 flex-1 bg-white rounded-full border border-primary/10" style={{ borderColor: `${config.primary}10` }} />
+              <div className="h-10 w-10 rounded-full" style={{ backgroundColor: config.primary }} />
             </div>
-            <div className="p-10 border-4 border-dashed border-accent/20 rounded-[3rem] flex flex-col items-center justify-center text-center gap-4" style={{ backgroundColor: `${config.accent}05` }}>
+            <div className="p-10 border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-center gap-4" style={{ backgroundColor: `${config.accent}05`, borderColor: `${config.accent}20` }}>
               <div className="h-20 w-20 rounded-[2rem] flex items-center justify-center text-white shadow-xl" style={{ backgroundColor: config.accent }}>
                 <Scan size={32} />
               </div>
               <div className="space-y-2">
-                <div className="h-4 w-32 bg-accent/20 mx-auto rounded-full" />
+                <div className="h-4 w-32 bg-accent/20 mx-auto rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
                 <div className="h-2 w-48 bg-muted-foreground/10 mx-auto rounded-full" />
               </div>
             </div>
@@ -170,43 +207,11 @@ export default function ThemeCustomizer() {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500 h-full relative pb-32">
-      {/* Top Controls */}
+      {/* Top Header Controls */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
           <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Design Lab</h2>
-          <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Wix-style real-time layout engine</p>
-        </div>
-        
-        {/* View Switcher Bar */}
-        <div className="flex bg-white/80 backdrop-blur p-1.5 rounded-full border border-primary/10 shadow-xl gap-1">
-          <Button 
-            variant={currentView === 'student-dash' ? 'default' : 'ghost'}
-            onClick={() => setCurrentView('student-dash')}
-            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
-          >
-            <GraduationCap size={14} /> Student Dash
-          </Button>
-          <Button 
-            variant={currentView === 'student-subjects' ? 'default' : 'ghost'}
-            onClick={() => setCurrentView('student-subjects')}
-            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
-          >
-            <BookOpen size={14} /> My Subjects
-          </Button>
-          <Button 
-            variant={currentView === 'teacher-hub' ? 'default' : 'ghost'}
-            onClick={() => setCurrentView('teacher-hub')}
-            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
-          >
-            <Users size={14} /> Teacher Hub
-          </Button>
-          <Button 
-            variant={currentView === 'library-scan' ? 'default' : 'ghost'}
-            onClick={() => setCurrentView('library-scan')}
-            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
-          >
-            <Scan size={14} /> Library Scan
-          </Button>
+          <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Wix-style real-time engine</p>
         </div>
 
         <div className="flex gap-4">
@@ -228,6 +233,55 @@ export default function ThemeCustomizer() {
         </div>
       </div>
 
+      {/* THE IMAGE-LIKE ACTION BAR (View Switcher) */}
+      <div className="flex justify-center w-full">
+        <div className="flex items-center bg-white p-2 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-primary/5 gap-2 max-w-fit px-10">
+          <button 
+            onClick={() => setCurrentView('student-dash')}
+            className={cn(
+              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
+              currentView === 'student-dash' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
+            )}
+          >
+            <GraduationCap size={20} className={cn(currentView === 'student-dash' ? "text-white" : "group-hover:text-primary")} />
+            <span className="font-black uppercase text-[10px] tracking-widest">Student Dash</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentView('student-subjects')}
+            className={cn(
+              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
+              currentView === 'student-subjects' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
+            )}
+          >
+            <BookOpen size={20} className={cn(currentView === 'student-subjects' ? "text-white" : "group-hover:text-primary")} />
+            <span className="font-black uppercase text-[10px] tracking-widest">My Subjects</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentView('teacher-hub')}
+            className={cn(
+              "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
+              currentView === 'teacher-hub' ? "bg-primary text-white" : "hover:bg-primary/5 text-muted-foreground"
+            )}
+          >
+            <Users size={20} className={cn(currentView === 'teacher-hub' ? "text-white" : "group-hover:text-primary")} />
+            <span className="font-black uppercase text-[10px] tracking-widest">Teacher Hub</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentView('library-scan')}
+            className={cn(
+              "flex items-center gap-3 px-8 py-4 rounded-full transition-all group",
+              currentView === 'library-scan' ? "bg-primary text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
+            )}
+          >
+            <Scan size={20} className={cn(currentView === 'library-scan' ? "text-white" : "group-hover:text-primary")} />
+            <span className="font-black uppercase text-[10px] tracking-widest">Library Scan</span>
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
         {/* Visual Controls (Left Sidebar) */}
@@ -238,19 +292,19 @@ export default function ThemeCustomizer() {
                 label="Primary Brand" 
                 value={config.primary} 
                 field="primary" 
-                description="Buttons & Active Highlights"
+                description="Headers, Main Buttons & Active Icons"
               />
               <ColorInput 
                 label="Secondary Canvas" 
                 value={config.secondary} 
                 field="secondary" 
-                description="Sidebar & Interface Textures"
+                description="Sidebar & Background Textures"
               />
               <ColorInput 
                 label="Accent Variable" 
                 value={config.accent} 
                 field="accent" 
-                description="Special Alerts & High Contrast"
+                description="Interactive Highlights & Special Badges"
               />
           </section>
 
@@ -296,62 +350,65 @@ export default function ThemeCustomizer() {
           </Card>
         </div>
 
-        {/* Live Workspace (Right Side) */}
+        {/* Live Workspace Emulator (Right Side) */}
         <div className={cn(
           "lg:col-span-8 relative transition-all duration-700",
           isPreviewFullscreen ? "fixed inset-0 z-[100] p-12 bg-black/95 backdrop-blur-2xl" : "h-[calc(100vh-280px)]"
         )}>
           <div className={cn(
-            "relative h-full bg-[#E5EEF0]/50 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden",
-            isMobileView ? "max-w-[400px] mx-auto shadow-3xl" : "w-full",
+            "relative h-full bg-[#E5EEF0]/50 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden shadow-inner",
+            isMobileView ? "max-w-[400px] mx-auto shadow-3xl border-solid bg-white" : "w-full",
             isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
           )}>
             
-            {/* Emulator Status Bar */}
-            <div className="absolute top-10 left-12 flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white shadow-xl"><Layout size={18}/></div>
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/40">Emulating: {currentView.replace('-', ' ')}</span>
-            </div>
-
-            <div className="absolute top-10 right-12 flex items-center gap-3 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full border border-primary/5 shadow-sm">
-              <Circle className="h-2 w-2 fill-green-500 text-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-600/80">Live Viewport</span>
-            </div>
-
             {/* THE EMULATED CONTENT */}
             <div className="relative w-full h-full flex">
               
-              {/* MOCK SIDEBAR (Always there for context) */}
+              {/* LIVE SIDEBAR EMULATOR */}
               {!isMobileView && (
                 <motion.div 
                   initial={{ x: -100, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  className="w-64 h-full p-8 flex flex-col gap-10 border-r border-white/5"
+                  className="w-64 h-full p-6 flex flex-col gap-8 border-r border-white/5 shadow-2xl relative z-20"
                   style={{ backgroundColor: config.secondary }}
                 >
-                  <div className="h-12 w-12 rounded-[1.25rem] bg-white/10" />
-                  <div className="space-y-6">
-                    {[1,2,3,4,5].map(i => (
-                      <div key={i} className="flex items-center gap-4">
-                        <div className="h-4 w-4 bg-white/10 rounded-full" />
-                        <div className="h-2 w-24 bg-white/10 rounded-full" />
+                  <div className="flex items-center gap-3 px-2">
+                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
+                    <div className="space-y-1">
+                      <div className="h-3 w-20 bg-white/20 rounded-full" />
+                      <div className="h-2 w-12 bg-white/10 rounded-full" />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-1">
+                    {sidebarItems.map((item, i) => (
+                      <div key={i} className={cn(
+                        "flex items-center gap-4 px-4 py-3 rounded-xl transition-all",
+                        i === 0 ? "bg-white/10 text-white" : "text-white/40"
+                      )}>
+                        <item.icon size={18} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-auto pt-8 border-t border-white/5 flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-white/20" />
-                      <div className="h-2 w-20 bg-white/10 rounded-full" />
+
+                  <div className="pt-6 border-t border-white/5 flex items-center gap-4 px-2">
+                      <div className="h-10 w-10 rounded-full bg-primary/20 border-2 border-white/10" style={{ backgroundColor: `${config.primary}40` }} />
+                      <div className="space-y-1">
+                        <div className="h-2 w-24 bg-white/20 rounded-full" />
+                        <div className="h-1.5 w-16 bg-white/10 rounded-full" />
+                      </div>
                   </div>
                 </motion.div>
               )}
 
               {/* VIEW CONTENT AREA */}
-              <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/10">
+              <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/5">
                 {/* Global Header Emulator */}
-                <div className="h-24 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5">
-                  <div className="h-8 w-32 bg-primary/10 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} />
+                <div className="h-20 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-10" style={{ borderBottomColor: `${config.primary}10` }}>
+                  <div className="h-10 w-32 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} />
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-accent/10" style={{ backgroundColor: `${config.accent}20` }} />
+                    <div className="h-10 w-10 rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
                     <div className="h-10 w-10 rounded-full bg-muted" />
                   </div>
                 </div>
@@ -371,19 +428,19 @@ export default function ThemeCustomizer() {
               </div>
             </div>
 
-            {/* FLOATING ACTION OVERLAY */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-8 duration-700">
+            {/* FLOATING DEVICE ACTION OVERLAY */}
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-8 duration-700 z-30">
               <Button 
                 variant="ghost" 
                 onClick={() => setIsMobileView(false)}
-                className={cn("rounded-full h-14 w-14 p-0", !isMobileView && "bg-primary text-white")}
+                className={cn("rounded-full h-14 w-14 p-0 transition-all", !isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}
               >
                 <Monitor size={20}/>
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => setIsMobileView(true)}
-                className={cn("rounded-full h-14 w-14 p-0", isMobileView && "bg-primary text-white")}
+                className={cn("rounded-full h-14 w-14 p-0 transition-all", isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}
               >
                 <Smartphone size={20}/>
               </Button>
@@ -393,10 +450,10 @@ export default function ThemeCustomizer() {
                 onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)}
                 className={cn(
                   "rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all",
-                  isPreviewFullscreen ? "bg-primary text-white scale-105" : ""
+                  isPreviewFullscreen ? "bg-primary text-white scale-105 shadow-xl shadow-primary/30" : "text-muted-foreground"
                 )}
               >
-                <Maximize size={18}/> {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN PREVIEW"}
+                <Maximize size={18}/> {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN"}
               </Button>
             </div>
 
