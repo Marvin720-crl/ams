@@ -93,8 +93,11 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-[#CED3D7]/20 flex flex-col">
-      {/* HEADER: Controlled by Primary Color */}
-      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-xl print:hidden">
+      {/* HEADER: Controlled by Header Variable */}
+      <header 
+        style={{ backgroundColor: 'hsl(var(--header))' }}
+        className="text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-xl print:hidden"
+      >
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -145,11 +148,14 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* ASIDE: Controlled by Secondary Color */}
-        <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-secondary border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
+        {/* ASIDE: Controlled by Sidebar Variable */}
+        <aside 
+          style={{ backgroundColor: 'hsl(var(--sidebar))' }}
+          className={cn(
+            "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
           <div 
             onClick={() => handleNav('profile')}
             className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/10 to-transparent cursor-pointer group"

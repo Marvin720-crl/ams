@@ -267,9 +267,11 @@ export default function ThemeCustomizer() {
           
           {/* BRANDING SECTION */}
           <Section label="Branding" icon={Palette}>
-             <ColorInput label="Primary Brand" value={config.primary} field="primary" description="Headers, Main Buttons & Active Icons" />
-             <ColorInput label="Secondary Canvas" value={config.secondary} field="secondary" description="Sidebar & Background Textures" />
+             <ColorInput label="Primary Brand" value={config.primary} field="primary" description="Action Buttons & Active Elements" />
+             <ColorInput label="Navigation Sidebar" value={config.sidebar} field="sidebar" description="Left Menu Background" />
+             <ColorInput label="Top Header" value={config.header} field="header" description="Top Banner Background" />
              <ColorInput label="Accent Variable" value={config.accent} field="accent" description="Interactive Highlights" />
+             <ColorInput label="Secondary Canvas" value={config.secondary} field="secondary" description="Page Background Textures" />
           </Section>
 
           {/* CHROMATICS & BRAND VARIABLES */}
@@ -325,75 +327,73 @@ export default function ThemeCustomizer() {
             isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
           )}>
             
-            <div className="relative w-full h-full flex">
+            <div className="relative w-full h-full flex flex-col">
               
-              {/* INTERACTIVE SIDEBAR EMULATOR */}
-              {!isMobileView && (
-                <motion.div 
-                  initial={{ x: -100, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className="w-64 h-full p-6 flex flex-col gap-8 border-r border-white/5 shadow-2xl relative z-20"
-                  style={{ backgroundColor: config.secondary }}
-                >
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">{config.campusLabel?.split(' ')[0] || 'AMACC'}</p>
-                      <p className="text-[8px] font-bold text-white/40 uppercase tracking-tighter">Student Portal</p>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 space-y-1">
-                    {ROLE_NAV[activeRole].map((item) => (
-                      <button 
-                        key={item.id} 
-                        onClick={() => setActivePage(item.id)}
-                        className={cn(
-                          "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group",
-                          activePage === item.id ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
-                        )}
-                      >
-                        <item.icon size={18} className={cn(activePage === item.id ? "text-accent" : "text-white/20 group-hover:text-white")} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="pt-6 border-t border-white/5 flex items-center gap-4 px-2">
-                      <div className="h-10 w-10 rounded-full bg-primary/20 border-2 border-white/10" style={{ backgroundColor: `${config.primary}40` }} />
-                      <div className="space-y-1">
-                        <div className="h-2 w-24 bg-white/20 rounded-full" />
-                        <div className="h-1.5 w-16 bg-white/10 rounded-full" />
-                      </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* LIVE WORKSPACE CONTENT */}
-              <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/5">
-                <div className="h-20 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-10" style={{ borderBottomColor: `${config.primary}10` }}>
+              {/* TOP HEADER EMULATOR */}
+              <div className="h-20 w-full shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-30 transition-colors" style={{ backgroundColor: config.header, borderBottomColor: `${config.primary}10` }}>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
                   <div className="flex items-center gap-2">
-                    <div className="h-10 rounded-lg bg-primary/10 flex items-center px-4" style={{ backgroundColor: `${config.primary}10` }}>
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">{config.campusLabel}</span>
+                    <div className="h-8 rounded-lg bg-white/10 flex items-center px-4">
+                        <span className="text-[9px] font-black text-white uppercase tracking-widest">{config.campusLabel}</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
-                    <div className="h-10 w-10 rounded-full bg-muted" />
                   </div>
                 </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-8 w-8 rounded-full" style={{ backgroundColor: `${config.accent}` }} />
+                  <div className="h-8 w-8 rounded-full bg-white/20" />
+                </div>
+              </div>
 
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${activeRole}-${activePage}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex-1"
+              <div className="flex-1 flex overflow-hidden">
+                {/* INTERACTIVE SIDEBAR EMULATOR */}
+                {!isMobileView && (
+                  <motion.div 
+                    initial={{ x: -100, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="w-64 h-full p-6 flex flex-col gap-6 border-r border-white/5 shadow-2xl relative z-20 transition-colors"
+                    style={{ backgroundColor: config.sidebar }}
                   >
-                    {renderPreviewPage()}
+                    <div className="flex-1 space-y-1">
+                      {ROLE_NAV[activeRole].map((item) => (
+                        <button 
+                          key={item.id} 
+                          onClick={() => setActivePage(item.id)}
+                          className={cn(
+                            "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group",
+                            activePage === item.id ? "bg-white/10 text-accent" : "text-white/40 hover:text-white"
+                          )}
+                        >
+                          <item.icon size={18} className={cn(activePage === item.id ? "text-accent" : "text-white/20 group-hover:text-white")} />
+                          <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="pt-6 border-t border-white/5 flex items-center gap-4 px-2">
+                        <div className="h-10 w-10 rounded-full bg-primary/20 border-2 border-white/10" style={{ backgroundColor: `${config.primary}40` }} />
+                        <div className="space-y-1">
+                          <div className="h-2 w-24 bg-white/20 rounded-full" />
+                          <div className="h-1.5 w-16 bg-white/10 rounded-full" />
+                        </div>
+                    </div>
                   </motion.div>
-                </AnimatePresence>
+                )}
+
+                {/* LIVE WORKSPACE CONTENT */}
+                <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar transition-colors" style={{ backgroundColor: config.secondary }}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${activeRole}-${activePage}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex-1"
+                    >
+                      {renderPreviewPage()}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
 

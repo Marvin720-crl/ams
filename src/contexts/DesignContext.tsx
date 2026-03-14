@@ -14,7 +14,9 @@ interface DesignContextType {
 
 const defaultConfig: ThemeConfig = {
   primary: '#6D1B0A', // Maroon
-  secondary: '#14343A', // Deep Teal
+  secondary: '#F4F7F8', // Light Grayish Blue
+  sidebar: '#14343A', // Deep Teal
+  header: '#6D1B0A', // Maroon
   accent: '#F17346', // Coral
   background: '#FFFFFF',
   radius: 1.5,
@@ -97,6 +99,8 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
       const root = document.documentElement;
       root.style.setProperty('--primary', hexToHsl(config.primary));
       root.style.setProperty('--secondary', hexToHsl(config.secondary));
+      root.style.setProperty('--sidebar', hexToHsl(config.sidebar));
+      root.style.setProperty('--header', hexToHsl(config.header));
       root.style.setProperty('--accent', hexToHsl(config.accent));
       root.style.setProperty('--background', hexToHsl(config.background));
       root.style.setProperty('--radius', `${config.radius}rem`);

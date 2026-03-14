@@ -6,6 +6,8 @@ export type Department = 'college' | 'shs';
 export interface ThemeConfig {
   primary: string; // Hex
   secondary: string;
+  sidebar: string; // New: Specific sidebar color
+  header: string; // New: Specific header color
   accent: string;
   background: string;
   radius: number; // in rem or px
