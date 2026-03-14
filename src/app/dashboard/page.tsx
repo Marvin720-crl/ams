@@ -58,7 +58,7 @@ export default function DashboardPage() {
       items-center
       justify-center
       min-h-screen
-      bg-muted/10
+      bg-white
       p-6
       text-center
       ">
@@ -71,11 +71,17 @@ export default function DashboardPage() {
         animate-pulse
         ">
 
-          <div className="
-          w-16 h-16
-          rounded-2xl
-          bg-primary
-          " />
+          <a 
+            href="https://myportfolio-48bb2.web.app/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
 
           <p className="
           text-muted-foreground

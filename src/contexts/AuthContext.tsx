@@ -125,11 +125,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={contextValue}>
       {loading && !user ? (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-muted/10 p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
             <div className="animate-pulse flex flex-col items-center">
-                <div className="w-16 h-16 bg-primary rounded-2xl mb-4" />
-                <p className="text-muted-foreground font-black uppercase tracking-widest">AMS:AMACC</p>
-                <p className="text-[8px] font-bold text-primary/40 mt-2 tracking-[0.3em]">SECURE CHANNEL ESTABLISHING...</p>
+                <a 
+                  href="https://myportfolio-48bb2.web.app/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-16 h-16 bg-primary rounded-2xl mb-4 flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer"
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </a>
+                <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-sm">AMS:AMACC</p>
+                <p className="text-[8px] font-bold text-primary/40 mt-2 tracking-[0.3em] uppercase">Secure Channel Establishing...</p>
             </div>
         </div>
       ) : (
