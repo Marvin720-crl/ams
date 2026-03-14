@@ -12,6 +12,7 @@ export interface User {
   department?: Department;
   program?: string;
   year?: number;
+  position?: string; // New: For staff/faculty roles
   profilePic?: string;
   emergencyContactName?: string;
   emergencyContactAddress?: string;

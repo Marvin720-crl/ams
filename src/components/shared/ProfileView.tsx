@@ -21,7 +21,8 @@ import {
   QrCode,
   User as UserIcon,
   X,
-  School
+  School,
+  Briefcase
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateUserAction } from '@/app/actions/dbActions';
@@ -47,6 +48,7 @@ export default function ProfileView() {
     department: 'college' as Department,
     program: '',
     year: 1,
+    position: '',
     profilePic: '',
     emergencyContactName: '',
     emergencyContactAddress: '',
@@ -61,6 +63,7 @@ export default function ProfileView() {
         department: (user.department as Department) || 'college',
         program: user.program || '',
         year: user.year || 1,
+        position: user.position || '',
         profilePic: user.profilePic || '',
         emergencyContactName: user.emergencyContactName || '',
         emergencyContactAddress: user.emergencyContactAddress || '',
@@ -89,13 +92,17 @@ export default function ProfileView() {
         department: formData.department,
         profilePic: formData.profilePic
       };
+      
       if (user.role === 'student') {
         updates.program = formData.program;
         updates.year = formData.year;
         updates.emergencyContactName = formData.emergencyContactName;
         updates.emergencyContactAddress = formData.emergencyContactAddress;
         updates.emergencyContactPhone = formData.emergencyContactPhone;
+      } else {
+        updates.position = formData.position;
       }
+
       const updatedUser = await updateUserAction(user.id, updates);
       if (updatedUser) {
         updateCurrentUser(updatedUser);
@@ -207,35 +214,51 @@ export default function ProfileView() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year / Grade Level</Label>
-              <Select value={String(formData.year)} disabled={user.role !== 'student'} onValueChange={(v) => setFormData({ ...formData, year: parseInt(v) })}>
-                <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
-                <SelectContent className="rounded-2xl">
-                  {formData.department === 'shs' ? (
-                    <>
-                      <SelectItem value="11" className="font-bold">Grade 11</SelectItem>
-                      <SelectItem value="12" className="font-bold">Grade 12</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="1" className="font-bold">1st Year</SelectItem>
-                      <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
-                      <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
-                      <SelectItem value="4" className="font-bold">4th Year</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Universal ID Number</Label>
-              <Input value={user.id} disabled className="h-14 rounded-2xl bg-muted/50 border-primary/5 font-bold px-6" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Program / Strand</Label>
-              <Input value={formData.program} disabled={user.role !== 'student'} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
-            </div>
+
+            {user.role === 'student' ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year / Grade Level</Label>
+                  <Select value={String(formData.year)} onValueChange={(v) => setFormData({ ...formData, year: parseInt(v) })}>
+                    <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-2xl">
+                      {formData.department === 'shs' ? (
+                        <>
+                          <SelectItem value="11" className="font-bold">Grade 11</SelectItem>
+                          <SelectItem value="12" className="font-bold">Grade 12</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="1" className="font-bold">1st Year</SelectItem>
+                          <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
+                          <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
+                          <SelectItem value="4" className="font-bold">4th Year</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Universal ID Number</Label>
+                  <Input value={user.id} disabled className="h-14 rounded-2xl bg-muted/50 border-primary/5 font-bold px-6" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Program / Strand</Label>
+                  <Input value={formData.program} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Professional Position</Label>
+                  <Input value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" placeholder="e.g. IT Instructor, Librarian" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Employee ID Number</Label>
+                  <Input value={user.id} disabled className="h-14 rounded-2xl bg-muted/50 border-primary/5 font-bold px-6" />
+                </div>
+              </>
+            )}
           </div>
 
           {user.role === 'student' && (

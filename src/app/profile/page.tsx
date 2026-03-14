@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -43,6 +44,7 @@ export default function ProfilePage() {
     email: '',
     program: '',
     year: 1,
+    position: '',
     profilePic: '',
     emergencyContactName: '',
     emergencyContactAddress: '',
@@ -56,6 +58,7 @@ export default function ProfilePage() {
         email: user.email || '',
         program: user.program || '',
         year: user.year || 1,
+        position: user.position || '',
         profilePic: user.profilePic || '',
         emergencyContactName: user.emergencyContactName || '',
         emergencyContactAddress: user.emergencyContactAddress || '',
@@ -89,6 +92,8 @@ export default function ProfilePage() {
         updates.emergencyContactName = formData.emergencyContactName;
         updates.emergencyContactAddress = formData.emergencyContactAddress;
         updates.emergencyContactPhone = formData.emergencyContactPhone;
+      } else {
+        updates.position = formData.position;
       }
       const updatedUser = await updateUserAction(user.id, updates);
       if (updatedUser) {
@@ -178,22 +183,33 @@ export default function ProfilePage() {
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</Label>
                 <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
               </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Program</Label>
-                <Input value={formData.program} disabled={user.role !== 'student'} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year Level</Label>
-                <Select value={String(formData.year)} disabled={user.role !== 'student'} onValueChange={(v) => setFormData({ ...formData, year: parseInt(v) })}>
-                  <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
-                  <SelectContent className="rounded-2xl">
-                    <SelectItem value="1" className="font-bold">1st Year</SelectItem>
-                    <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
-                    <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
-                    <SelectItem value="4" className="font-bold">4th Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+
+              {user.role === 'student' ? (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Academic Program</Label>
+                    <Input value={formData.program} onChange={(e) => setFormData({ ...formData, program: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Year Level</Label>
+                    <Select value={String(formData.year)} onValueChange={(v) => setFormData({ ...formData, year: parseInt(v) })}>
+                      <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6"><SelectValue /></SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        <SelectItem value="1" className="font-bold">1st Year</SelectItem>
+                        <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
+                        <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
+                        <SelectItem value="4" className="font-bold">4th Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Professional Position</Label>
+                  <Input value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} className="h-14 rounded-2xl border-primary/10 font-bold px-6" placeholder="e.g. IT Instructor, Librarian" />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Universal ID Number</Label>
                 <Input value={user.id} disabled className="h-14 rounded-2xl bg-muted/50 border-primary/5 font-bold px-6" />
