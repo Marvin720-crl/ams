@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useDesign } from '@/contexts/DesignContext';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,6 @@ import {
   Maximize,
   Smartphone,
   Monitor,
-  ChevronRight,
-  GraduationCap,
-  BookOpen,
-  Users,
-  Scan,
   Home,
   MessageCircle,
   ShieldAlert,
@@ -31,11 +26,15 @@ import {
   FileText,
   BarChart3,
   FileCheck,
-  MapPin,
   Type,
   Droplets,
   Layers,
-  X
+  X,
+  GraduationCap,
+  Users,
+  BookOpen,
+  Scan,
+  MapPin
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -93,23 +92,23 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   const [localColor, setLocalColor] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Sync with prop only when the picker is closed to prevent "fighting"
   useEffect(() => {
-    setLocalColor(value);
-  }, [value]);
+    if (!isOpen) setLocalColor(value);
+  }, [value, isOpen]);
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInteraction = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
     setLocalColor(newVal);
     onChange(field, newVal);
   };
 
   return (
-    <div className="relative bg-white rounded-[2.5rem] p-8 shadow-[0_15px_40px_-5px_rgba(0,0,0,0.05)] border border-primary/5 hover:border-primary/20 transition-all group overflow-hidden">
-      {/* Header Info */}
+    <div className="relative bg-white rounded-[2.5rem] p-8 shadow-sm border border-primary/5 hover:border-primary/20 transition-all group overflow-hidden">
       <div className="flex justify-between items-start mb-8">
         <div className="space-y-1.5">
-          <Label className="font-black uppercase text-sm tracking-widest text-[#6D1B0A] leading-none block">{label}</Label>
-          <p className="text-[10px] font-black text-[#3D797F] uppercase tracking-wider leading-tight">{description}</p>
+          <Label className="font-black uppercase text-sm tracking-widest text-foreground leading-none block">{label}</Label>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider leading-tight">{description}</p>
         </div>
         <div 
           className="h-16 w-16 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
@@ -117,61 +116,57 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
         />
       </div>
       
-      {/* Main Interactive Pill - Matches Image */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <button 
-            className="h-24 w-full rounded-full bg-[#E5EEF0]/60 border-2 border-transparent hover:border-primary/10 flex items-center px-10 transition-all active:scale-[0.98]"
+            className="h-24 w-full rounded-[1.5rem] bg-muted/20 border-2 border-transparent hover:border-primary/10 flex items-center px-8 transition-all active:scale-[0.98]"
           >
-            <div className="flex-1 text-center font-black text-2xl text-[#6D1B0A] tracking-tighter">
+            <div className="flex-1 text-center font-black text-2xl tracking-tighter">
               {localColor?.toUpperCase()}
             </div>
-            <div className="h-10 w-10 bg-white/40 rounded-full flex items-center justify-center text-[#6D1B0A]/40">
+            <div className="h-10 w-10 bg-white/40 rounded-full flex items-center justify-center text-foreground/40">
               <Palette size={22} />
             </div>
           </button>
         </PopoverTrigger>
         <PopoverContent 
           onInteractOutside={(e) => e.preventDefault()} 
-          className="w-[360px] p-0 border-none rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden z-[120] animate-in zoom-in-95 duration-200"
+          className="w-[360px] p-0 border-none rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden z-[120]"
         >
           <div className="bg-white p-10 space-y-8">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-black uppercase tracking-[0.3em] text-[#6D1B0A]">Precision Palette</span>
+              <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Precision Palette</span>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="h-12 w-12 rounded-full bg-[#E5EEF0] flex items-center justify-center text-[#6D1B0A] hover:bg-[#6D1B0A] hover:text-white transition-all shadow-sm"
+                className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-primary hover:text-white transition-all"
               >
                 <X size={20} />
               </button>
             </div>
             
-            <div className="relative aspect-square w-full rounded-[3rem] overflow-hidden border-8 border-[#E5EEF0] shadow-inner group">
-              <div 
-                className="absolute inset-0 transition-colors duration-75" 
-                style={{ backgroundColor: localColor }}
-              />
+            <div className="relative aspect-square w-full rounded-[3rem] overflow-hidden border-8 border-muted shadow-inner group">
+              <div className="absolute inset-0" style={{ backgroundColor: localColor }} />
               <input 
                 type="color" 
                 value={localColor} 
-                onInput={handleInput}
+                onInput={handleInteraction}
+                onChange={handleInteraction}
                 className="absolute inset-0 w-full h-full cursor-crosshair opacity-0"
               />
-              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/5 transition-all">
+              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
                  <div className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-xl flex items-center justify-center border-2 border-white/40 shadow-2xl">
                     <Droplets size={32} className="text-white drop-shadow-md" />
                  </div>
-                 <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] mt-4 drop-shadow-md opacity-0 group-hover:opacity-100">Live Spectrum Tuning</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-[#E5EEF0]/50 p-3 rounded-full border border-primary/5">
-              <div className="flex-1 h-14 bg-white rounded-full flex items-center px-8 font-black text-[#6D1B0A] tracking-tighter text-xl">
+            <div className="flex items-center gap-4 bg-muted/50 p-3 rounded-full">
+              <div className="flex-1 h-14 bg-white rounded-full flex items-center px-8 font-black text-primary tracking-tighter text-xl shadow-inner">
                 {localColor.toUpperCase()}
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="h-14 w-14 rounded-full bg-[#6D1B0A] flex items-center justify-center text-white shadow-xl hover:scale-105 active:scale-95 transition-all"
+                className="h-14 w-14 rounded-full bg-primary text-white shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
               >
                 <Save size={24} strokeWidth={3} />
               </button>
@@ -197,9 +192,7 @@ export default function ThemeCustomizer() {
     setSaving(true);
     await saveConfig();
     setSaving(false);
-    toast.success("UI preferences published successfully!", {
-      description: "Ang bagong disenyo ay makikita na ng lahat ng users."
-    });
+    toast.success("UI preferences published successfully!");
   };
 
   const onColorChange = useCallback((field: string, val: string) => {
@@ -224,26 +217,10 @@ export default function ThemeCustomizer() {
               ))}
             </div>
             <Card className="p-8 border-none shadow-2xl" style={{ borderRadius: `${config.radius * 1.5}rem` }}>
-              <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" style={{ backgroundColor: `${config.primary}10` }} />
+              <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" />
               <div className="space-y-4">
                 {[1,2].map(i => (
                   <div key={i} className="h-12 w-full bg-muted/30 rounded-xl" />
-                ))}
-              </div>
-            </Card>
-          </div>
-        );
-      case 'grades':
-        return (
-          <div className="p-8">
-            <Card className="p-10 border-none shadow-2xl bg-white space-y-8" style={{ borderRadius: `${config.radius * 2}rem` }}>
-              <div className="flex justify-center border-b pb-8"><div className="h-12 w-48 bg-primary/10 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} /></div>
-              <div className="space-y-4">
-                {[1,2,3,4,5].map(i => (
-                  <div key={i} className="flex justify-between items-center py-3 border-b border-primary/5">
-                    <div className="h-3 w-32 bg-muted/40 rounded-full" />
-                    <div className="h-4 w-10 bg-primary/20 rounded-md" style={{ backgroundColor: `${config.primary}20` }} />
-                  </div>
                 ))}
               </div>
             </Card>
@@ -256,7 +233,7 @@ export default function ThemeCustomizer() {
               <Layers size={48} />
             </div>
             <h4 className="text-white/40 font-black uppercase text-xs tracking-widest">Workspace Emulator</h4>
-            <p className="text-white/20 text-[10px] mt-2 font-bold uppercase tracking-widest">Select an item from the sidebar to preview layout</p>
+            <p className="text-white/20 text-[10px] mt-2 font-bold uppercase tracking-widest">Live Workspace Active</p>
           </div>
         );
     }
@@ -264,10 +241,9 @@ export default function ThemeCustomizer() {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500 h-full relative pb-32">
-      {/* HEADER SECTION */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
-          <h2 className="text-[3.5rem] font-black text-[#6D1B0A] tracking-tighter uppercase leading-none">Universal Lab</h2>
+          <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Universal Lab</h2>
           <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Prototype Engine v2.0</p>
         </div>
 
@@ -275,14 +251,13 @@ export default function ThemeCustomizer() {
           <Button variant="outline" onClick={resetToDefault} className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted">
             <RotateCcw size={18} />
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-[#6D1B0A] text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
+          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
             {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
             Publish Design
           </Button>
         </div>
       </div>
 
-      {/* ROLE SWITCHER PILL BAR */}
       <div className="flex justify-center w-full">
         <div className="flex items-center bg-white p-2 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-primary/5 gap-2 max-w-fit px-10">
           {(['student', 'teacher', 'admin', 'library'] as Role[]).map(role => (
@@ -291,13 +266,9 @@ export default function ThemeCustomizer() {
               onClick={() => { setActiveRole(role); setActivePage('home'); }}
               className={cn(
                 "flex items-center gap-3 px-6 py-4 rounded-full transition-all group",
-                activeRole === role ? "bg-[#6D1B0A] text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
+                activeRole === role ? "bg-primary text-white shadow-xl" : "hover:bg-primary/5 text-muted-foreground"
               )}
             >
-              {role === 'student' && <GraduationCap size={20} />}
-              {role === 'teacher' && <Users size={20} />}
-              {role === 'admin' && <ShieldAlert size={20} />}
-              {role === 'library' && <BookOpen size={20} />}
               <span className="font-black uppercase text-[10px] tracking-widest">{role} Dash</span>
             </button>
           ))}
@@ -306,7 +277,6 @@ export default function ThemeCustomizer() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
-        {/* LEFT SIDEBAR CONTROLS */}
         <div className="lg:col-span-4 space-y-10 h-[calc(100vh-280px)] overflow-y-auto no-scrollbar pr-4 pb-20">
           
           <Section label="Branding" icon={Palette}>
@@ -339,7 +309,7 @@ export default function ThemeCustomizer() {
           </Section>
 
           <Section label="Brand Variables" icon={Type}>
-            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 space-y-6">
+            <div className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 space-y-6">
               <div className="space-y-2">
                 <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Campus Label</Label>
                 <input 
@@ -356,41 +326,31 @@ export default function ThemeCustomizer() {
                 </div>
                 <Slider value={[config.logoScale || 100]} max={150} min={50} step={5} onValueChange={(val) => updateConfig({ logoScale: val[0] })} />
               </div>
-            </Card>
+            </div>
           </Section>
         </div>
 
-        {/* RIGHT SIDE EMULATOR */}
         <div className={cn(
           "lg:col-span-8 relative transition-all duration-700",
           isPreviewFullscreen ? "fixed inset-0 z-[100] p-12 bg-black/95 backdrop-blur-2xl" : "h-[calc(100vh-280px)]"
         )}>
           <div className={cn(
-            "relative h-full bg-[#E5EEF0]/50 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden shadow-inner",
+            "relative h-full bg-secondary rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden shadow-inner",
             isMobileView ? "max-w-[400px] mx-auto shadow-3xl border-solid bg-white" : "w-full",
             isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
           )}>
             
             <div className="relative w-full h-full flex flex-col">
-              
-              {/* TOP HEADER EMULATOR */}
-              <div className="h-20 w-full shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-30 transition-colors" style={{ backgroundColor: config.header, borderBottomColor: `${config.primary}10` }}>
+              <div className="h-20 w-full shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-30 transition-colors" style={{ backgroundColor: config.header }}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 rounded-lg bg-white/10 flex items-center px-4">
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest">{config.campusLabel}</span>
-                    </div>
+                  <div className="h-8 rounded-lg bg-white/10 flex items-center px-4">
+                      <span className="text-[9px] font-black text-white uppercase tracking-widest">{config.campusLabel}</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="h-8 w-8 rounded-full" style={{ backgroundColor: `${config.accent}` }} />
-                  <div className="h-8 w-8 rounded-full bg-white/20" />
                 </div>
               </div>
 
               <div className="flex-1 flex overflow-hidden">
-                {/* INTERACTIVE SIDEBAR EMULATOR */}
                 {!isMobileView && (
                   <motion.div 
                     initial={{ x: -100, opacity: 0 }}
@@ -413,18 +373,9 @@ export default function ThemeCustomizer() {
                         </button>
                       ))}
                     </div>
-
-                    <div className="pt-6 border-t border-white/5 flex items-center gap-4 px-2">
-                        <div className="h-10 w-10 rounded-full bg-primary/20 border-2 border-white/10" style={{ backgroundColor: `${config.primary}40` }} />
-                        <div className="space-y-1">
-                          <div className="h-2 w-24 bg-white/20 rounded-full" />
-                          <div className="h-1.5 w-16 bg-white/10 rounded-full" />
-                        </div>
-                    </div>
                   </motion.div>
                 )}
 
-                {/* LIVE WORKSPACE CONTENT */}
                 <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar transition-colors" style={{ backgroundColor: config.secondary }}>
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -441,16 +392,15 @@ export default function ThemeCustomizer() {
               </div>
             </div>
 
-            {/* FLOATING ACTION BAR OVERLAY */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-8 duration-700 z-30">
-              <Button variant="ghost" onClick={() => setIsMobileView(false)} className={cn("rounded-full h-14 w-14 p-0 transition-all", !isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}>
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-2xl z-30">
+              <Button variant="ghost" onClick={() => setIsMobileView(false)} className={cn("rounded-full h-14 w-14 p-0 transition-all", !isMobileView && "bg-primary text-white shadow-lg scale-110")}>
                 <Monitor size={20}/>
               </Button>
-              <Button variant="ghost" onClick={() => setIsMobileView(true)} className={cn("rounded-full h-14 w-14 p-0 transition-all", isMobileView && "bg-primary text-white shadow-lg shadow-primary/20 scale-110")}>
+              <Button variant="ghost" onClick={() => setIsMobileView(true)} className={cn("rounded-full h-14 w-14 p-0 transition-all", isMobileView && "bg-primary text-white shadow-lg scale-110")}>
                 <Smartphone size={20}/>
               </Button>
               <div className="h-8 w-px bg-primary/10" />
-              <Button variant={isPreviewFullscreen ? "default" : "ghost"} onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)} className={cn("rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all", isPreviewFullscreen ? "bg-primary text-white scale-105 shadow-xl shadow-primary/30" : "text-muted-foreground")}>
+              <Button variant={isPreviewFullscreen ? "default" : "ghost"} onClick={() => setIsPreviewFullscreen(!isPreviewFullscreen)} className={cn("rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 transition-all", isPreviewFullscreen ? "bg-primary text-white scale-105" : "text-muted-foreground")}>
                 {isPreviewFullscreen ? <X size={18}/> : <Maximize size={18}/>} 
                 {isPreviewFullscreen ? "EXIT PREVIEW" : "FULLSCREEN"}
               </Button>

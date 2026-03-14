@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ThemeConfig } from '@/utils/storage';
 import { getSettingsAction, updateSettingsAction } from '@/app/actions/dbActions';
 
@@ -13,11 +13,11 @@ interface DesignContextType {
 }
 
 const defaultConfig: ThemeConfig = {
-  primary: '#6D1B0A', // Maroon
-  secondary: '#F4F7F8', // Light Grayish Blue
-  sidebar: '#14343A', // Deep Teal
-  header: '#6D1B0A', // Maroon
-  accent: '#F17346', // Coral
+  primary: '#6D1B0A', 
+  secondary: '#F4F7F8', 
+  sidebar: '#14343A', 
+  header: '#6D1B0A', 
+  accent: '#F17346', 
   background: '#FFFFFF',
   radius: 1.5,
   glassIntensity: 15,
@@ -30,6 +30,54 @@ const defaultConfig: ThemeConfig = {
 
 const DesignContext = createContext<DesignContextType | undefined>(undefined);
 
+export const hexToHsl = (hex: string) => {
+  let r = 0, g = 0, b = 0;
+  if (!hex || typeof hex !== 'string') return '0 0% 0%';
+  
+  const cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 3) {
+    r = parseInt(cleanHex[0] + cleanHex[0], 16);
+    g = parseInt(cleanHex[1] + cleanHex[1], 16);
+    b = parseInt(cleanHex[2] + cleanHex[2], 16);
+  } else if (cleanHex.length === 6) {
+    r = parseInt(cleanHex.substring(0, 2), 16);
+    g = parseInt(cleanHex.substring(2, 4), 16);
+    b = parseInt(cleanHex.substring(4, 6), 16);
+  }
+  
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s, l = (max + min) / 2;
+  if (max === min) { h = s = 0; } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+};
+
+export const applyThemeToDocument = (config: Partial<ThemeConfig>) => {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  
+  if (config.primary) root.style.setProperty('--primary', hexToHsl(config.primary));
+  if (config.secondary) root.style.setProperty('--secondary', hexToHsl(config.secondary));
+  if (config.sidebar) root.style.setProperty('--sidebar', hexToHsl(config.sidebar));
+  if (config.header) root.style.setProperty('--header', hexToHsl(config.header));
+  if (config.accent) root.style.setProperty('--accent', hexToHsl(config.accent));
+  if (config.background) root.style.setProperty('--background', hexToHsl(config.background));
+  if (config.radius !== undefined) root.style.setProperty('--radius', `${config.radius}rem`);
+  if (config.glassIntensity !== undefined) {
+    root.style.setProperty('--glass-opacity', `${config.glassIntensity / 100}`);
+    root.style.setProperty('--glass-blur', `${(config.glassIntensity / 100) * 20}px`);
+  }
+};
+
 export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
   const [config, setConfig] = useState<ThemeConfig>(defaultConfig);
 
@@ -38,7 +86,9 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const settings = await getSettingsAction();
         if (settings.theme) {
-          setConfig({ ...defaultConfig, ...settings.theme });
+          const loadedConfig = { ...defaultConfig, ...settings.theme };
+          setConfig(loadedConfig);
+          applyThemeToDocument(loadedConfig);
         }
       } catch (e) {
         console.error("Theme load error", e);
@@ -47,40 +97,14 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
     loadTheme();
   }, []);
 
-  const hexToHsl = (hex: string) => {
-    let r = 0, g = 0, b = 0;
-    if (!hex || typeof hex !== 'string') return '0 0% 0%';
-    
-    const cleanHex = hex.replace('#', '');
-    if (cleanHex.length === 3) {
-      r = parseInt(cleanHex[0] + cleanHex[0], 16);
-      g = parseInt(cleanHex[1] + cleanHex[1], 16);
-      b = parseInt(cleanHex[2] + cleanHex[2], 16);
-    } else if (cleanHex.length === 6) {
-      r = parseInt(cleanHex.substring(0, 2), 16);
-      g = parseInt(cleanHex.substring(2, 4), 16);
-      b = parseInt(cleanHex.substring(4, 6), 16);
-    }
-    
-    r /= 255; g /= 255; b /= 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s, l = (max + min) / 2;
-    if (max === min) { h = s = 0; } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-  };
-
-  const updateConfig = (updates: Partial<ThemeConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
-  };
+  const updateConfig = useCallback((updates: Partial<ThemeConfig>) => {
+    setConfig(prev => {
+      const newConfig = { ...prev, ...updates };
+      // Immediate injection for maximum smoothness
+      applyThemeToDocument(updates);
+      return newConfig;
+    });
+  }, []);
 
   const saveConfig = async () => {
     try {
@@ -92,24 +116,8 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetToDefault = () => {
     setConfig(defaultConfig);
+    applyThemeToDocument(defaultConfig);
   };
-
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const root = document.documentElement;
-      root.style.setProperty('--primary', hexToHsl(config.primary));
-      root.style.setProperty('--secondary', hexToHsl(config.secondary));
-      root.style.setProperty('--sidebar', hexToHsl(config.sidebar));
-      root.style.setProperty('--header', hexToHsl(config.header));
-      root.style.setProperty('--accent', hexToHsl(config.accent));
-      root.style.setProperty('--background', hexToHsl(config.background));
-      root.style.setProperty('--radius', `${config.radius}rem`);
-      
-      // Glassmorphism intensity
-      root.style.setProperty('--glass-opacity', `${config.glassIntensity / 100}`);
-      root.style.setProperty('--glass-blur', `${(config.glassIntensity / 100) * 20}px`);
-    }
-  }, [config]);
 
   return (
     <DesignContext.Provider value={{ config, updateConfig, saveConfig, resetToDefault }}>
