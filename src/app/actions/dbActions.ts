@@ -4,13 +4,12 @@ import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFil
 import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
 
 /**
- * IRON WALL SECURITY PROTOCOL
- * Automated Banning & Input Sanitization
+ * IRON WALL SECURITY PROTOCOL v2.0
+ * Intelligent File Inspection & Automated Banning
  */
 
 const SECURITY_LIMITS = {
-    MAX_TEXT_LENGTH: 15000,
-    MAX_SIGNATURE_LENGTH: 300000, // 300KB limit for signatures
+    MAX_TEXT_LENGTH: 50000, // Increased for standard text
     SUSPICIOUS_PATTERNS: [
         /<script.*?>.*?<\/script>/gi,
         /javascript:/gi,
@@ -21,7 +20,9 @@ const SECURITY_LIMITS = {
         /localStorage/gi,
         /union select/gi,
         /drop table/gi,
-        /truncate/gi
+        /truncate/gi,
+        /--/g, // SQL Comment injection
+        /xp_cmdshell/gi
     ]
 };
 
@@ -47,31 +48,34 @@ async function detectAndBan(userId: string, reason: string) {
 
 function sanitizeInput(input: any, userId?: string): any {
     if (typeof input === 'string') {
+        const isDataUri = input.startsWith('data:');
         let isViolation = false;
         let violationReason = "";
 
-        // Check for suspicious patterns
+        // 1. Check for malicious patterns (Injection/Virus-like code)
+        // We check even large files for script injections
         for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
             if (pattern.test(input)) {
                 isViolation = true;
-                violationReason = `Malisyosong pattern detected: ${pattern.source}`;
+                violationReason = `Malisyosong pattern detected in ${isDataUri ? 'file' : 'text'}: ${pattern.source}`;
                 break;
             }
         }
 
-        // Check for excessive length
-        if (input.length > SECURITY_LIMITS.MAX_TEXT_LENGTH) {
+        // 2. Length check - Skip length restriction for actual file payloads (Data URIs)
+        // This allows any file size (Images, PDFs, etc.)
+        if (!isDataUri && input.length > SECURITY_LIMITS.MAX_TEXT_LENGTH) {
             isViolation = true;
-            violationReason = "Excessive payload length (DoS attempt)";
+            violationReason = "Excessive text payload length (DoS attempt)";
         }
 
         if (isViolation && userId) {
-            // Trigger ban asynchronously
+            // Trigger ban
             detectAndBan(userId, violationReason);
             throw new Error(`SECURITY_BREACH: ${violationReason}`);
         }
 
-        return input.replace(/<script.*?>.*?<\/script>/gi, '').trim();
+        return input;
     }
     
     if (Array.isArray(input)) return input.map(i => sanitizeInput(i, userId));
@@ -136,12 +140,6 @@ export async function updateUserAction(id: string, updates: Partial<User>) {
   if (index !== -1) {
     const sanitized = sanitizeInput(updates, id);
     
-    // Specific check for digital signature size
-    if (sanitized.signature && sanitized.signature.length > SECURITY_LIMITS.MAX_SIGNATURE_LENGTH) {
-        await detectAndBan(id, "Suspicious signature size (Payload over 300KB)");
-        throw new Error('SECURITY_BREACH: PAYLOAD_TOO_LARGE');
-    }
-
     if (typeof sanitized.profilePic === 'string' && sanitized.profilePic.startsWith('data:')) {
       const newPath = await saveProfileImage(id, sanitized.profilePic);
       if (newPath) sanitized.profilePic = newPath;
