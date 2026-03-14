@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -139,7 +138,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                             "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap transition-all shadow-xl",
                             isMe 
                                 ? "bg-primary text-white rounded-tr-none" 
-                                : "bg-[#2b2d31] text-white/90 rounded-tl-none border border-white/5"
+                                : "bg-[#161b2e] text-white/90 rounded-tl-none border border-white/5"
                         )}>
                             {msg.text}
 
@@ -203,9 +202,9 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
     }, [conversation, users, user?.id]);
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#313338] overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-[#0a0f1e] overflow-hidden">
             {/* Chat Header */}
-            <div className="h-16 px-4 md:px-6 shadow-md border-b border-black/20 flex items-center justify-between bg-[#313338]/95 backdrop-blur-md sticky top-0 z-10">
+            <div className="h-16 px-4 md:px-6 shadow-md border-b border-white/5 flex items-center justify-between bg-[#0a0f1e]/95 backdrop-blur-md sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar}
@@ -225,7 +224,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                             {conversation.type === 'private' ? otherUser?.name : conversation.name}
                         </span>
                         <div className="flex items-center gap-1.5">
-                            <div className={cn("w-2 h-2 rounded-full", isPartnerActive ? "bg-green-500 animate-pulse" : "bg-white/10")} />
+                            <div className={cn("w-2 h-2 rounded-full", isPartnerActive ? "bg-accent animate-pulse" : "bg-white/10")} />
                             <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
                                 {isPartnerActive ? "Authorized Workspace" : "Encrypted Workspace"}
                             </span>
@@ -256,8 +255,8 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
             </div>
 
             {/* Input Area */}
-            <div className="p-4 md:p-8 bg-[#313338]">
-                <div className="bg-[#383a40] rounded-[1.5rem] px-4 py-2 flex items-center gap-3 md:gap-4 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xl">
+            <div className="p-4 md:p-8 bg-[#0a0f1e]">
+                <div className="bg-[#1c233a] rounded-[1.5rem] px-4 py-2 flex items-center gap-3 md:gap-4 border border-white/5 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xl">
                     <input 
                         type="file" 
                         ref={fileInputRef} 
@@ -275,7 +274,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                         </button>
                         <button 
                             onClick={() => setShowNitro(true)}
-                            className="hidden sm:flex h-10 w-10 rounded-full items-center justify-center text-pink-400 hover:bg-pink-400/10 transition-all"
+                            className="hidden sm:flex h-10 w-10 rounded-full items-center justify-center text-accent hover:bg-accent/10 transition-all"
                         >
                             <Zap size={22} fill="currentColor" className="opacity-50" />
                         </button>
@@ -293,11 +292,11 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                     <div className="flex items-center gap-1">
                         <Popover>
                             <PopoverTrigger asChild>
-                                <button className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-yellow-400 hover:bg-yellow-400/10 transition-all">
+                                <button className="h-10 w-10 rounded-full flex items-center justify-center text-white/40 hover:text-accent hover:bg-accent/10 transition-all">
                                     <Smile size={22}/>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[300px] md:w-96 bg-[#232428] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
+                            <PopoverContent className="w-[300px] md:w-96 bg-[#050810] border-none p-6 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] mb-4">
                                 <div className="grid grid-cols-6 md:grid-cols-8 gap-3 max-h-72 overflow-y-auto pr-2 no-scrollbar">
                                     {EMOJIS.map((emoji, index) => (
                                         <button 
@@ -328,30 +327,30 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
 
             {/* Nitro Perks Dialog */}
             <Dialog open={showNitro} onOpenChange={setShowNitro}>
-                <DialogContent className="bg-[#1e1f22] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
+                <DialogContent className="bg-[#050810] border-none text-white rounded-[3rem] p-10 max-w-[90vw] md:max-w-[480px] shadow-2xl">
                     <div className="flex flex-col items-center text-center">
-                        <div className="h-24 w-24 bg-[#eb459e] rounded-[2.5rem] mb-8 flex items-center justify-center text-white shadow-2xl shadow-[#eb459e]/30 rotate-3">
+                        <div className="h-24 w-24 bg-accent rounded-[2.5rem] mb-8 flex items-center justify-center text-secondary shadow-2xl shadow-accent/30 rotate-3">
                             <Zap size={48} fill="currentColor" />
                         </div>
                         
                         <DialogTitle className="text-3xl md:text-[2.8rem] font-black uppercase tracking-tighter leading-none mb-4">
                             ACADEMIC NITRO
                         </DialogTitle>
-                        <p className="text-[#eb459e] font-black uppercase tracking-[0.2em] text-[11px] mb-10">
+                        <p className="text-accent font-black uppercase tracking-[0.2em] text-[11px] mb-10">
                             UNLEASH ULTIMATE ACADEMIC POWER
                         </p>
                     </div>
                     
                     <div className="space-y-4">
                         <div className="flex items-center gap-5 bg-white/5 p-6 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors">
-                            <div className="h-12 w-12 rounded-2xl bg-[#00aff4] flex items-center justify-center shadow-xl shrink-0"><Download size={24} className="text-white"/></div>
+                            <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shrink-0"><Download size={24} className="text-white"/></div>
                             <div className="flex-1">
                                 <p className="font-black text-[13px] uppercase tracking-wide">MAXIMUM PAYLOAD</p>
                                 <p className="text-white/40 text-[11px] font-bold mt-0.5">Share massive datasets up to 1GB.</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-5 bg-white/5 p-6 rounded-3xl border border-white/5 hover:bg-white/10 transition-colors">
-                            <div className="h-12 w-12 rounded-2xl bg-[#5865f2] flex items-center justify-center shadow-xl shrink-0"><Gem size={24} className="text-white"/></div>
+                            <div className="h-12 w-12 rounded-2xl bg-secondary flex items-center justify-center shadow-xl shrink-0"><Gem size={24} className="text-white"/></div>
                             <div className="flex-1">
                                 <p className="font-black text-[13px] uppercase tracking-wide">CUSTOM EMBLEMS</p>
                                 <p className="text-white/40 text-[11px] font-bold mt-0.5">Stylize your workspace identity.</p>
@@ -360,7 +359,7 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                     </div>
 
                     <div className="mt-10">
-                        <Button className="w-full h-16 bg-[#eb459e] hover:bg-[#d83c90] text-white font-black uppercase text-sm tracking-[0.2em] rounded-2xl shadow-2xl shadow-[#eb459e]/20 transition-transform active:scale-95">
+                        <Button className="w-full h-16 bg-accent hover:bg-accent/90 text-secondary font-black uppercase text-sm tracking-[0.2em] rounded-2xl shadow-2xl shadow-accent/20 transition-transform active:scale-95">
                             UPGRADE WORKSPACE
                         </Button>
                     </div>

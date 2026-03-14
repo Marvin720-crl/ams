@@ -80,12 +80,12 @@ export default function ChatSidebar({
 
   return (
     <div className={cn(
-      "w-72 bg-[#2b2d31] flex flex-col border-r border-black/20 shrink-0 transition-all duration-300 ease-in-out",
+      "w-72 bg-[#070b16] flex flex-col border-r border-white/5 shrink-0 transition-all duration-300 ease-in-out",
       "fixed inset-y-0 left-0 z-[70] md:relative md:translate-x-0 md:w-72",
       isOpen ? "translate-x-0" : "-translate-x-full"
     )}>
       {/* SERVER HEADER */}
-      <div className="h-16 px-4 border-b border-black/20 flex items-center justify-between hover:bg-white/5 transition cursor-pointer group">
+      <div className="h-16 px-4 border-b border-white/5 flex items-center justify-between hover:bg-white/5 transition cursor-pointer group">
         <span className="text-white font-black text-sm uppercase tracking-tight">Academic Hub</span>
         <button onClick={onClose} className="md:hidden text-white/50 hover:text-white">
           <X size={20}/>
@@ -134,16 +134,16 @@ export default function ChatSidebar({
               <DialogTrigger asChild>
                 <Plus size={14} className="cursor-pointer hover:text-white transition" />
               </DialogTrigger>
-              <DialogContent className="bg-[#313338] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg z-[100] md:left-[calc(50%+144px)] md:-translate-x-1/2 lg:left-[calc(50%+200px)] xl:left-[calc(50%+240px)]">
+              <DialogContent className="bg-[#0a0f1e] border-none text-white rounded-[2rem] p-10 shadow-2xl w-[90vw] max-w-lg z-[100] md:left-[calc(50%+144px)] md:-translate-x-1/2 lg:left-[calc(50%+200px)] xl:left-[calc(50%+240px)]">
                 <DialogHeader>
                   <DialogTitle className="font-black text-3xl uppercase tracking-tighter mb-8 text-white">START A CONVERSATION</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-8">
                   <div className="relative group">
-                    <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-red-500 transition-colors" />
+                    <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
                     <Input 
                       placeholder="Search name or ID..." 
-                      className="bg-black/20 border-2 border-red-600 focus:ring-0 focus:border-red-500 rounded-2xl pl-14 h-16 text-white text-lg font-bold transition-all shadow-xl placeholder:text-white/10" 
+                      className="bg-black/20 border-2 border-primary focus:ring-0 focus:border-primary rounded-2xl pl-14 h-16 text-white text-lg font-bold transition-all shadow-xl placeholder:text-white/10" 
                       value={dmSearch} 
                       onChange={(e)=>setDmSearch(e.target.value)} 
                     />
@@ -161,12 +161,12 @@ export default function ChatSidebar({
                           onClick={() => { onStartDM(u.id); setDmSearch(''); }} 
                           className="w-full flex items-center gap-5 p-4 rounded-2xl hover:bg-white/5 transition-all group active:scale-[0.98]"
                         >
-                          <Avatar className="h-14 w-14 border-2 border-white/5 group-hover:border-red-600 transition-colors">
+                          <Avatar className="h-14 w-14 border-2 border-white/5 group-hover:border-primary transition-colors">
                             <AvatarImage src={u.profilePic}/>
                             <AvatarFallback className="bg-primary text-white font-black text-lg">{u.name?.[0]}</AvatarFallback>
                           </Avatar>
                           <div className="text-left flex-1 overflow-hidden">
-                            <p className="text-lg font-black text-white truncate group-hover:text-red-500 transition-colors">{u.name}</p>
+                            <p className="text-lg font-black text-white truncate group-hover:text-primary transition-colors">{u.name}</p>
                             <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mt-0.5">{u.role.replace('_', ' ')} • {u.id}</p>
                           </div>
                         </button>
@@ -193,7 +193,7 @@ export default function ChatSidebar({
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={otherUser?.profilePic}/>
-                    <AvatarFallback className="bg-muted text-white font-black text-xs">{otherUser?.name?.[0] || '?'}</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-white font-black text-xs">{otherUser?.name?.[0] || '?'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 text-left overflow-hidden">
                     <p className="text-sm font-bold truncate leading-none mb-1">{otherUser?.name || conv.name}</p>
@@ -207,15 +207,15 @@ export default function ChatSidebar({
       </div>
 
       {/* USER FOOTER */}
-      <div className="bg-[#232428] p-2 h-16 flex items-center gap-2 border-t border-black/10">
+      <div className="bg-[#050810] p-2 h-16 flex items-center gap-2 border-t border-white/5">
         <div className="flex-1 flex items-center gap-3 p-1.5 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
           <div className="relative">
-            <Avatar className="h-9 w-9 border border-black/20">
+            <Avatar className="h-9 w-9 border border-white/10">
               <AvatarImage src={user?.profilePic}/>
               <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name?.[0]}</AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center shadow-lg">
-              <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-accent rounded-full border-2 border-[#050810] flex items-center justify-center shadow-lg">
+              <div className="w-1.5 h-1.5 bg-background rounded-full animate-pulse" />
             </div>
           </div>
           <div className="overflow-hidden">

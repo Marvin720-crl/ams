@@ -209,7 +209,7 @@ export default function ChatContainer() {
 
   if (loading && conversations.length === 0) {
     return (
-      <div className="h-[calc(100vh-180px)] flex items-center justify-center bg-[#313338] rounded-3xl border border-white/5 shadow-xl">
+      <div className="h-[calc(100vh-180px)] flex items-center justify-center bg-[#0a0f1e] rounded-3xl border border-white/5 shadow-xl">
         <div className="text-center space-y-4">
           <Loader2 className="animate-spin text-primary h-12 w-12 mx-auto"/>
           <p className="text-white/40 font-black uppercase text-[10px] tracking-widest">Warp Speed Loading...</p>
@@ -219,7 +219,7 @@ export default function ChatContainer() {
   }
 
   return (
-    <div className="h-[calc(100vh-180px)] bg-[#313338] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
+    <div className="h-[calc(100vh-180px)] bg-[#0a0f1e] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/60 z-[65] md:hidden"
@@ -237,7 +237,7 @@ export default function ChatContainer() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col bg-[#313338]">
+      <div className="flex-1 flex flex-col bg-[#0a0f1e]">
         {selectedConv ? (
           <ChatWindow
             conversation={selectedConv}

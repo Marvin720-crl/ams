@@ -5,31 +5,34 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
+    --foreground: 222 47% 11%; /* Dark Blueish Foreground */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 222 47% 11%;
     
-    /* Primary Red #E30613 */
-    --primary: 356 95% 45%;
+    /* Primary Maroon #800000 */
+    --primary: 0 100% 25%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 356 95% 45%;
+    /* Secondary Dark Blue #0f172a */
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted tones */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
     
-    --accent: 356 95% 97%;
-    --accent-foreground: 356 95% 45%;
+    /* Accent Yellow #FFCC00 */
+    --accent: 48 100% 50%;
+    --accent-foreground: 222 47% 11%;
     
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
     
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 356 95% 45%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 0 100% 25%;
     --radius: 1.25rem;
   }
 }
@@ -57,8 +60,8 @@
 }
 
 .hero-landscape {
-  @apply relative overflow-hidden rounded-[2.5rem] bg-[#E30613] text-white shadow-2xl;
-  background-image: linear-gradient(135deg, #E30613 0%, #b3050f 100%);
+  @apply relative overflow-hidden rounded-[2.5rem] text-white shadow-2xl;
+  background-image: linear-gradient(135deg, #800000 0%, #4d0000 100%);
 }
 
 .glass-card {

@@ -95,8 +95,8 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
   }
 
   return (
-    <div className="min-h-screen bg-muted/10 flex flex-col">
-      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-md print:hidden">
+    <div className="min-h-screen bg-[#fcfcfc] flex flex-col">
+      <header className="bg-primary text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-lg print:hidden">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -119,7 +119,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setGuideOpen(true)}
-            className="hidden md:flex h-10 px-4 items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full transition-all border border-white/10"
+            className="hidden md:flex h-10 px-4 items-center gap-2 bg-accent text-secondary hover:bg-accent/90 rounded-full transition-all border border-accent/10"
           >
             <HelpCircle size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest">Tutorial</span>
@@ -142,27 +142,27 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+              className="fixed inset-0 bg-secondary/60 z-40 lg:hidden backdrop-blur-sm"
             />
           )}
         </AnimatePresence>
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#f8f8f8] border-r w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-white border-r border-secondary/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div 
             onClick={() => handleNav('profile')}
             className="pt-12 pb-10 px-6 flex flex-col items-center bg-gradient-to-b from-primary/5 to-transparent cursor-pointer group"
           >
-            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden">
+            <div className="w-24 h-24 rounded-[1.75rem] bg-primary flex items-center justify-center text-4xl text-white font-black shadow-xl shadow-primary/20 rotate-3 mb-6 transition-transform group-hover:rotate-0 overflow-hidden border-4 border-accent/20">
               {user?.profilePic ? (
                 <img src={user.profilePic} alt="avatar" className="w-full h-full object-cover" />
               ) : (
                 user?.name?.charAt(0) || 'S'
               )}
             </div>
-            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-foreground px-4 group-hover:text-primary transition-colors">
+            <h2 className="text-sm font-black uppercase tracking-tight text-center leading-tight text-secondary px-4 group-hover:text-primary transition-colors">
               {user?.name}
             </h2>
             <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground text-center">
@@ -181,20 +181,20 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                   className={cn(
                     "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all group",
                     isActive 
-                      ? "bg-white text-primary border-l-4 border-primary shadow-sm scale-[1.02]" 
-                      : "text-muted-foreground hover:bg-white/50 hover:text-primary"
+                      ? "bg-secondary text-accent border-l-4 border-accent shadow-lg scale-[1.02]" 
+                      : "text-secondary/60 hover:bg-primary/5 hover:text-primary"
                   )}
                 >
                   <Icon size={18} className={cn(
                     "transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                    isActive ? "text-accent" : "text-secondary/40 group-hover:text-primary"
                   )} />
                   {item.label}
                 </button>
               );
             })}
 
-            <div className="pt-6 mt-6 border-t border-primary/5">
+            <div className="pt-6 mt-6 border-t border-secondary/5">
               <button
                 onClick={() => setGuideOpen(true)}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 transition-all"
@@ -206,7 +206,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 bg-muted/5 p-4 md:p-10">
+        <main className="flex-1 min-w-0 bg-secondary/[0.02] p-4 md:p-10">
           <div className="max-w-7xl mx-auto h-full">
             <motion.div
               key={currentView}
