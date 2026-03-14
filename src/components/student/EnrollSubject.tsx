@@ -9,7 +9,8 @@ import {
   Loader2,
   Info,
   CheckCircle2,
-  BookOpen
+  BookOpen,
+  User as UserIcon
 } from 'lucide-react';
 
 import {
@@ -44,7 +45,7 @@ export default function EnrollSubject() {
 
   // Extract stable primitives for dependencies
   const userId = user?.id;
-  const userDepartment = user?.department;
+  const userDepartment = user?.department || 'college'; // Fallback to college if missing
 
   /* -----------------------------
      LOAD INITIAL DATA
@@ -74,14 +75,15 @@ export default function EnrollSubject() {
       setExistingEnrollments(enrollments.filter((e: Enrollment) => e.studentId === userId));
       setAllAvailableSubjects(subjects);
 
+      // Load teachers from the same department OR those with subjects in approved terms
       const teacherUsers = users.filter(u => 
         u.role === 'teacher' && 
-        u.department === userDepartment
+        (!u.department || u.department === userDepartment)
       );
 
       const teachersWithSubjects = teacherUsers.filter(t =>
         subjects.some(
-          s => s.teacherId === t.id && approvedTerms.includes(s.termId)
+          s => s.teacherId === t.id && (approvedTerms.includes(s.termId))
         )
       );
 
@@ -103,11 +105,13 @@ export default function EnrollSubject() {
   ----------------------------- */
 
   const displayedSubjects = useMemo(() => {
-    if (!selectedTeacher || !userId || !userDepartment) return [];
+    if (!selectedTeacher || !userId) return [];
+    
+    // resilient filtering: if userDepartment is missing, show based on teacher only
     return allAvailableSubjects.filter(s =>
       s.teacherId === selectedTeacher &&
       myApprovedTerms.includes(s.termId) &&
-      s.department === userDepartment
+      (!s.department || s.department === userDepartment)
     );
   }, [allAvailableSubjects, selectedTeacher, myApprovedTerms, userId, userDepartment]);
 
@@ -207,7 +211,7 @@ export default function EnrollSubject() {
     <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
         <h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
-          ENROLL IN SUBJECT ({userDepartment?.toUpperCase()})
+          ENROLL IN SUBJECT ({userDepartment?.toUpperCase() || 'COLLEGE'})
         </h2>
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
           Ipinapakita lamang ang mga Instructor at Subjects para sa iyong department
@@ -226,19 +230,22 @@ export default function EnrollSubject() {
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
             {userDepartment === 'shs' ? 'SHS Instructor' : 'College Instructor'}
           </Label>
-          <select
-            value={selectedTeacher}
-            onChange={(e) => {
-              setSelectedTeacher(e.target.value);
-              setSelectedSubjectIds([]);
-            }}
-            className="w-full h-14 bg-muted/30 border-none rounded-2xl px-6 font-bold focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
-          >
-            <option value="">Select Instructor</option>
-            {teachers.map(t => (
-              <option key={t.id} value={t.id}>{t.name} ({t.id})</option>
-            ))}
-          </select>
+          <div className="relative">
+            <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-primary/40 h-5 w-5 pointer-events-none" />
+            <select
+              value={selectedTeacher}
+              onChange={(e) => {
+                setSelectedTeacher(e.target.value);
+                setSelectedSubjectIds([]);
+              }}
+              className="w-full h-14 bg-muted/30 border-none rounded-2xl pl-14 pr-6 font-bold focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+            >
+              <option value="">Select Instructor</option>
+              {teachers.map(t => (
+                <option key={t.id} value={t.id}>{t.name} ({t.id})</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {selectedTeacher && (
@@ -255,19 +262,20 @@ export default function EnrollSubject() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {displayedSubjects.map(s => {
-                  const isEnrolled = existingEnrollments.some(e => e.subjectId === s.id);
+                  const isEnrolled = existingEnrollments.some(e => e.subjectId === s.id && e.status === 'approved');
+                  const isPending = existingEnrollments.some(e => e.subjectId === s.id && e.status === 'pending');
                   const isSelected = selectedSubjectIds.includes(s.id);
                   
                   return (
                     <div 
                       key={s.id} 
                       onClick={() => {
-                        if (!isEnrolled) toggleSubject(s.id);
+                        if (!isEnrolled && !isPending) toggleSubject(s.id);
                       }}
                       className={cn(
                         "p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group",
                         isSelected ? "border-primary bg-primary/5" : "border-primary/5 hover:border-primary/20 bg-white",
-                        isEnrolled && "opacity-50 cursor-not-allowed grayscale"
+                        (isEnrolled || isPending) && "opacity-50 cursor-not-allowed"
                       )}
                     >
                       <div className="flex-1 pr-4">
@@ -283,6 +291,11 @@ export default function EnrollSubject() {
                         <div className="flex items-center gap-1 text-[9px] font-black text-green-600 uppercase">
                           <CheckCircle2 size={14} />
                           Enrolled
+                        </div>
+                      ) : isPending ? (
+                        <div className="flex items-center gap-1 text-[9px] font-black text-amber-600 uppercase">
+                          <Loader2 size={14} className="animate-spin" />
+                          Pending
                         </div>
                       ) : (
                         <div className="flex items-center h-full pointer-events-none">
@@ -314,7 +327,7 @@ export default function EnrollSubject() {
 
       <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl text-center">
         <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-relaxed">
-          Protocol: Kasalukuyan kang nasa <span className="underline">{userDepartment?.toUpperCase()}</span> department. Tanging mga kaugnay na tala ang iyong makikita.
+          Protocol: Kasalukuyan kang nasa <span className="underline">{userDepartment?.toUpperCase() || 'GENERAL'}</span> department. Tanging mga kaugnay na tala ang iyong makikita.
         </p>
       </div>
     </div>

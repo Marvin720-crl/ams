@@ -1,284 +1,226 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 import {
-getEnrollmentsAction,
-getSubjectsAction
+  getEnrollmentsAction,
+  getSubjectsAction
 } from '@/app/actions/dbActions';
 
 import {
-Subject,
-Enrollment
+  Subject,
+  Enrollment
 } from '@/utils/storage';
 
 import {
-Tabs,
-TabsContent,
-TabsList,
-TabsTrigger
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from "@/components/ui/tabs";
 
 import StudentCalendar from './StudentCalendar';
 import SubjectDetailsStudent from './SubjectDetailsStudent';
 
 import {
-Card,
-CardContent
+  Card,
+  CardContent
 } from '@/components/ui/card';
 
 import {
-Calendar,
-BookOpen,
-Loader2
+  Calendar,
+  BookOpen,
+  Loader2,
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function MySubjects() {
-
   const { user } = useAuth();
 
-  const [subjects,setSubjects] = useState<Subject[]>([]);
-  const [selectedSubject,setSelectedSubject] = useState<Subject | null>(null);
-  const [loading,setLoading] = useState(true);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-
-    if(user){
-
+  useEffect(() => {
+    if (user) {
       loadSubjects();
-
     }
-
-  },[user]);
+  }, [user]);
 
   const loadSubjects = async () => {
-
-    if(!user) return;
-
+    if (!user) return;
     setLoading(true);
+    try {
+      const [allEnrollments, allSubjects] = await Promise.all([
+        getEnrollmentsAction(),
+        getSubjectsAction()
+      ]);
 
-    const enrollments:Enrollment[] =
-      await getEnrollmentsAction();
-
-    const allSubjects:Subject[] =
-      await getSubjectsAction();
-
-    const approvedEnrollments =
-      enrollments.filter(
-        e =>
-          e.studentId === user.id &&
-          e.status === 'approved'
-      );
-
-    const subjectIds =
-      approvedEnrollments.map(e=>e.subjectId);
-
-    const studentSubjects =
-      allSubjects.filter(s =>
-        subjectIds.includes(s.id)
-      );
-
-    setSubjects(studentSubjects);
-
-    setLoading(false);
-
+      const myEnrollments = allEnrollments.filter(e => e.studentId === user.id);
+      setEnrollments(myEnrollments);
+      setSubjects(allSubjects);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if(selectedSubject){
+  const approvedSubjects = useMemo(() => {
+    const approvedIds = enrollments
+      .filter(e => e.status === 'approved')
+      .map(e => e.subjectId);
+    return subjects.filter(s => approvedIds.includes(s.id));
+  }, [subjects, enrollments]);
 
+  const pendingSubjects = useMemo(() => {
+    const pendingIds = enrollments
+      .filter(e => e.status === 'pending')
+      .map(e => e.subjectId);
+    return subjects.filter(s => pendingIds.includes(s.id));
+  }, [subjects, enrollments]);
+
+  if (selectedSubject) {
     return (
-
       <SubjectDetailsStudent
         subject={selectedSubject}
-        onBack={()=>setSelectedSubject(null)}
+        onBack={() => setSelectedSubject(null)}
       />
-
     );
-
   }
 
   return (
-
-    <div className="space-y-6">
-
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       {/* Header */}
-
       <div>
-
-        <h2 className="text-2xl sm:text-3xl font-bold">
-
-          My Subjects
-
+        <h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
+          My Academic Load
         </h2>
-
-        <p className="text-gray-500">
-
-          View and manage your enrolled subjects
-
+        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
+          Manage your active and pending course subjects
         </p>
-
       </div>
 
       {/* Tabs */}
-
       <Tabs defaultValue="subjects" className="w-full">
-
-        <TabsList
-          className="
-          grid
-          grid-cols-2
-          max-w-sm
-          bg-muted
-          rounded-lg
-          "
-        >
-
-          <TabsTrigger value="subjects">
-
-            My Subjects
-
+        <TabsList className="bg-white border-2 border-primary/5 h-14 p-1.5 rounded-full mb-8">
+          <TabsTrigger value="subjects" className="rounded-full font-black uppercase text-[10px] tracking-widest px-8 data-[state=active]:bg-primary data-[state=active]:text-white">
+            Current Subjects
           </TabsTrigger>
-
-          <TabsTrigger value="schedule">
-
+          <TabsTrigger value="schedule" className="rounded-full font-black uppercase text-[10px] tracking-widest px-8 data-[state=active]:bg-primary data-[state=active]:text-white">
             Weekly Schedule
-
           </TabsTrigger>
-
         </TabsList>
 
-        {/* SUBJECT LIST */}
-
-        <TabsContent value="subjects" className="mt-6">
-
+        <TabsContent value="subjects" className="mt-0">
           {loading ? (
-
-            <div className="flex justify-center py-12">
-
-              <Loader2
-                className="animate-spin text-primary"
-                size={32}
-              />
-
+            <div className="flex justify-center py-20">
+              <Loader2 className="animate-spin text-primary" size={40} />
             </div>
-
-          ) : subjects.length === 0 ? (
-
-            <div className="
-            text-center
-            py-16
-            text-gray-400
-            ">
-
-              <BookOpen
-                size={48}
-                className="mx-auto mb-4"
-              />
-
-              No enrolled subjects yet
-
-            </div>
-
           ) : (
+            <div className="space-y-10">
+              {/* APPROVED SUBJECTS */}
+              <section>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                    <CheckCircle2 size={18} />
+                  </div>
+                  <h3 className="font-black text-sm uppercase tracking-widest text-foreground">Enrolled ({approvedSubjects.length})</h3>
+                </div>
 
-            <div className="
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            lg:grid-cols-3
-            gap-6
-            ">
+                {approvedSubjects.length === 0 ? (
+                  <div className="p-12 border-2 border-dashed rounded-[2.5rem] text-center bg-white/50">
+                    <BookOpen className="mx-auto text-muted-foreground/20 mb-4" size={48} />
+                    <p className="text-sm font-bold text-muted-foreground uppercase">Walang aktibong subjects.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {approvedSubjects.map(subject => {
+                      const schedule = subject.schedules?.[0];
+                      return (
+                        <Card
+                          key={subject.id}
+                          onClick={() => setSelectedSubject(subject)}
+                          className="cursor-pointer hover:shadow-2xl transition-all border-primary/5 hover:border-primary/20 hover:-translate-y-1 bg-white rounded-[2rem] overflow-hidden group"
+                        >
+                          <div className="h-2 bg-primary" />
+                          <CardContent className="p-8 space-y-4">
+                            <div className="space-y-1">
+                              <h3 className="font-black text-xl text-primary leading-tight uppercase group-hover:text-primary/80 transition-colors">
+                                {subject.name}
+                              </h3>
+                              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{subject.code || 'SUBJ'}</p>
+                            </div>
 
-              {subjects.map(subject=>{
+                            {schedule && (
+                              <div className="flex items-center gap-2 text-xs font-bold text-foreground/70 bg-muted/30 p-3 rounded-xl">
+                                <Clock size={14} className="text-primary" />
+                                {schedule.day} • {schedule.startTime}
+                              </div>
+                            )}
 
-                const schedule =
-                  subject.schedules?.[0];
+                            <div className="border-t pt-4 flex justify-between items-center">
+                              <div>
+                                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Instructor</p>
+                                <p className="text-xs font-bold">{subject.teacherName}</p>
+                              </div>
+                              <Badge variant="success" className="h-6 font-black text-[9px] uppercase tracking-tighter">Active</Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
 
-                return(
+              {/* PENDING SUBJECTS */}
+              {pendingSubjects.length > 0 && (
+                <section className="pt-4 border-t border-primary/5">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+                      <AlertCircle size={18} />
+                    </div>
+                    <h3 className="font-black text-sm uppercase tracking-widest text-foreground">Pending Approval ({pendingSubjects.length})</h3>
+                  </div>
 
-                  <Card
-                    key={subject.id}
-                    onClick={()=>setSelectedSubject(subject)}
-                    className="
-                    cursor-pointer
-                    hover:shadow-lg
-                    transition
-                    border
-                    "
-                  >
-
-                    <div className="h-1 bg-primary"/>
-
-                    <CardContent className="p-5 space-y-3">
-
-                      <h3 className="font-semibold text-lg">
-
-                        {subject.name}
-
-                      </h3>
-
-                      {schedule && (
-
-                        <p className="
-                        text-sm
-                        text-muted-foreground
-                        flex
-                        items-center
-                        gap-1
-                        ">
-
-                          <Calendar size={14}/>
-
-                          {schedule.day} • {schedule.startTime}
-
-                        </p>
-
-                      )}
-
-                      <div className="border-t pt-3">
-
-                        <p className="text-xs text-muted-foreground">
-
-                          Instructor
-
-                        </p>
-
-                        <p className="text-sm font-medium">
-
-                          {subject.teacherName || "N/A"}
-
-                        </p>
-
-                      </div>
-
-                    </CardContent>
-
-                  </Card>
-
-                );
-
-              })}
-
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pendingSubjects.map(subject => (
+                      <Card
+                        key={subject.id}
+                        className="bg-amber-50/50 border-amber-100 rounded-[2rem] shadow-sm overflow-hidden"
+                      >
+                        <CardContent className="p-8 space-y-4">
+                          <div className="space-y-1">
+                            <h3 className="font-black text-lg text-amber-900 leading-tight uppercase opacity-70">
+                              {subject.name}
+                            </h3>
+                            <p className="text-[9px] font-black text-amber-700/50 uppercase tracking-[0.2em]">{subject.code || 'SUBJ'}</p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-[10px] font-black text-amber-600 uppercase tracking-widest">
+                            <Loader2 size={14} className="animate-spin" />
+                            Awaiting Instructor
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
-
           )}
-
         </TabsContent>
 
-        {/* WEEKLY CALENDAR */}
-
-        <TabsContent value="schedule" className="mt-6">
-
-          <StudentCalendar subjects={subjects} />
-
+        <TabsContent value="schedule" className="mt-0">
+          <StudentCalendar subjects={approvedSubjects} />
         </TabsContent>
-
       </Tabs>
-
     </div>
-
   );
-
 }
