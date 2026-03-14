@@ -109,11 +109,14 @@ export default function ChatSidebar({
               <button
                 key={conv.id}
                 onClick={() => onSelect(conv)}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition ${
-                    selectedId === conv.id ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white'
-                  }`}
+                className={cn(
+                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition",
+                  selectedId === conv.id 
+                    ? 'bg-white/10 text-white' 
+                    : 'text-white/50 hover:bg-white/5 hover:text-white'
+                )}
               >
-                <Hash size={18}/>
+                <Hash size={18} className={cn(selectedId === conv.id ? "text-white" : "text-white/30")} />
                 <span className="text-sm font-bold truncate">{conv.name}</span>
               </button>
             ))}
@@ -131,26 +134,37 @@ export default function ChatSidebar({
               <DialogTrigger asChild>
                 <Plus size={14} className="cursor-pointer hover:text-white transition" />
               </DialogTrigger>
-              <DialogContent className="bg-[#313338] border-none text-white rounded-2xl p-6">
-                <DialogHeader><DialogTitle className="font-black text-xl">Start a Conversation</DialogTitle></DialogHeader>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
-                    <Input placeholder="Search name or ID..." className="bg-black/20 border-none pl-9 h-10 text-white" value={dmSearch} onChange={(e)=>setDmSearch(e.target.value)} />
+              <DialogContent className="bg-[#313338] border-none text-white rounded-2xl p-6 shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="font-black text-xl uppercase tracking-tighter">Start a Conversation</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div className="relative group">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+                    <Input 
+                      placeholder="Search name or ID..." 
+                      className="bg-black/40 border-2 border-white/10 focus:border-primary rounded-xl pl-10 h-12 text-white transition-all" 
+                      value={dmSearch} 
+                      onChange={(e)=>setDmSearch(e.target.value)} 
+                    />
                   </div>
-                  <div className="max-h-60 overflow-y-auto space-y-1 no-scrollbar">
-                    {filteredUsers.map(u => (
-                      <button key={u.id} onClick={() => { onStartDM(u.id); setDmSearch(''); }} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={u.profilePic}/>
-                          <AvatarFallback>{u.name?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="text-left">
-                          <p className="text-sm font-bold">{u.name}</p>
-                          <p className="text-[10px] text-white/40 uppercase">{u.role} • {u.id}</p>
-                        </div>
-                      </button>
-                    ))}
+                  <div className="max-h-60 overflow-y-auto space-y-1 no-scrollbar mt-2">
+                    {filteredUsers.length === 0 ? (
+                      <p className="text-center text-white/20 py-8 text-xs font-bold uppercase tracking-widest">No users found</p>
+                    ) : (
+                      filteredUsers.map(u => (
+                        <button key={u.id} onClick={() => { onStartDM(u.id); setDmSearch(''); }} className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors">
+                          <Avatar className="h-10 w-10 border border-white/5">
+                            <AvatarImage src={u.profilePic}/>
+                            <AvatarFallback className="bg-primary text-white font-black text-xs">{u.name?.[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="text-left flex-1 overflow-hidden">
+                            <p className="text-sm font-bold truncate">{u.name}</p>
+                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">{u.role.replace('_', ' ')} • {u.id}</p>
+                          </div>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               </DialogContent>
@@ -165,17 +179,18 @@ export default function ChatSidebar({
                 <button
                   key={conv.id}
                   onClick={() => onSelect(conv)}
-                  className={`w-full flex items-center gap-3 px-2 py-1.5 rounded-md transition ${
-                      selectedId === conv.id ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white'
-                    }`}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-2 py-2 rounded-md transition",
+                    selectedId === conv.id ? 'bg-white/10 text-white' : 'text-white/50 hover:bg-white/5 hover:text-white'
+                  )}
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={otherUser?.profilePic}/>
-                    <AvatarFallback>{otherUser?.name?.[0]}</AvatarFallback>
+                    <AvatarFallback className="bg-muted text-white font-black text-xs">{otherUser?.name?.[0] || '?'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 text-left overflow-hidden">
-                    <p className="text-sm font-bold truncate">{otherUser?.name || conv.name}</p>
-                    <p className="text-[10px] text-white/40 truncate leading-none">{conv.lastMessage || "Start chatting"}</p>
+                    <p className="text-sm font-bold truncate leading-none mb-1">{otherUser?.name || conv.name}</p>
+                    <p className="text-[10px] text-white/30 truncate leading-none font-medium">{conv.lastMessage || "Start chatting"}</p>
                   </div>
                 </button>
               );
@@ -185,23 +200,29 @@ export default function ChatSidebar({
       </div>
 
       {/* USER FOOTER */}
-      <div className="bg-[#232428] p-2 h-14 flex items-center gap-2">
-        <div className="flex-1 flex items-center gap-2 p-1 hover:bg-white/5 rounded-lg">
+      <div className="bg-[#232428] p-2 h-16 flex items-center gap-2 border-t border-black/10">
+        <div className="flex-1 flex items-center gap-3 p-1.5 hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
           <div className="relative">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-9 w-9 border border-black/20">
               <AvatarImage src={user?.profilePic}/>
               <AvatarFallback className="bg-primary text-white font-black text-xs">{user?.name?.[0]}</AvatarFallback>
             </Avatar>
-            <div className="absolute -top-1 -left-1 w-4 h-4 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center text-[8px] font-bold text-white">1</div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-600 rounded-full border-2 border-[#232428] flex items-center justify-center shadow-lg">
+              <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            </div>
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-black text-white truncate leading-none mb-0.5">{user?.name || 'User'}</p>
+            <p className="text-xs font-black text-white truncate leading-none mb-1 uppercase tracking-tight">{user?.name || 'User'}</p>
             <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none truncate">{user?.id}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Volume2 size={18} className="text-white/60 hover:text-white cursor-pointer"/>
-          <Settings size={18} className="text-white/60 hover:text-white cursor-pointer"/>
+        <div className="flex items-center gap-1.5 pr-1">
+          <button className="p-1.5 text-white/40 hover:text-white hover:bg-white/5 rounded-md transition-all">
+            <Volume2 size={18}/>
+          </button>
+          <button className="p-1.5 text-white/40 hover:text-white hover:bg-white/5 rounded-md transition-all">
+            <Settings size={18}/>
+          </button>
         </div>
       </div>
     </div>
