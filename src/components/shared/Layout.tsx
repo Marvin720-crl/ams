@@ -105,7 +105,14 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <div className="flex items-center">
-            <Image src="/logo.png" alt="AMA Student Portal" width={200} height={52} className="h-14 w-auto" />
+            <Image 
+              src="/logo.png" 
+              alt="AMA Student Portal" 
+              width={280} 
+              height={72} 
+              className="h-20 w-auto" 
+              priority
+            />
           </div>
         </div>
         
