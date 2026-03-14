@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../shared/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList, ShieldAlert } from 'lucide-react';
+import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList, ShieldAlert, Palette } from 'lucide-react';
 import ManageUsers from './ManageUsers';
 import AllRequests from './AllRequests';
 import AttendanceReports from './AttendanceReports';
@@ -12,6 +13,7 @@ import AuditLog from './AuditLog';
 import SystemSettings from './SystemSettings';
 import TermManagement from './TermManagement';
 import SecurityCenter from './SecurityCenter';
+import ThemeCustomizer from './ThemeCustomizer';
 import ProfileView from '../shared/ProfileView';
 import { getUsersAction, getEnrollmentsAction, getLabRequestsAction, getTermsAction } from '@/app/actions/dbActions';
 
@@ -86,9 +88,18 @@ export default function AdminDashboard() {
 
   const renderHome = () => (
     <div className="space-y-10">
-      <div>
-        <h2 className="text-4xl font-black text-primary tracking-tighter uppercase leading-none">System Control</h2>
-        <p className="text-muted-foreground font-bold text-[10px] tracking-[0.2em] mt-2 uppercase">Root Management v1.0</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-4xl font-black text-primary tracking-tighter uppercase leading-none">System Control</h2>
+          <p className="text-muted-foreground font-bold text-[10px] tracking-[0.2em] mt-2 uppercase">Root Management v1.0</p>
+        </div>
+        <button 
+          onClick={() => setCurrentView('design')}
+          className="h-14 px-8 bg-white border-2 border-primary/10 rounded-2xl flex items-center gap-3 shadow-xl hover:border-primary transition-all active:scale-95 group"
+        >
+          <Palette className="h-5 w-5 text-primary group-hover:animate-spin" />
+          <span className="font-black uppercase text-[10px] tracking-widest text-primary">Open Design Lab</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -143,6 +154,7 @@ export default function AdminDashboard() {
       case 'security': return <SecurityCenter />;
       case 'audit': return <AuditLog />;
       case 'settings': return <SystemSettings />;
+      case 'design': return <ThemeCustomizer />;
       case 'profile': return <ProfileView />;
       default: return renderHome();
     }

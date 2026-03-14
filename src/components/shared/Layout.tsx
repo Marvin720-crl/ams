@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert, HelpCircle
+  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert, HelpCircle, Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -58,6 +59,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       case 'admin':
         return [
           { id: 'home', label: 'Dashboard', icon: Home },
+          { id: 'design', label: 'Design Lab', icon: Palette },
           { id: 'security', label: 'Security Center', icon: ShieldAlert },
           { id: 'terms', label: 'Term Management', icon: School },
           { id: 'users', label: 'Manage Users', icon: Users },
@@ -148,7 +150,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         </AnimatePresence>
 
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-[#14343A] border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
+          "fixed inset-y-0 left-0 z-[60] lg:z-40 lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] bg-secondary border-r border-white/5 w-72 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 print:hidden shadow-2xl lg:shadow-none",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div 

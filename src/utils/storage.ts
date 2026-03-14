@@ -3,6 +3,16 @@
 export type UserRole = 'admin' | 'teacher' | 'student' | 'library_admin';
 export type Department = 'college' | 'shs';
 
+export interface ThemeConfig {
+  primary: string; // Hex
+  secondary: string;
+  accent: string;
+  background: string;
+  radius: number; // in rem or px
+  glassIntensity: number;
+  fontFamily: string;
+}
+
 export interface User {
   id: string; // USN or EMP number
   name: string;

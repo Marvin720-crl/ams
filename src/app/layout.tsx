@@ -1,6 +1,8 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { DesignProvider } from '@/contexts/DesignContext';
 
 export const metadata: Metadata = {
   title: 'AMS:AMACC - Student Portal Management',
@@ -20,9 +22,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <DesignProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </DesignProvider>
       </body>
     </html>
   );
