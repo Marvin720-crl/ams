@@ -58,6 +58,7 @@ export const hexToHsl = (hex: string) => {
     }
     h /= 6;
   }
+  // Modern space-separated format for Tailwind CSS HSL variables
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
@@ -101,7 +102,7 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
     setConfig(prev => {
       const newConfig = { ...prev, ...updates };
       // Immediate injection for maximum smoothness
-      applyThemeToDocument(updates);
+      applyThemeToDocument(newConfig);
       return newConfig;
     });
   }, []);

@@ -92,7 +92,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
   }
 
   return (
-    <div className="min-h-screen bg-[#CED3D7]/20 flex flex-col">
+    <div className="min-h-screen bg-secondary flex flex-col">
       {/* HEADER: Controlled by Header Variable */}
       <header 
         style={{ backgroundColor: 'hsl(var(--header))' }}
@@ -211,7 +211,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 bg-secondary/[0.02] p-4 md:p-10">
+        <main className="flex-1 min-w-0 bg-secondary p-4 md:p-10">
           <div className="max-w-7xl mx-auto h-full">
             <motion.div
               key={currentView}
