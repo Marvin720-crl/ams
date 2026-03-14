@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -32,17 +31,11 @@ export default function ChatContainer() {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // Cache for tracking message IDs to prevent duplicates during slow net
   const processedMessageIds = useRef<Set<string>>(new Set());
-
-  /* -------------------------------------- */
-  /* INITIAL LOAD */
-  /* -------------------------------------- */
 
   const initChat = useCallback(async () => {
     if (!user) return;
     
-    // Check if we have cached chat data to avoid spinner
     const cachedConvs = localStorage.getItem(`cache_convs_${user.id}`);
     if (cachedConvs) {
         setConversations(JSON.parse(cachedConvs));
@@ -78,10 +71,6 @@ export default function ChatContainer() {
     }
   }, [user, selectedConv]);
 
-  /* -------------------------------------- */
-  /* LOAD MESSAGES */
-  /* -------------------------------------- */
-
   const loadMessages = async (convId: string) => {
     const cachedMsgs = localStorage.getItem(`cache_msgs_${convId}`);
     if (cachedMsgs) {
@@ -98,10 +87,6 @@ export default function ChatContainer() {
     }
   };
 
-  /* -------------------------------------- */
-  /* REFRESH MESSAGES (SMART POLLING) */
-  /* -------------------------------------- */
-
   const refreshMessages = useCallback(async (convId: string) => {
     try {
       const [msgs, allUsers] = await Promise.all([
@@ -109,9 +94,8 @@ export default function ChatContainer() {
         getUsersAction()
       ]);
       
-      setUsers(allUsers); // Refresh user list for real-time status
+      setUsers(allUsers);
 
-      // Only update state if message count changed to save data
       setMessages(prev => {
         if (prev.length !== msgs.length) {
           processedMessageIds.current = new Set(msgs.map(m => m.id));
@@ -125,16 +109,12 @@ export default function ChatContainer() {
     }
   }, []);
 
-  /* -------------------------------------- */
-  /* POLLING (Adaptive for slow net) */
-  /* -------------------------------------- */
-
   useEffect(() => {
     if (!selectedConv) return;
 
     const interval = setInterval(() => {
       refreshMessages(selectedConv.id);
-    }, 4000); // 4s polling is balanced for slow net
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [selectedConv, refreshMessages]);
@@ -149,13 +129,9 @@ export default function ChatContainer() {
       return;
     }
     setSelectedConv(conv);
-    setIsSidebarOpen(false); // Close sidebar on mobile after selection
+    setIsSidebarOpen(false);
     await loadMessages(conv.id);
   };
-
-  /* -------------------------------------- */
-  /* SEND MESSAGE (ULTRA OPTIMISTIC) */
-  /* -------------------------------------- */
 
   const handleSendMessage = async (
     text: string,
@@ -176,7 +152,6 @@ export default function ChatContainer() {
       fileUrl: file ? 'pending' : undefined
     };
 
-    // Instant UI update
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
@@ -193,7 +168,6 @@ export default function ChatContainer() {
       setMessages(prev => prev.map(m => m.id === tempId ? realMsg : m));
       processedMessageIds.current.add(realMsg.id);
 
-      // Update Sidebar instantly
       setConversations(prev => {
         const updated = prev.map(c => {
           if (c.id !== selectedConv.id) return c;
@@ -206,7 +180,6 @@ export default function ChatContainer() {
         return updated.sort((a, b) => new Date(b.lastTimestamp || 0).getTime() - new Date(a.lastTimestamp || 0).getTime());
       });
     } catch {
-      // Mark as error instead of removing
       toast.error("Message not sent. Weak signal.");
       setMessages(prev => prev.filter(m => m.id !== tempId));
     }
@@ -236,7 +209,7 @@ export default function ChatContainer() {
 
   if (loading && conversations.length === 0) {
     return (
-      <div className="h-[80vh] flex items-center justify-center bg-[#313338] rounded-3xl border border-white/5 shadow-xl">
+      <div className="h-[calc(100vh-180px)] flex items-center justify-center bg-[#313338] rounded-3xl border border-white/5 shadow-xl">
         <div className="text-center space-y-4">
           <Loader2 className="animate-spin text-primary h-12 w-12 mx-auto"/>
           <p className="text-white/40 font-black uppercase text-[10px] tracking-widest">Warp Speed Loading...</p>
@@ -246,8 +219,7 @@ export default function ChatContainer() {
   }
 
   return (
-    <div className="h-[85vh] bg-[#313338] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
-      {/* Overlay for mobile sidebar */}
+    <div className="h-[calc(100vh-180px)] bg-[#313338] rounded-[2rem] shadow-2xl flex overflow-hidden relative">
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/60 z-[65] md:hidden"

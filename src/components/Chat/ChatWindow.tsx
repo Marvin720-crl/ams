@@ -28,9 +28,8 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Real-time Active/Offline Status Logic
     const isPartnerActive = useMemo(() => {
-        if (conversation.type !== 'private') return true; // Channels always "active"
+        if (conversation.type !== 'private') return true;
         
         const otherId = conversation.memberIds.find(id => id !== user?.id);
         const partner = users.find(u => u.id === otherId);
@@ -39,11 +38,9 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
         
         const lastSeen = new Date(partner.lastSeen);
         const now = new Date();
-        // If last activity was within 2 minutes, consider online
         return (now.getTime() - lastSeen.getTime()) < 120000; 
     }, [conversation, users, user?.id]);
 
-    // Speed Optimization: Scroll immediately on new message
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({
@@ -83,7 +80,6 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
         setInputText(prev => prev + emoji);
     };
 
-    // Performance: Memoize the message list to prevent jitter on slow CPUs/Mobile
     const renderedMessages = useMemo(() => {
         return messages.map((msg) => {
             const isMe = msg.senderId === user?.id;
@@ -160,6 +156,12 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
         });
     }, [messages, user?.id]);
 
+    const otherUser = useMemo(() => {
+        if (conversation.type !== 'private') return null;
+        const otherId = conversation.memberIds.find(id => id !== user?.id);
+        return users.find(u => u.id === otherId);
+    }, [conversation, users, user?.id]);
+
     return (
         <div className="flex-1 flex flex-col h-full bg-[#1e1f22] overflow-hidden">
             {/* Chat Header */}
@@ -179,7 +181,9 @@ export default function ChatWindow({ conversation, messages, users, onSend, onTo
                         )}
                     </div>
                     <div className="overflow-hidden">
-                        <span className="text-white font-black text-sm uppercase tracking-tighter block truncate">{conversation.name}</span>
+                        <span className="text-white font-black text-sm uppercase tracking-tighter block truncate">
+                            {conversation.type === 'private' ? otherUser?.name : conversation.name}
+                        </span>
                         {isPartnerActive ? (
                             <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Active Now</span>
                         ) : (
