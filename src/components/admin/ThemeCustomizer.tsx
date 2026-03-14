@@ -18,17 +18,30 @@ import {
   Move,
   Type,
   Maximize,
-  Circle
+  Circle,
+  Smartphone,
+  Monitor,
+  Eye,
+  ChevronRight,
+  GraduationCap,
+  BookOpen,
+  Users,
+  Scan,
+  MessageCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+type PreviewView = 'student-dash' | 'student-subjects' | 'teacher-hub' | 'library-scan';
 
 export default function ThemeCustomizer() {
   const { config, updateConfig, saveConfig, resetToDefault } = useDesign();
   const [saving, setSaving] = useState(false);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
+  const [currentView, setCurrentView] = useState<PreviewView>('student-dash');
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -71,21 +84,138 @@ export default function ThemeCustomizer() {
     </div>
   );
 
+  const renderPreviewContent = () => {
+    switch(currentView) {
+      case 'student-dash':
+        return (
+          <div className="space-y-8 w-full p-8">
+            <div className="flex justify-between items-center">
+              <div className="h-8 w-48 rounded-lg bg-primary/10" style={{ backgroundColor: `${config.primary}20` }} />
+              <div className="h-10 w-10 rounded-full bg-primary/10" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[1,2,3,4].map(i => (
+                <Card key={i} className="p-6 border-none shadow-xl" style={{ borderRadius: `${config.radius}rem` }}>
+                  <div className="h-8 w-8 rounded-xl bg-primary/10 mb-4" />
+                  <div className="h-2 w-20 bg-muted-foreground/20 rounded-full" />
+                </Card>
+              ))}
+            </div>
+            <Card className="p-8 border-none shadow-2xl" style={{ borderRadius: `${config.radius * 1.5}rem` }}>
+              <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" />
+              <div className="space-y-4">
+                {[1,2].map(i => (
+                  <div key={i} className="h-12 w-full bg-muted/30 rounded-xl" />
+                ))}
+              </div>
+            </Card>
+          </div>
+        );
+      case 'student-subjects':
+        return (
+          <div className="space-y-8 w-full p-8">
+            <div className="h-10 w-64 bg-primary/10 rounded-full" />
+            <div className="grid grid-cols-1 gap-6">
+              {[1,2,3].map(i => (
+                <Card key={i} className="p-8 border-none shadow-xl flex items-center justify-between" style={{ borderRadius: `${config.radius * 2}rem` }}>
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-40 bg-primary/20 rounded-full" />
+                      <div className="h-2 w-24 bg-muted-foreground/20 rounded-full" />
+                    </div>
+                  </div>
+                  <ChevronRight className="text-primary/20" />
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      case 'teacher-hub':
+        return (
+          <div className="space-y-8 w-full p-8">
+            <div className="grid grid-cols-2 gap-4">
+              {[1,2,3,4].map(i => (
+                <Card key={i} className="p-6 border-none shadow-xl bg-primary text-white" style={{ backgroundColor: config.primary, borderRadius: `${config.radius}rem` }}>
+                  <div className="h-10 w-10 rounded-xl bg-white/10 mb-4" />
+                  <div className="h-8 w-12 bg-white/20 rounded-lg" />
+                </Card>
+              ))}
+            </div>
+            <div className="h-64 w-full rounded-[2.5rem] border-4 border-dashed border-primary/10 flex items-center justify-center">
+              <Scan className="text-primary/20" size={48} />
+            </div>
+          </div>
+        );
+      case 'library-scan':
+        return (
+          <div className="space-y-8 w-full p-8">
+            <div className="flex gap-2">
+              <div className="h-10 flex-1 bg-white rounded-full border border-primary/10" />
+              <div className="h-10 w-10 bg-primary rounded-full" style={{ backgroundColor: config.primary }} />
+            </div>
+            <div className="p-10 border-4 border-dashed border-accent/20 rounded-[3rem] flex flex-col items-center justify-center text-center gap-4" style={{ backgroundColor: `${config.accent}05` }}>
+              <div className="h-20 w-20 rounded-[2rem] flex items-center justify-center text-white shadow-xl" style={{ backgroundColor: config.accent }}>
+                <Scan size={32} />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-accent/20 mx-auto rounded-full" />
+                <div className="h-2 w-48 bg-muted-foreground/10 mx-auto rounded-full" />
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="space-y-10 animate-in fade-in duration-500 h-full relative pb-32">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      {/* Top Controls */}
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
           <h2 className="text-[3.5rem] font-black text-primary tracking-tighter uppercase leading-none">Design Lab</h2>
           <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Wix-style real-time layout engine</p>
         </div>
+        
+        {/* View Switcher Bar */}
+        <div className="flex bg-white/80 backdrop-blur p-1.5 rounded-full border border-primary/10 shadow-xl gap-1">
+          <Button 
+            variant={currentView === 'student-dash' ? 'default' : 'ghost'}
+            onClick={() => setCurrentView('student-dash')}
+            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
+          >
+            <GraduationCap size={14} /> Student Dash
+          </Button>
+          <Button 
+            variant={currentView === 'student-subjects' ? 'default' : 'ghost'}
+            onClick={() => setCurrentView('student-subjects')}
+            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
+          >
+            <BookOpen size={14} /> My Subjects
+          </Button>
+          <Button 
+            variant={currentView === 'teacher-hub' ? 'default' : 'ghost'}
+            onClick={() => setCurrentView('teacher-hub')}
+            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
+          >
+            <Users size={14} /> Teacher Hub
+          </Button>
+          <Button 
+            variant={currentView === 'library-scan' ? 'default' : 'ghost'}
+            onClick={() => setCurrentView('library-scan')}
+            className="rounded-full h-12 px-6 font-black uppercase text-[9px] tracking-widest gap-2"
+          >
+            <Scan size={14} /> Library Scan
+          </Button>
+        </div>
+
         <div className="flex gap-4">
           <Button 
             variant="outline" 
             onClick={resetToDefault}
-            className="h-16 px-10 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted"
+            className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted"
           >
             <RotateCcw size={18} />
-            Reset Defaults
           </Button>
           <Button 
             onClick={handleSave}
@@ -103,36 +233,34 @@ export default function ThemeCustomizer() {
         {/* Visual Controls (Left Sidebar) */}
         <div className="lg:col-span-4 space-y-10 h-[calc(100vh-280px)] overflow-y-auto no-scrollbar pr-4">
           
-          {/* Chromatics Section */}
           <section className="space-y-6">
              <ColorInput 
                 label="Primary Brand" 
                 value={config.primary} 
                 field="primary" 
-                description="Buttons & Registry Focus"
+                description="Buttons & Active Highlights"
               />
               <ColorInput 
                 label="Secondary Canvas" 
                 value={config.secondary} 
                 field="secondary" 
-                description="Sidebar & Background Textures"
+                description="Sidebar & Interface Textures"
               />
               <ColorInput 
                 label="Accent Variable" 
                 value={config.accent} 
                 field="accent" 
-                description="Interactive Special Highlights"
+                description="Special Alerts & High Contrast"
               />
           </section>
 
-          {/* Geometry Section (Matches Screenshot) */}
           <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 p-10">
               <div className="flex items-center gap-5">
                 <div className="h-12 w-12 rounded-[1.25rem] bg-primary/10 flex items-center justify-center text-primary"><Shapes size={24}/></div>
                 <div>
                   <CardTitle className="text-2xl font-black uppercase tracking-tight text-primary">Geometry</CardTitle>
-                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Component curves</CardDescription>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">Component architecture</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -168,137 +296,96 @@ export default function ThemeCustomizer() {
           </Card>
         </div>
 
-        {/* Live Interactive Workspace (Right Side) */}
+        {/* Live Workspace (Right Side) */}
         <div className={cn(
           "lg:col-span-8 relative transition-all duration-700",
           isPreviewFullscreen ? "fixed inset-0 z-[100] p-12 bg-black/95 backdrop-blur-2xl" : "h-[calc(100vh-280px)]"
         )}>
           <div className={cn(
-            "relative h-full bg-[#E5EEF0]/50 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden group",
-            isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)]" : ""
+            "relative h-full bg-[#E5EEF0]/50 rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden",
+            isMobileView ? "max-w-[400px] mx-auto shadow-3xl" : "w-full",
+            isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
           )}>
             
-            {/* Labels overlay */}
+            {/* Emulator Status Bar */}
             <div className="absolute top-10 left-12 flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white shadow-xl"><Move size={18}/></div>
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/40">Hold to Test Layout Alignment</span>
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white shadow-xl"><Layout size={18}/></div>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/40">Emulating: {currentView.replace('-', ' ')}</span>
             </div>
 
             <div className="absolute top-10 right-12 flex items-center gap-3 bg-white/80 backdrop-blur px-6 py-2.5 rounded-full border border-primary/5 shadow-sm">
               <Circle className="h-2 w-2 fill-green-500 text-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-600/80">Real-time Sync Active</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-600/80">Live Viewport</span>
             </div>
 
-            {/* THE WORKSPACE CANVAS (Matches Screenshot) */}
-            <div className="relative w-full max-w-5xl h-[85%] flex items-center justify-center">
+            {/* THE EMULATED CONTENT */}
+            <div className="relative w-full h-full flex">
               
-              {/* MOCK SIDEBAR (TEAL) */}
-              <motion.div 
-                drag
-                dragConstraints={{ left: -150, right: 150, top: -100, bottom: 100 }}
-                className={cn(
-                  "absolute left-0 w-56 h-[90%] shadow-3xl p-8 flex flex-col gap-8 cursor-grab active:cursor-grabbing transition-shadow",
-                  selectedElement === 'secondary' ? "ring-4 ring-primary ring-offset-4" : "hover:shadow-2xl"
-                )}
-                style={{ backgroundColor: config.secondary, borderRadius: `${config.radius * 1.5}rem` }}
-                onClick={() => setSelectedElement('secondary')}
-              >
-                <div className="h-12 w-12 rounded-[1.25rem] bg-white/10" />
-                <div className="space-y-4">
-                  {[1,2,3,4,5].map(i => (
-                    <div key={i} className="h-2 w-full bg-white/10 rounded-full" />
-                  ))}
-                </div>
-                <div className="mt-auto pt-8 border-t border-white/5 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-white/20" />
-                    <div className="h-2 w-20 bg-white/10 rounded-full" />
-                </div>
-              </motion.div>
-
-              {/* MOCK MAIN CONTENT (RIGHT SIDE) */}
-              <div className="ml-64 w-full h-[90%] flex flex-col gap-10">
-                
-                {/* MOCK HEADER (WHITE) */}
+              {/* MOCK SIDEBAR (Always there for context) */}
+              {!isMobileView && (
                 <motion.div 
-                  drag
-                  dragConstraints={{ left: -100, right: 100, top: -50, bottom: 50 }}
-                  className="h-28 w-full bg-white shadow-xl p-8 flex items-center justify-between cursor-grab active:cursor-grabbing"
-                  style={{ borderRadius: `${config.radius}rem` }}
+                  initial={{ x: -100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className="w-64 h-full p-8 flex flex-col gap-10 border-r border-white/5"
+                  style={{ backgroundColor: config.secondary }}
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="h-12 w-48 rounded-[1rem] bg-primary/10" style={{ backgroundColor: `${config.primary}15` }}>
-                        <div className="h-full w-1/3 bg-primary rounded-[1rem]" style={{ backgroundColor: config.primary }} />
-                    </div>
+                  <div className="h-12 w-12 rounded-[1.25rem] bg-white/10" />
+                  <div className="space-y-6">
+                    {[1,2,3,4,5].map(i => (
+                      <div key={i} className="flex items-center gap-4">
+                        <div className="h-4 w-4 bg-white/10 rounded-full" />
+                        <div className="h-2 w-24 bg-white/10 rounded-full" />
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-muted/50" />
-                    <div className="h-12 w-12 rounded-full bg-primary/10" style={{ backgroundColor: `${config.secondary}20` }}>
-                        <div className="h-full w-full flex items-center justify-center text-primary" style={{ color: config.secondary }}>
-                            <Circle size={20} className="fill-current" />
-                        </div>
-                    </div>
+                  <div className="mt-auto pt-8 border-t border-white/5 flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-white/20" />
+                      <div className="h-2 w-20 bg-white/10 rounded-full" />
                   </div>
                 </motion.div>
+              )}
 
-                {/* MOCK CONTENT GRID */}
-                <div className="grid grid-cols-12 gap-10 flex-1">
-                  
-                  {/* WIDE CARD */}
-                  <motion.div 
-                    drag
-                    className="col-span-7 bg-white shadow-2xl p-10 flex flex-col justify-between cursor-grab active:cursor-grabbing group"
-                    style={{ borderRadius: `${config.radius * 2}rem` }}
-                  >
-                    <div className="space-y-5">
-                      <div className="h-2.5 w-32 rounded-full bg-primary/10" style={{ backgroundColor: `${config.primary}20` }} />
-                      <div className="space-y-3">
-                        <div className="h-10 w-64 bg-foreground/5 rounded-2xl" />
-                        <div className="h-2.5 w-full bg-foreground/5 rounded-full" />
-                        <div className="h-2.5 w-2/3 bg-foreground/5 rounded-full" />
-                      </div>
-                    </div>
-                    <Button 
-                      className="h-16 w-full font-black uppercase text-[11px] tracking-[0.3em] shadow-2xl group-hover:scale-[1.02] transition-transform"
-                      style={{ backgroundColor: config.primary, borderRadius: `${config.radius}rem`, color: 'white' }}
-                    >
-                      Primary Command
-                    </Button>
-                  </motion.div>
-
-                  {/* ACCENT CARD (Matches Screenshot) */}
-                  <motion.div 
-                    drag
-                    className="col-span-5 shadow-2xl p-10 flex flex-col items-center justify-center text-center gap-6 cursor-grab active:cursor-grabbing relative overflow-hidden"
-                    style={{ 
-                      borderRadius: `${config.radius * 2}rem`, 
-                      backgroundColor: `${config.accent}15`,
-                      border: `3px dashed ${config.accent}40`
-                    }}
-                  >
-                    <div 
-                        className="h-20 w-20 rounded-[1.75rem] flex items-center justify-center shadow-2xl transition-transform hover:scale-110" 
-                        style={{ backgroundColor: config.accent, color: 'white' }}
-                    >
-                      <Sparkles size={40} className="drop-shadow-lg" />
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.3em] leading-none mb-2" style={{ color: config.accent }}>Accent Element</p>
-                        <p className="text-[9px] font-bold uppercase opacity-40 max-w-[120px] mx-auto">Real-time reactive visual component</p>
-                    </div>
-                  </motion.div>
+              {/* VIEW CONTENT AREA */}
+              <div className="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar bg-muted/10">
+                {/* Global Header Emulator */}
+                <div className="h-24 w-full bg-white shadow-sm flex items-center justify-between px-10 border-b border-primary/5">
+                  <div className="h-8 w-32 bg-primary/10 rounded-lg" style={{ backgroundColor: `${config.primary}10` }} />
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-accent/10" style={{ backgroundColor: `${config.accent}20` }} />
+                    <div className="h-10 w-10 rounded-full bg-muted" />
+                  </div>
                 </div>
 
+                {/* Switchable View Content */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentView}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex-1"
+                  >
+                    {renderPreviewContent()}
+                  </motion.div>
+                </AnimatePresence>
               </div>
-
             </div>
 
-            {/* FLOATING ACTION OVERLAY (Matching Screenshot) */}
+            {/* FLOATING ACTION OVERLAY */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-white/90 backdrop-blur-3xl p-4 px-10 rounded-full border border-primary/10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-8 duration-700">
               <Button 
                 variant="ghost" 
-                className="rounded-full h-14 px-8 font-black uppercase text-[10px] tracking-[0.2em] gap-3 hover:bg-muted transition-all"
+                onClick={() => setIsMobileView(false)}
+                className={cn("rounded-full h-14 w-14 p-0", !isMobileView && "bg-primary text-white")}
               >
-                <Type size={18}/> Text Styling
+                <Monitor size={20}/>
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => setIsMobileView(true)}
+                className={cn("rounded-full h-14 w-14 p-0", isMobileView && "bg-primary text-white")}
+              >
+                <Smartphone size={20}/>
               </Button>
               <div className="h-8 w-px bg-primary/10" />
               <Button 
