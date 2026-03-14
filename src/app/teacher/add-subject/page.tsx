@@ -9,11 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Clock, Calendar, ArrowLeft, Loader2, Plus, Trash2, School } from 'lucide-react';
+import { BookOpen, Clock, Calendar, ArrowLeft, Loader2, Plus, Trash2, School, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { addSubjectAction, getTermsAction } from '@/app/actions/dbActions';
 import { Schedule, Term } from '@/utils/storage';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -28,14 +28,16 @@ export default function AddSubjectPage() {
   const [title, setTitle] = useState('');
   const [termId, setTermId] = useState('');
   const [activeTerms, setActiveTerms] = useState<Term[]>([]);
+  const [fetchingTerms, setFetchingTerms] = useState(true);
   const [schedules, setSchedules] = useState<Partial<Schedule>[]>([{ day: '', startTime: '', dismissalTime: '' }]);
 
   useEffect(() => {
+    setFetchingTerms(true);
     getTermsAction().then(data => {
       const active = data.filter(t => t.status === 'active');
       setActiveTerms(active);
       if (active.length > 0) setTermId(active[0].id);
-    });
+    }).finally(() => setFetchingTerms(false));
   }, []);
 
   const handleScheduleChange = (index: number, field: keyof Schedule, value: string) => {
@@ -72,6 +74,7 @@ export default function AddSubjectPage() {
         teacherId: user.id,
         teacherName: user.name,
         termId: termId,
+        department: user.department,
         schedules: schedules as Schedule[],
         description: '',
       };
@@ -100,88 +103,97 @@ export default function AddSubjectPage() {
       </header>
 
       <main className="container mx-auto px-4 py-12 flex justify-center">
-        <Card className="w-full max-w-2xl border-primary/10 shadow-2xl rounded-3xl overflow-hidden">
+        <Card className="w-full max-w-2xl border-primary/10 shadow-2xl rounded-[3rem] overflow-hidden">
           <div className="h-3 bg-primary" />
           <CardHeader className="text-center pt-10">
-            <CardTitle className="text-3xl font-black text-primary">New Subject</CardTitle>
-            <CardDescription>Enter academic session details</CardDescription>
+            <CardTitle className="text-3xl font-black text-primary uppercase tracking-tighter">New Subject</CardTitle>
+            <CardDescription className="font-bold text-[10px] uppercase tracking-widest mt-2">Enter academic session details</CardDescription>
           </CardHeader>
           <CardContent className="p-10">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 font-bold"><BookOpen className="h-4 w-4 text-primary" /> Subject Title</Label>
+                <Label className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-muted-foreground ml-1"><BookOpen className="h-3 w-3 text-primary" /> Subject Title</Label>
                 <Input 
                   placeholder="e.g. Data Structures" 
                   required 
                   value={title} 
                   onChange={e => setTitle(e.target.value)} 
-                  className="h-12 border-primary/10 font-bold"
+                  className="h-14 rounded-2xl border-primary/10 font-bold px-6"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 font-bold"><School className="h-4 w-4 text-primary" /> Academic Term</Label>
-                <Select value={termId} onValueChange={setTermId}>
-                  <SelectTrigger className="h-12 border-primary/10 font-bold">
-                    <SelectValue placeholder="Select active term" />
+                <Label className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest text-muted-foreground ml-1"><School className="h-3 w-3 text-primary" /> Academic Term</Label>
+                <Select value={termId} onValueChange={setTermId} disabled={fetchingTerms}>
+                  <SelectTrigger className="h-14 rounded-2xl border-primary/10 font-bold px-6">
+                    <SelectValue placeholder={fetchingTerms ? "Loading..." : "Select Term"} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {activeTerms.map(t => (
-                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                    ))}
+                  <SelectContent className="rounded-2xl">
+                    <SelectGroup>
+                        {activeTerms.length === 0 ? (
+                            <div className="p-4 text-center text-[10px] font-bold text-destructive uppercase flex items-center gap-2">
+                                <AlertCircle className="h-3 w-3" /> No active terms found
+                            </div>
+                        ) : (
+                            activeTerms.map(t => (
+                                <SelectItem key={t.id} value={t.id} className="font-bold">{t.name}</SelectItem>
+                            ))
+                        )}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
                <div className="space-y-4">
-                <Label className="font-bold flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" /> Schedules</Label>
+                <Label className="font-black uppercase text-[10px] tracking-widest text-muted-foreground flex items-center gap-2 ml-1"><Calendar className="h-3 w-3 text-primary" /> Schedules</Label>
                 {schedules.map((schedule, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-4 border rounded-xl bg-muted/5">
-                     <div className="space-y-2">
-                      <Label htmlFor={`day-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Day</Label>
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end p-6 border rounded-[1.5rem] bg-muted/5 relative">
+                     <div className="space-y-1">
+                      <Label htmlFor={`day-${index}`} className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Day</Label>
                        <Select value={schedule.day} onValueChange={(v) => handleScheduleChange(index, 'day', v)}>
-                          <SelectTrigger className="h-12">
+                          <SelectTrigger className="h-12 rounded-xl bg-white">
                             <SelectValue placeholder="Day" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-xl">
                             {DAYS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                           </SelectContent>
                         </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`time-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Start Time</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor={`time-${index}`} className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Start</Label>
                       <Input 
                         id={`time-${index}`}
                         type="time"
                         value={schedule.startTime} 
                         onChange={e => handleScheduleChange(index, 'startTime', e.target.value)} 
-                        className="h-12"
+                        className="h-12 rounded-xl bg-white px-4"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`dismissal-${index}`} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Dismissal Time</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor={`dismissal-${index}`} className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Dismissal</Label>
                       <Input
                         id={`dismissal-${index}`}
                         type="time"
                         value={schedule.dismissalTime}
                         onChange={e => handleScheduleChange(index, 'dismissalTime', e.target.value)}
-                        className="h-12"
+                        className="h-12 rounded-xl bg-white px-4"
                       />
                     </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeSchedule(index)} disabled={schedules.length <= 1}>
-                        <Trash2 className="h-5 w-5 text-destructive" />
+                    <Button type="button" variant="destructive" size="icon" onClick={() => removeSchedule(index)} disabled={schedules.length <= 1} className="h-12 w-12 rounded-xl shrink-0">
+                        <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
                 ))}
-                 <Button type="button" variant="outline" className="w-full h-12 border-dashed border-2 rounded-xl" onClick={addSchedule}>
-                  <Plus className="h-4 w-4 mr-2"/> Add Schedule Block
+                 <Button type="button" variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 font-black uppercase text-[10px] tracking-widest gap-2" onClick={addSchedule}>
+                  <Plus className="h-4 w-4"/> Add Schedule Block
                 </Button>
               </div>
 
 
               <div className="pt-6">
-                <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 uppercase tracking-widest text-xs" disabled={loading}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publish Subject"}
+                <Button type="submit" className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 uppercase tracking-widest text-xs" disabled={loading || activeTerms.length === 0}>
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
+                  {loading ? "Publishing..." : "Publish Subject"}
                 </Button>
               </div>
             </form>
