@@ -42,14 +42,17 @@ export default function EnrollSubject() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
+  // Extract stable primitives for dependencies
+  const userId = user?.id;
+  const userDepartment = user?.department;
+
   /* -----------------------------
      LOAD INITIAL DATA
   ----------------------------- */
 
   const loadInitialData = useCallback(async () => {
-    if (!user) return;
-    setInitialLoading(true);
-
+    if (!userId) return;
+    
     try {
       const [
         users,
@@ -64,16 +67,16 @@ export default function EnrollSubject() {
       ]);
 
       const approvedTerms = termEnrollments
-        .filter((te: TermEnrollment) => te.studentId === user.id && te.status === 'approved')
+        .filter((te: TermEnrollment) => te.studentId === userId && te.status === 'approved')
         .map((te: TermEnrollment) => te.termId);
 
       setMyApprovedTerms(approvedTerms);
-      setExistingEnrollments(enrollments.filter((e: Enrollment) => e.studentId === user.id));
+      setExistingEnrollments(enrollments.filter((e: Enrollment) => e.studentId === userId));
       setAllAvailableSubjects(subjects);
 
       const teacherUsers = users.filter(u => 
         u.role === 'teacher' && 
-        u.department === user.department
+        u.department === userDepartment
       );
 
       const teachersWithSubjects = teacherUsers.filter(t =>
@@ -89,7 +92,7 @@ export default function EnrollSubject() {
     } finally {
       setInitialLoading(false);
     }
-  }, [user]);
+  }, [userId, userDepartment]);
 
   useEffect(() => {
     loadInitialData();
@@ -100,13 +103,13 @@ export default function EnrollSubject() {
   ----------------------------- */
 
   const displayedSubjects = useMemo(() => {
-    if (!selectedTeacher || !user) return [];
+    if (!selectedTeacher || !userId || !userDepartment) return [];
     return allAvailableSubjects.filter(s =>
       s.teacherId === selectedTeacher &&
       myApprovedTerms.includes(s.termId) &&
-      s.department === user.department
+      s.department === userDepartment
     );
-  }, [allAvailableSubjects, selectedTeacher, myApprovedTerms, user]);
+  }, [allAvailableSubjects, selectedTeacher, myApprovedTerms, userId, userDepartment]);
 
   /* -----------------------------
      SELECTION HANDLER
@@ -126,7 +129,7 @@ export default function EnrollSubject() {
     e.preventDefault();
     setError('');
 
-    if (!user || selectedSubjectIds.length === 0) {
+    if (!userId || selectedSubjectIds.length === 0) {
       setError('Please select at least one subject.');
       return;
     }
@@ -147,7 +150,7 @@ export default function EnrollSubject() {
 
         const newEnrollment = {
           id: `ENR-${Date.now()}-${subjectId}`,
-          studentId: user.id,
+          studentId: userId,
           subjectId: subjectId,
           enrolledAt: new Date().toISOString(),
           status: 'pending' as const
@@ -162,7 +165,7 @@ export default function EnrollSubject() {
       }
       
       if (failCount > 0) {
-        toast.warning(`${failCount} subject(s) were na-request na.`);
+        toast.warning(`${failCount} subject(s) were requested na.`);
       }
 
       setSelectedTeacher('');
@@ -204,7 +207,7 @@ export default function EnrollSubject() {
     <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
         <h2 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">
-          ENROLL IN SUBJECT ({user?.department?.toUpperCase()})
+          ENROLL IN SUBJECT ({userDepartment?.toUpperCase()})
         </h2>
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
           Ipinapakita lamang ang mga Instructor at Subjects para sa iyong department
@@ -221,7 +224,7 @@ export default function EnrollSubject() {
       <form onSubmit={handleSubmit} className="bg-white border-2 border-primary/5 rounded-[2rem] shadow-xl p-10 space-y-8">
         <div className="space-y-2">
           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-            {user?.department === 'shs' ? 'SHS Instructor' : 'College Instructor'}
+            {userDepartment === 'shs' ? 'SHS Instructor' : 'College Instructor'}
           </Label>
           <select
             value={selectedTeacher}
@@ -282,7 +285,7 @@ export default function EnrollSubject() {
                           Enrolled
                         </div>
                       ) : (
-                        <div className="pointer-events-none">
+                        <div className="flex items-center h-full pointer-events-none">
                           <Checkbox 
                             checked={isSelected}
                             className="rounded-lg h-6 w-6 border-2 border-primary/20 data-[state=checked]:bg-primary"
@@ -311,7 +314,7 @@ export default function EnrollSubject() {
 
       <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl text-center">
         <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-relaxed">
-          Protocol: Kasalukuyan kang nasa <span className="underline">{user?.department?.toUpperCase()}</span> department. Tanging mga kaugnay na tala ang iyong makikita.
+          Protocol: Kasalukuyan kang nasa <span className="underline">{userDepartment?.toUpperCase()}</span> department. Tanging mga kaugnay na tala ang iyong makikita.
         </p>
       </div>
     </div>
