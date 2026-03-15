@@ -29,49 +29,51 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
     switch (user.role) {
       case 'student':
         return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'view-card', label: 'Grade Slip', icon: GraduationCap },
-          { id: 'subjects', label: 'My Subjects', icon: Book },
-          { id: 'classwork', label: 'Classwork', icon: FileCheck },
-          { id: 'make-request', label: 'Make Request', icon: FileText },
-          { id: 'my-requests', label: 'My Requests', icon: FileCheck },
-          { id: 'library', label: 'Library', icon: BookOpen },
+          { id: 'home', label: 'DASHBOARD', icon: Home },
+          { id: 'chat', label: 'MESSAGES', icon: MessageCircle },
+          { id: 'view-card', label: 'GRADE SLIP', icon: GraduationCap },
+          { id: 'subjects', label: 'MY SUBJECTS', icon: Book },
+          { id: 'classwork', label: 'CLASSWORK', icon: FileCheck },
+          { id: 'make-request', label: 'MAKE REQUEST', icon: FileText },
+          { id: 'my-requests', label: 'MY REQUESTS', icon: FileCheck },
+          { id: 'library', label: 'LIBRARY', icon: BookOpen },
         ];
       case 'teacher':
         return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'scanner', label: 'QR Scanner', icon: Scan },
-          { id: 'pending-enrollments', label: 'Pending Enroll', icon: UserPlus },
-          { id: 'pending-requests', label: 'Lab Requests', icon: ClipboardList },
-          { id: 'enrolled-students', label: 'Class Roster', icon: Users },
-          { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
-          { id: 'manage-subjects', label: 'Manage Subjects', icon: Book },
-          { id: 'classwork', label: 'Classwork', icon: FileCheck },
-          { id: 'reservations', label: 'Room Reservations', icon: MapPin },
-          { id: 'attendance-records', label: 'Attendance Records', icon: FileCheck },
+          { id: 'home', label: 'DASHBOARD', icon: Home },
+          { id: 'chat', label: 'MESSAGES', icon: MessageCircle },
+          { id: 'grading', label: 'GRADING SETUP', icon: BarChart3 },
+          { id: 'schedule', label: 'MY SCHEDULE', icon: Calendar },
+          { id: 'scanner', label: 'QR SCANNER', icon: Scan },
+          { id: 'manage-subjects', label: 'MANAGE SUBJECTS', icon: Book },
+          { id: 'classwork', label: 'CLASSWORK', icon: FileCheck },
+          { id: 'reservations', label: 'ROOM RESERVATIONS', icon: MapPin },
+          { id: 'pending-requests', label: 'PENDING REQUESTS', icon: ClipboardList },
+          { id: 'pending-enrollments', label: 'PENDING ENROLLMENTS', icon: UserPlus },
+          { id: 'enrolled-students', label: 'ENROLLED STUDENTS', icon: Users },
+          { id: 'lab-view', label: 'LAB VIEW', icon: Monitor },
+          { id: 'attendance-records', label: 'ATTENDANCE RECORDS', icon: FileCheck },
         ];
       case 'admin':
         return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'design', label: 'Design Lab', icon: Palette },
-          { id: 'security', label: 'Security Center', icon: ShieldAlert },
-          { id: 'terms', label: 'Term Management', icon: School },
-          { id: 'users', label: 'Manage Users', icon: Users },
-          { id: 'requests', label: 'All Requests', icon: FileText },
-          { id: 'attendance', label: 'Attendance Reports', icon: Calendar },
-          { id: 'labs', label: 'Lab Management', icon: Monitor },
-          { id: 'audit', label: 'Audit Log', icon: BarChart3 },
-          { id: 'settings', label: 'System Settings', icon: Settings },
+          { id: 'home', label: 'DASHBOARD', icon: Home },
+          { id: 'design', label: 'DESIGN LAB', icon: Palette },
+          { id: 'security', label: 'SECURITY CENTER', icon: ShieldAlert },
+          { id: 'terms', label: 'TERM MANAGEMENT', icon: School },
+          { id: 'users', label: 'MANAGE USERS', icon: Users },
+          { id: 'requests', label: 'ALL REQUESTS', icon: FileText },
+          { id: 'attendance', label: 'ATTENDANCE REPORTS', icon: Calendar },
+          { id: 'labs', label: 'LAB MANAGEMENT', icon: Monitor },
+          { id: 'audit', label: 'AUDIT LOG', icon: BarChart3 },
+          { id: 'settings', label: 'SYSTEM SETTINGS', icon: Settings },
         ];
       case 'library_admin':
         return [
-          { id: 'home', label: 'Dashboard', icon: Home },
-          { id: 'books', label: 'Manage Books', icon: BookOpen },
-          { id: 'scan-lend', label: 'Scan & Lend', icon: Scan },
-          { id: 'borrow-requests', label: 'Borrow Requests', icon: FileText },
-          { id: 'borrow-records', label: 'Borrow Records', icon: FileCheck },
+          { id: 'home', label: 'DASHBOARD', icon: Home },
+          { id: 'books', label: 'MANAGE BOOKS', icon: BookOpen },
+          { id: 'scan-lend', label: 'SCAN & LEND', icon: Scan },
+          { id: 'borrow-requests', label: 'BORROW REQUESTS', icon: FileText },
+          { id: 'borrow-records', label: 'BORROW RECORDS', icon: FileCheck },
         ];
       default:
         return [];
@@ -204,7 +206,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-accent hover:bg-white/5 transition-all"
               >
                 <HelpCircle size={18} />
-                User Guide
+                USER GUIDE
               </button>
             </div>
           </nav>
