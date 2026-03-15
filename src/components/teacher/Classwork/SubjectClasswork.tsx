@@ -47,9 +47,11 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
   const handleDeleteMaterial = async (id: string) => {
     if (!confirm("Are you sure you want to delete this learning material?")) return;
     try {
-      await deleteMaterialAction(id);
-      toast.success("Learning material deleted.");
-      loadData();
+      const result = await deleteMaterialAction(id);
+      if (result.success) {
+        toast.success("Learning material deleted.");
+        loadData();
+      }
     } catch (e) {
       toast.error("Failed to delete material.");
     }
@@ -58,9 +60,11 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
   const handleDeleteClasswork = async (id: string) => {
     if (!confirm("Are you sure you want to delete this assessment? All student submissions will be permanently lost.")) return;
     try {
-      await deleteClassworkAction(id);
-      toast.success("Assessment and submissions deleted.");
-      loadData();
+      const result = await deleteClassworkAction(id);
+      if (result.success) {
+        toast.success("Assessment and submissions deleted.");
+        loadData();
+      }
     } catch (e) {
       toast.error("Failed to delete assessment.");
     }
@@ -110,27 +114,25 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {classworks.map(cw => (
                 <div key={cw.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <ClipboardList size={80} />
-                  </div>
-                  
-                  <div className="absolute top-6 right-6 z-20">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDeleteClasswork(cw.id)}
-                      className="h-12 w-12 rounded-2xl text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 size={20} />
-                    </Button>
+                  {/* Decorative Clipboard with Trash icon inside - Matches screenshot */}
+                  <div className="absolute top-6 right-6 flex items-center justify-center">
+                    <div className="relative">
+                      <ClipboardList size={80} className="text-muted/10" />
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteClasswork(cw.id); }}
+                        className="absolute top-[28px] right-[18px] h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-red-600 hover:text-white transition-all active:scale-95"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="relative z-10">
                     <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-2 bg-primary/5 inline-block px-3 py-1 rounded-full">{cw.type.replace('_', ' ')}</p>
-                    <h3 className="font-black text-2xl text-foreground leading-tight uppercase tracking-tight mb-4 group-hover:text-primary transition-colors pr-12">
+                    <h3 className="font-black text-3xl text-foreground leading-tight uppercase tracking-tight mb-4 group-hover:text-primary transition-colors pr-24">
                       {cw.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-8">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-10">
                       <span className="text-red-500">DUE:</span>
                       {format(new Date(cw.dueDate), "MMM dd, yyyy • h:mm a")}
                     </div>
@@ -140,16 +142,16 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
                         variant="outline" 
                         size="sm" 
                         onClick={() => setEditingClasswork(cw)}
-                        className="flex-1 h-12 rounded-2xl gap-2 font-black uppercase text-[10px] tracking-widest border-primary/10 hover:bg-primary/5"
+                        className="flex-1 h-14 rounded-xl gap-2 font-black uppercase text-[10px] tracking-widest border-primary/10 hover:bg-primary/5"
                       >
-                        <Edit className="h-3.5 w-3.5" />
+                        <Edit className="h-4 w-4" />
                         Modify
                       </Button>
                       <Button 
                         onClick={() => setSelectedClasswork(cw)}
-                        className="flex-1 h-12 rounded-2xl gap-2 bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10"
+                        className="flex-1 h-14 rounded-xl gap-2 bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10"
                       >
-                        <Users className="h-3.5 w-3.5" />
+                        <Users className="h-4 w-4" />
                         Submissions
                       </Button>
                     </div>

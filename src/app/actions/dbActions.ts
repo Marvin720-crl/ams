@@ -539,13 +539,14 @@ export async function updateClassworkAction(id: string, updates: Partial<Classwo
 }
 
 export async function deleteClassworkAction(id: string) {
-    let classworks = await getClassworksAction();
-    classworks = classworks.filter(cw => cw.id !== id);
+    let classworks = await readDb('classworks');
+    classworks = classworks.filter((cw: any) => cw.id !== id);
     await writeDb('classworks', classworks);
     
-    let submissions = await getSubmissionsAction();
-    submissions = submissions.filter(s => s.classworkId !== id);
+    let submissions = await readDb('submissions');
+    submissions = submissions.filter((s: any) => s.classworkId !== id);
     await writeDb('submissions', submissions);
+    return { success: true };
 }
 
 export async function getSubmissionsAction(): Promise<Submission[]> {
@@ -615,9 +616,10 @@ export async function addMaterialAction(material: Omit<Material, 'id' | 'created
 }
 
 export async function deleteMaterialAction(id: string) {
-    let materials = await getMaterialsAction();
-    materials = materials.filter(m => m.id !== id);
+    let materials = await readDb('materials');
+    materials = materials.filter((m: any) => m.id !== id);
     await writeDb('materials', materials);
+    return { success: true };
 }
 
 // GRADING & ACADEMIC
