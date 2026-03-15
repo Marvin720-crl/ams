@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,6 +35,7 @@ getTermsAction
 
 import { Term } from '@/utils/storage';
 import { Card } from '../ui/card';
+import { cn } from '@/lib/utils';
 
 export default function TeacherDashboard() {
 
