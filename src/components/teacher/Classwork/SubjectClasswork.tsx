@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Subject, Classwork, Material } from '@/utils/storage';
-import { getClassworksAction, getMaterialsAction, deleteMaterialAction } from '@/app/actions/dbActions';
+import { getClassworksAction, getMaterialsAction, deleteMaterialAction, deleteClassworkAction } from '@/app/actions/dbActions';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus, BookOpen, Loader2, Edit, Users, FileText, Trash2, Download, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
@@ -11,6 +12,7 @@ import EditClassworkDialog from './EditClassworkDialog';
 import CreateMaterialDialog from './CreateMaterialDialog';
 import SubmissionsView from './SubmissionView';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 interface SubjectClassworkProps {
   subject: Subject;
@@ -46,9 +48,21 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
     if (!confirm("Are you sure you want to delete this learning material?")) return;
     try {
       await deleteMaterialAction(id);
+      toast.success("Learning material deleted.");
       loadData();
     } catch (e) {
-      console.error(e);
+      toast.error("Failed to delete material.");
+    }
+  };
+
+  const handleDeleteClasswork = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this assessment? All student submissions will be permanently lost.")) return;
+    try {
+      await deleteClassworkAction(id);
+      toast.success("Assessment and submissions deleted.");
+      loadData();
+    } catch (e) {
+      toast.error("Failed to delete assessment.");
     }
   };
   
@@ -99,9 +113,21 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <ClipboardList size={80} />
                   </div>
+                  
+                  <div className="absolute top-6 right-6 z-20">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDeleteClasswork(cw.id)}
+                      className="h-12 w-12 rounded-2xl text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 size={20} />
+                    </Button>
+                  </div>
+
                   <div className="relative z-10">
                     <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-2 bg-primary/5 inline-block px-3 py-1 rounded-full">{cw.type.replace('_', ' ')}</p>
-                    <h3 className="font-black text-2xl text-foreground leading-tight uppercase tracking-tight mb-4 group-hover:text-primary transition-colors">
+                    <h3 className="font-black text-2xl text-foreground leading-tight uppercase tracking-tight mb-4 group-hover:text-primary transition-colors pr-12">
                       {cw.title}
                     </h3>
                     <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-8">
@@ -151,7 +177,12 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
                     <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-inner">
                       <FileText size={24} />
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteMaterial(m.id)} className="rounded-full h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDeleteMaterial(m.id)} 
+                      className="h-10 w-10 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                    >
                         <Trash2 size={18} />
                     </Button>
                   </div>

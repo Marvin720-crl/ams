@@ -55,11 +55,9 @@ function sanitizeInput(input: any, userId?: string): any {
 
         // PERFORMANCE OPTIMIZATION: 
         // Skip heavy regex scanning for very large data URIs (files)
-        // Scanning MBs of base64 text with regex causes the server to hang.
         const shouldSkipDeepScan = isDataUri && input.length > 100000;
 
         if (!shouldSkipDeepScan) {
-            // 1. Check for malicious patterns (Injection/Virus-like code)
             for (const pattern of SECURITY_LIMITS.SUSPICIOUS_PATTERNS) {
                 if (pattern.test(input)) {
                     isViolation = true;
@@ -69,15 +67,12 @@ function sanitizeInput(input: any, userId?: string): any {
             }
         }
 
-        // 2. Length check - Skip length restriction for actual file payloads (Data URIs)
-        // This allows any file size (Images, PDFs, etc.)
         if (!isDataUri && input.length > SECURITY_LIMITS.MAX_TEXT_LENGTH) {
             isViolation = true;
             violationReason = "Excessive text payload length (DoS attempt)";
         }
 
         if (isViolation && userId) {
-            // Trigger ban
             detectAndBan(userId, violationReason);
             throw new Error(`SECURITY_BREACH: ${violationReason}`);
         }
@@ -174,7 +169,6 @@ export async function addUserAction(user: User) {
   const users = await readDb('users');
   const sanitized = sanitizeInput(user, user.id);
   
-  // Strict ID Length Validation
   if (user.role === 'student' && user.id.length !== 11) {
     throw new Error('USN must be exactly 11 digits.');
   }
@@ -184,12 +178,9 @@ export async function addUserAction(user: User) {
 
   if (users.some((u: User) => u.id === sanitized.id)) throw new Error('User already exists with this ID.');
   
-  // Default approval status
-  // Students always require approval. Teachers added via secret might also need it.
   if (user.role === 'student') {
     sanitized.isApproved = false;
   } else {
-    // Admins and Library admins added by admin are pre-approved
     sanitized.isApproved = true;
   }
 
@@ -547,6 +538,16 @@ export async function updateClassworkAction(id: string, updates: Partial<Classwo
     return null;
 }
 
+export async function deleteClassworkAction(id: string) {
+    let classworks = await getClassworksAction();
+    classworks = classworks.filter(cw => cw.id !== id);
+    await writeDb('classworks', classworks);
+    
+    let submissions = await getSubmissionsAction();
+    submissions = submissions.filter(s => s.classworkId !== id);
+    await writeDb('submissions', submissions);
+}
+
 export async function getSubmissionsAction(): Promise<Submission[]> {
     return await readDb('submissions');
 }
@@ -673,12 +674,10 @@ export async function endTermAction(termId: string) {
     const termIndex = terms.findIndex(t => t.id === termId);
     if (termIndex === -1) return;
 
-    // 1. Mark term as ended
     terms[termIndex].status = 'ended';
     terms[termIndex].endedAt = new Date().toISOString();
     await writeDb('terms', terms);
 
-    // 2. Finalize Academic Records
     const [enrollments, users, subjects, weights, classworks, submissions, attendances, records] = await Promise.all([
         getEnrollmentsAction(),
         getUsersAction(),
@@ -695,16 +694,13 @@ export async function endTermAction(termId: string) {
     for (const subject of termSubjects) {
         const subjectEnrollments = enrollments.filter(e => e.subjectId === subject.id && e.status === 'approved');
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
-            attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
+            attendance: 10, late: 5, activities: 20, quizzes: 20, performance: 25, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.type === type); // Wait, type is not defined here. Fixed below.
         
-        // Fix for undefined 'type' in loop
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
             const studentAttendances = attendances.filter(a => a.studentId === enrollment.studentId && a.subjectId === subject.id);
             
-            // Calculate components
             const getCompScore = (taskType: string) => {
                 const tasks = classworks.filter(cw => cw.subjectId === subject.id && cw.type === taskType);
                 if (tasks.length === 0) return 100;
@@ -718,16 +714,17 @@ export async function endTermAction(termId: string) {
             };
 
             const attendanceScore = studentAttendances.length > 0 ? (studentAttendances.filter(a => a.status === 'present').length / studentAttendances.length) * 100 : 100;
+            const lateScore = studentAttendances.length > 0 ? (studentAttendances.filter(a => a.status === 'late').length / studentAttendances.length) * 100 : 100;
             
             const finalScore = (
                 (attendanceScore * (subjectWeights.attendance / 100)) +
+                (lateScore * (subjectWeights.late / 100)) +
                 (getCompScore('activity') * (subjectWeights.activities / 100)) +
                 (getCompScore('quiz') * (subjectWeights.quizzes / 100)) +
                 (getCompScore('performance') * (subjectWeights.performance / 100)) +
                 (getCompScore('final_output') * (subjectWeights.finalOutput / 100))
             );
 
-            // Grade Scale mapping
             const getGrade = (s: number) => {
                 if(s >= 97) return 1.0; if(s >= 94) return 1.25; if(s >= 91) return 1.5;
                 if(s >= 88) return 1.75; if(s >= 85) return 2.0; if(s >= 82) return 2.25;
@@ -809,7 +806,6 @@ export async function getConversationsAction(userId: string): Promise<Conversati
     const convs: Conversation[] = await readDb('conversations');
     const enrollments: Enrollment[] = await getEnrollmentsAction();
     
-    // Auto-join students to subject conversations
     const userEnrollments = enrollments.filter(e => e.studentId === userId && e.status === 'approved');
     const updatedConvs = convs.map(c => {
         if (c.type === 'subject') {
@@ -854,7 +850,6 @@ export async function sendMessageAction(message: Omit<ChatMessage, 'id' | 'times
     messages.push(newMessage);
     await writeDb('chatmessages', messages);
     
-    // Update last message in conversation
     const convs = await readDb('conversations');
     const cIndex = convs.findIndex((c: any) => c.id === message.conversationId);
     if (cIndex !== -1) {
@@ -946,7 +941,6 @@ export async function cleanupExpiredSessionsAction() {
 
     if (updatedCount > 0) {
         await writeDb('attendance', updatedAttendances);
-        // Free up PCs
         const activePcIds = updatedAttendances.filter(a => !a.timeOut && a.pcId).map(a => a.pcId);
         const latestPcs: Pc[] = await getPcsAction();
         const updatedPcs = latestPcs.map(pc => ({
