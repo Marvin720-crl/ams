@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Subject, Classwork, Material } from '@/utils/storage';
 import { getClassworksAction, getMaterialsAction, deleteMaterialAction } from '@/app/actions/dbActions';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, BookOpen, Loader2, Edit, Users, FileText, Trash2, Download } from 'lucide-react';
+import { ArrowLeft, Plus, BookOpen, Loader2, Edit, Users, FileText, Trash2, Download, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 import CreateClassworkDialog from './CreateClassworkDialog';
 import EditClassworkDialog from './EditClassworkDialog';
