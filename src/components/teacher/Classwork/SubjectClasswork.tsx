@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -120,16 +119,7 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
               {classworks.map(cw => (
                 <div key={cw.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group relative overflow-hidden">
                   
-                  {/* Decorative Header Area with clickable delete */}
-                  <div className="absolute top-6 right-6 z-20">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleDeleteClasswork(cw.id); }}
-                      className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-
+                  {/* Decorative Header Area - Delete button removed from Assessments */}
                   <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                     <ClipboardList size={120} />
                   </div>
@@ -184,12 +174,13 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
                 <div key={m.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group relative">
                   
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-inner">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-inner pointer-events-none">
                       <FileText size={24} />
                     </div>
+                    {/* Delete remains active for Learning Modules */}
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDeleteMaterial(m.id); }} 
-                      className="h-10 w-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm z-20"
+                      className="h-10 w-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm z-30"
                     >
                         <Trash2 size={18} />
                     </button>
