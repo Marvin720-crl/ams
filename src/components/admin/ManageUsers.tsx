@@ -19,6 +19,7 @@ import {
   Loader2,
   CheckCircle2,
   Clock,
+  Filter,
 } from "lucide-react";
 
 import { Button } from "../ui/button";
@@ -66,6 +67,7 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -196,7 +198,12 @@ export default function ManageUsers() {
     const roleMatch =
       roleFilter === "All" || u.role === roleFilter;
 
-    return searchMatch && roleMatch;
+    const statusMatch =
+      statusFilter === "All" || 
+      (statusFilter === "Pending" && u.isApproved === false) ||
+      (statusFilter === "Active" && u.isApproved !== false);
+
+    return searchMatch && roleMatch && statusMatch;
   });
 
   /* -----------------------------
@@ -414,9 +421,9 @@ export default function ManageUsers() {
           <div className="text-3xl font-black text-primary">{teachers}</div>
         </div>
 
-        <div className="bg-primary/5 p-6 rounded-[2rem] border-2 border-primary/10 shadow-xl">
-          <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Pending Approval</p>
-          <div className="text-3xl font-black text-primary flex items-center gap-2">
+        <div className={`p-6 rounded-[2rem] border-2 shadow-xl cursor-pointer transition-all ${statusFilter === 'Pending' ? 'bg-primary text-white border-primary' : 'bg-primary/5 border-primary/10'}`} onClick={() => setStatusFilter(statusFilter === 'Pending' ? 'All' : 'Pending')}>
+          <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${statusFilter === 'Pending' ? 'text-white/70' : 'text-primary'}`}>Pending Approval</p>
+          <div className={`text-3xl font-black flex items-center gap-2 ${statusFilter === 'Pending' ? 'text-white' : 'text-primary'}`}>
             {pending}
             {pending > 0 && <Clock className="h-6 w-6 animate-pulse" />}
           </div>
@@ -461,6 +468,23 @@ export default function ManageUsers() {
             <SelectItem value="admin">Administrators</SelectItem>
             <SelectItem value="library_admin">Library Staff</SelectItem>
 
+          </SelectContent>
+
+        </Select>
+
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => setStatusFilter(v)}
+        >
+
+          <SelectTrigger className="w-[200px] h-14 rounded-2xl border-primary/5 shadow-lg font-black uppercase text-[10px] tracking-widest">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+
+          <SelectContent className="rounded-2xl font-bold">
+            <SelectItem value="All">All Access Levels</SelectItem>
+            <SelectItem value="Pending">Pending Only</SelectItem>
+            <SelectItem value="Active">Active Only</SelectItem>
           </SelectContent>
 
         </Select>
@@ -539,7 +563,7 @@ export default function ManageUsers() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleApproveUser(user.id)}
-                          className="h-10 px-4 rounded-xl border-green-200 text-green-600 hover:bg-green-500 hover:text-white font-black uppercase text-[9px] tracking-widest gap-2"
+                          className="h-10 px-4 rounded-xl border-green-200 text-green-600 hover:bg-green-500 hover:text-white font-black uppercase text-[9px] tracking-widest gap-2 shadow-sm"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Approve

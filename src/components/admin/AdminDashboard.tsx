@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../shared/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList, ShieldAlert, Palette } from 'lucide-react';
+import { Users, Calendar, Monitor, User, BookOpen, School, ClipboardList, ShieldAlert, Palette, Clock } from 'lucide-react';
 import ManageUsers from './ManageUsers';
 import AllRequests from './AllRequests';
 import AttendanceReports from './AttendanceReports';
@@ -17,21 +17,23 @@ import ThemeCustomizer from './ThemeCustomizer';
 import ProfileView from '../shared/ProfileView';
 import { getUsersAction, getEnrollmentsAction, getLabRequestsAction, getTermsAction } from '@/app/actions/dbActions';
 
-function StatCard({ icon, label, value, onClick }: any) {
+function StatCard({ icon, label, value, onClick, highlight }: any) {
   return (
     <div
       onClick={onClick}
       className={`bg-white rounded-[2.5rem] shadow-xl p-8 transition-all group hover:-translate-y-1 ${
         onClick ? 'cursor-pointer hover:shadow-2xl' : ''
-      }`}
+      } ${highlight ? 'border-2 border-primary/20 bg-primary/[0.02]' : ''}`}
     >
       <div className="flex items-center justify-between mb-6">
-        <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+        <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all ${
+          highlight ? 'bg-primary text-white' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
+        }`}>
             {icon}
         </div>
       </div>
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
-      <p className="text-4xl font-black text-primary tracking-tighter">{value}</p>
+      <p className={`text-4xl font-black tracking-tighter ${highlight ? 'text-primary' : 'text-primary'}`}>{value}</p>
     </div>
   );
 }
@@ -47,7 +49,8 @@ export default function AdminDashboard() {
     enrollments: 0,
     activeSessions: 0,
     activeTerms: 0,
-    bannedUsers: 0
+    bannedUsers: 0,
+    pendingApprovals: 0
   });
 
   useEffect(() => {
@@ -69,6 +72,7 @@ export default function AdminDashboard() {
       const teachers = users.filter((u: any) => u.role === 'teacher').length;
       const students = users.filter((u: any) => u.role === 'student').length;
       const bannedUsers = users.filter((u: any) => u.isBanned).length;
+      const pendingApprovals = users.filter((u: any) => u.role === 'student' && u.isApproved === false).length;
       const activeSessions = requests.filter(r => r.status === 'approved').length;
       const activeTermsCount = terms.filter(t => t.status === 'active').length;
 
@@ -79,7 +83,8 @@ export default function AdminDashboard() {
         enrollments: enrollments.length,
         activeSessions,
         activeTerms: activeTermsCount,
-        bannedUsers
+        bannedUsers,
+        pendingApprovals
       });
     } catch (error) {
       console.error('Failed to load dashboard stats', error);
@@ -103,6 +108,13 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <StatCard
+          icon={<Clock size={28} className={stats.pendingApprovals > 0 ? 'animate-pulse' : ''} />}
+          label="Pending Registration"
+          value={stats.pendingApprovals}
+          onClick={() => setCurrentView('users')}
+          highlight={stats.pendingApprovals > 0}
+        />
         <StatCard
           icon={<School size={28} />}
           label="Active Trimesters"
@@ -131,12 +143,6 @@ export default function AdminDashboard() {
           icon={<User size={28} className="text-blue-600" />}
           label="Certified Faculty"
           value={stats.teachers}
-          onClick={() => setCurrentView('users')}
-        />
-        <StatCard
-          icon={<User size={28} className="text-green-600" />}
-          label="Verified Students"
-          value={stats.students}
           onClick={() => setCurrentView('users')}
         />
       </div>
