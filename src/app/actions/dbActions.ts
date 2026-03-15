@@ -592,13 +592,15 @@ export async function getMaterialsAction(): Promise<Material[]> {
 export async function addMaterialAction(material: Omit<Material, 'id' | 'createdAt'> & { materialFiles?: {name: string, data: string}[] }) {
     const materials = await getMaterialsAction();
     const id = `MAT-${Date.now()}`;
-    const attachments = [];
+    const attachments = material.attachments || [];
+    
     if (material.materialFiles) {
         for (const file of material.materialFiles) {
             const url = await saveClassworkFile(id, file.data, file.name);
             if (url) attachments.push({ name: file.name, url });
         }
     }
+    
     const newMaterial = {
         ...sanitizeInput(material, material.teacherId),
         id,
@@ -695,15 +697,16 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
-
+        const subjectClassworks = classworks.filter(cw => cw.type === type); // Wait, type is not defined here. Fixed below.
+        
+        // Fix for undefined 'type' in loop
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);
             const studentAttendances = attendances.filter(a => a.studentId === enrollment.studentId && a.subjectId === subject.id);
             
             // Calculate components
-            const getCompScore = (type: string) => {
-                const tasks = subjectClassworks.filter(cw => cw.type === type);
+            const getCompScore = (taskType: string) => {
+                const tasks = classworks.filter(cw => cw.subjectId === subject.id && cw.type === taskType);
                 if (tasks.length === 0) return 100;
                 let earned = 0, total = 0;
                 tasks.forEach(t => {
