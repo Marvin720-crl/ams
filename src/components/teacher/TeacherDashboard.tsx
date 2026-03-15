@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -55,7 +56,7 @@ pendingRequests:0
 
 useEffect(()=>{
 if(user) loadDashboard();
-},[user]);
+}, [user, currentView]);
 
 const loadDashboard = async ()=>{
 
@@ -110,7 +111,10 @@ e=>teacherSubjects.some(s=>s.id===e.subjectId)
 ).length;
 
 const pendingRequests =
-requestsData.filter(r=>r.status==='pending').length;
+requestsData.filter(r => {
+    const isTeacherSubject = teacherSubjects.some(s => s.id === r.subjectId);
+    return isTeacherSubject && r.status === 'pending';
+}).length;
 
 setSubjects(subjectsWithCounts);
 
@@ -136,8 +140,6 @@ setLoading(false);
 const renderHome = () => (
 
 <div className="space-y-10">
-
-{/* Header */}
 
 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
@@ -168,37 +170,37 @@ Active: {term.name}
 
 </div>
 
-{/* Stats */}
-
 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
 <StatCard
 title="Total Subjects"
 value={stats.totalSubjects}
 icon={<Book size={22}/>}
+onClick={() => setCurrentView('manage-subjects')}
 />
 
 <StatCard
 title="Total Students"
 value={stats.totalStudents}
 icon={<Users size={22}/>}
+onClick={() => setCurrentView('enrolled-students')}
 />
 
 <StatCard
 title="Pending Enrollments"
 value={stats.pendingEnrollments}
 icon={<School size={22}/>}
+onClick={() => setCurrentView('pending-enrollments')}
 />
 
 <StatCard
 title="Pending Requests"
 value={stats.pendingRequests}
 icon={<ClipboardList size={22}/>}
+onClick={() => setCurrentView('pending-requests')}
 />
 
 </div>
-
-{/* Subject Cards */}
 
 {loading ? (
 
@@ -370,11 +372,17 @@ onNavigate={setCurrentView}
 
 }
 
-function StatCard({title,value,icon}:any){
+function StatCard({title,value,icon,onClick}:any){
 
 return(
 
-<div className="bg-white p-8 rounded-[2.5rem] border-primary/5 shadow-xl flex items-center gap-6 hover:shadow-2xl transition-all group">
+<div 
+  onClick={onClick}
+  className={cn(
+    "bg-white p-8 rounded-[2.5rem] border-primary/5 shadow-xl flex items-center gap-6 hover:shadow-2xl transition-all group",
+    onClick && "cursor-pointer"
+  )}
+>
 
 <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
 {icon}

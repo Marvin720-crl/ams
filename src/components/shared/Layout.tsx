@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Home, Book, FileText, Calendar, Users, Settings, LogOut,
-  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert, HelpCircle, Palette
+  BookOpen, BarChart3, FileCheck, Menu, X, Monitor, MapPin, Scan, GraduationCap, MessageCircle, School, ShieldAlert, HelpCircle, Palette, UserPlus, ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -42,13 +42,14 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         return [
           { id: 'home', label: 'Dashboard', icon: Home },
           { id: 'chat', label: 'Messages', icon: MessageCircle },
-          { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
-          { id: 'schedule', label: 'My Schedule', icon: Calendar },
           { id: 'scanner', label: 'QR Scanner', icon: Scan },
+          { id: 'pending-enrollments', label: 'Pending Enroll', icon: UserPlus },
+          { id: 'pending-requests', label: 'Lab Requests', icon: ClipboardList },
+          { id: 'enrolled-students', label: 'Class Roster', icon: Users },
+          { id: 'grading', label: 'Grading Setup', icon: BarChart3 },
           { id: 'manage-subjects', label: 'Manage Subjects', icon: Book },
           { id: 'classwork', label: 'Classwork', icon: FileCheck },
           { id: 'reservations', label: 'Room Reservations', icon: MapPin },
-          { id: 'lab-view', label: 'Lab View', icon: Monitor },
           { id: 'attendance-records', label: 'Attendance Records', icon: FileCheck },
         ];
       case 'admin':
@@ -93,7 +94,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
-      {/* HEADER: Controlled by Header Variable */}
       <header 
         style={{ backgroundColor: 'hsl(var(--header))' }}
         className="text-white h-28 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 shadow-xl print:hidden"
@@ -148,7 +148,6 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           )}
         </AnimatePresence>
 
-        {/* ASIDE: Controlled by Sidebar Variable */}
         <aside 
           style={{ backgroundColor: 'hsl(var(--sidebar))' }}
           className={cn(

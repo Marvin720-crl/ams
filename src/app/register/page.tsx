@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select'
 
 import { toast } from 'sonner'
-import { UserPlus, Loader2, AlertCircle } from 'lucide-react'
+import { UserPlus, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 
 import {
   addUserAction,
@@ -132,18 +132,22 @@ export default function RegisterPage() {
       await addUserAction(newUser as any)
 
       if (formData.role === 'student') {
-        toast.success('Registration successful! Please wait for admin approval before logging in.');
+        toast.success('Registration successful!', {
+          description: 'Please wait for admin approval before logging in.'
+        });
       } else {
-        toast.success('Registration successful! Please login.');
+        toast.success('Registration successful!', {
+          description: 'You can now sign in to your dashboard.'
+        });
       }
 
       router.push('/')
     } catch (error: any) {
       console.error(error)
       toast.error(error.message || 'Registration failed.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
@@ -152,7 +156,7 @@ export default function RegisterPage() {
       {/* HEADER */}
 
       <header className="bg-primary shadow-md">
-        <div className="container mx-auto px-6 py-4 flex items-center">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <Image
               src="/logo.png"
@@ -162,6 +166,12 @@ export default function RegisterPage() {
               style={{ height: 'auto' }}
             />
           </Link>
+          <Button variant="ghost" asChild className="text-white hover:bg-white/10 rounded-full">
+            <Link href="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Login
+            </Link>
+          </Button>
         </div>
       </header>
 
@@ -169,17 +179,17 @@ export default function RegisterPage() {
 
       <main className="flex-grow flex items-center justify-center p-4">
 
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+        <div className="w-full max-w-4xl bg-white rounded-theme-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
 
           {/* LEFT PANEL */}
 
-          <div className="w-full md:w-2/5 bg-primary text-white p-10 md:p-12 flex flex-col justify-center">
+          <div className="w-full md:w-2/5 bg-primary text-white p-10 md:p-12 flex flex-col justify-center items-start">
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 uppercase">
-              Join Academic Hub
+            <h1 className="text-3xl md:text-4xl font-black mb-6 uppercase tracking-tighter leading-tight">
+              JOIN ACADEMIC HUB
             </h1>
 
-            <p className="text-white/80 text-sm leading-relaxed">
+            <p className="text-white/80 text-sm leading-relaxed font-bold">
               Create your account to access the AMA Student Portal. Student accounts require manual verification by the registrar.
             </p>
 
@@ -189,20 +199,20 @@ export default function RegisterPage() {
 
           <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto max-h-[85vh] no-scrollbar">
 
-            <h2 className="text-2xl font-bold mb-2">
+            <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
               Registration
             </h2>
 
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest mb-10">
               Fill in your details to create an account.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
 
               {/* ROLE */}
 
               <div className="space-y-2">
-                <Label>I am a</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">I am a</Label>
 
                 <Select
                   value={formData.role}
@@ -211,13 +221,13 @@ export default function RegisterPage() {
                     updateField('id', ''); // Reset ID when role changes
                   }}
                 >
-                  <SelectTrigger className="h-12 rounded-xl">
+                  <SelectTrigger className="h-12 rounded-xl font-bold">
                     <SelectValue />
                   </SelectTrigger>
 
                   <SelectContent className="rounded-xl">
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="teacher">Teacher</SelectItem>
+                    <SelectItem value="student" className="font-bold">Student</SelectItem>
+                    <SelectItem value="teacher" className="font-bold">Teacher</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -226,10 +236,10 @@ export default function RegisterPage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-end">
-                  <Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
                     {formData.role === 'student' ? 'Student ID / USN (11 digits)' : 'Employee ID (8 digits)'}
                   </Label>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${
                     formData.role === 'student' 
                       ? (formData.id.length === 11 ? 'text-green-500' : 'text-primary')
                       : (formData.id.length === 8 ? 'text-green-500' : 'text-primary')
@@ -244,7 +254,7 @@ export default function RegisterPage() {
                   required
                   maxLength={formData.role === 'student' ? 11 : 8}
                   disabled={loading}
-                  className="h-12 rounded-xl font-bold text-lg"
+                  className="h-14 rounded-xl font-black text-xl tracking-widest px-6"
                   placeholder={formData.role === 'student' ? "e.g. 25001198310" : "e.g. 12345678"}
                 />
               </div>
@@ -252,21 +262,22 @@ export default function RegisterPage() {
               {/* NAME */}
 
               <div className="space-y-2">
-                <Label>Full Name</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Full Name</Label>
 
                 <Input
                   value={formData.name}
                   onChange={e => updateField('name', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-xl font-bold px-6"
+                  placeholder="Juan Dela Cruz"
                 />
               </div>
 
               {/* EMAIL */}
 
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Email</Label>
 
                 <Input
                   type="email"
@@ -274,14 +285,15 @@ export default function RegisterPage() {
                   onChange={e => updateField('email', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-xl font-bold px-6"
+                  placeholder="juan@school.edu"
                 />
               </div>
 
               {/* PASSWORD */}
 
               <div className="space-y-2">
-                <Label>Password</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Password</Label>
 
                 <Input
                   type="password"
@@ -289,7 +301,8 @@ export default function RegisterPage() {
                   onChange={e => updateField('password', e.target.value)}
                   required
                   disabled={loading}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-xl font-bold px-6"
+                  placeholder="••••••••"
                 />
               </div>
 
@@ -300,41 +313,41 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-2 gap-4">
 
                     <div className="space-y-2">
-                      <Label>Program</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Program</Label>
 
                       <Input
-                        placeholder={formData.department === 'shs' ? "STEM / ABM" : "BSCS"}
+                        placeholder={formData.department === 'shs' ? "STEM" : "BSCS"}
                         value={formData.program}
                         onChange={e => updateField('program', e.target.value)}
                         required
                         disabled={loading}
-                        className="h-12 rounded-xl"
+                        className="h-12 rounded-xl font-bold"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Year / Grade Level</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Year / Grade</Label>
 
                       <Select
                         value={String(formData.year)}
                         onValueChange={v => updateField('year', Number(v))}
                       >
-                        <SelectTrigger className="h-12 rounded-xl">
+                        <SelectTrigger className="h-12 rounded-xl font-bold">
                           <SelectValue />
                         </SelectTrigger>
 
                         <SelectContent className="rounded-xl">
                           {formData.department === 'shs' ? (
                             <>
-                              <SelectItem value="11">Grade 11</SelectItem>
-                              <SelectItem value="12">Grade 12</SelectItem>
+                              <SelectItem value="11" className="font-bold">Grade 11</SelectItem>
+                              <SelectItem value="12" className="font-bold">Grade 12</SelectItem>
                             </>
                           ) : (
                             <>
-                              <SelectItem value="1">1st Year</SelectItem>
-                              <SelectItem value="2">2nd Year</SelectItem>
-                              <SelectItem value="3">3rd Year</SelectItem>
-                              <SelectItem value="4">4th Year</SelectItem>
+                              <SelectItem value="1" className="font-bold">1st Year</SelectItem>
+                              <SelectItem value="2" className="font-bold">2nd Year</SelectItem>
+                              <SelectItem value="3" className="font-bold">3rd Year</SelectItem>
+                              <SelectItem value="4" className="font-bold">4th Year</SelectItem>
                             </>
                           )}
                         </SelectContent>
@@ -343,20 +356,20 @@ export default function RegisterPage() {
 
                   </div>
 
-                  <div className="border-t pt-5 mt-5 space-y-4">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-primary">Emergency Contact</h3>
+                  <div className="border-t border-primary/5 pt-8 mt-8 space-y-6">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary">Emergency Protocol Contact</h3>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase">Name</Label>
-                        <Input value={formData.emergencyContactName} onChange={e => updateField('emergencyContactName', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Contact Name</Label>
+                        <Input value={formData.emergencyContactName} onChange={e => updateField('emergencyContactName', e.target.value)} disabled={loading} className="h-12 rounded-xl font-bold" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase">Address</Label>
-                        <Input value={formData.emergencyContactAddress} onChange={e => updateField('emergencyContactAddress', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Address</Label>
+                        <Input value={formData.emergencyContactAddress} onChange={e => updateField('emergencyContactAddress', e.target.value)} disabled={loading} className="h-12 rounded-xl font-bold" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase">Phone Number</Label>
-                        <Input value={formData.emergencyContactPhone} onChange={e => updateField('emergencyContactPhone', e.target.value)} disabled={loading} className="h-12 rounded-xl" />
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Phone Number</Label>
+                        <Input value={formData.emergencyContactPhone} onChange={e => updateField('emergencyContactPhone', e.target.value)} disabled={loading} className="h-12 rounded-xl font-bold" />
                       </div>
                     </div>
                   </div>
@@ -367,7 +380,7 @@ export default function RegisterPage() {
 
               {formData.role === 'teacher' && (
                 <div className="space-y-2">
-                  <Label>Teacher Secret Code</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Instructor Authentication Code</Label>
 
                   <Input
                     type="password"
@@ -375,7 +388,8 @@ export default function RegisterPage() {
                     onChange={e => updateField('teacherSecret', e.target.value)}
                     required
                     disabled={loading}
-                    className="h-12 rounded-xl"
+                    className="h-12 rounded-xl font-bold px-6"
+                    placeholder="Enter Secret Code"
                   />
                 </div>
               )}
@@ -384,27 +398,27 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                className="w-full h-14 text-sm font-black uppercase tracking-widest gap-2 rounded-2xl shadow-xl shadow-primary/20"
+                className="w-full h-16 text-sm font-black uppercase tracking-[0.2em] gap-3 rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95"
                 disabled={loading}
               >
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin" />
-                    REGISTERING...
+                    AUTHENTICATING...
                   </>
                 ) : (
                   <>
-                    Sign Up
-                    <UserPlus size={18} />
+                    Commit Registration
+                    <UserPlus size={20} />
                   </>
                 )}
               </Button>
 
             </form>
 
-            <div className="text-center mt-6 text-sm text-muted-foreground">
+            <div className="text-center mt-8 text-sm font-bold text-muted-foreground uppercase tracking-tight">
               Already have an account?{" "}
-              <Link href="/" className="font-semibold text-primary hover:underline">
+              <Link href="/" className="font-black text-primary hover:underline ml-1">
                 Sign In
               </Link>
             </div>
