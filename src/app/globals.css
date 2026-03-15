@@ -45,7 +45,14 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
   }
+  
+  *::-webkit-scrollbar {
+    display: none !important; /* Chrome/Safari/Edge */
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-sans;
   }
@@ -98,19 +105,4 @@
 /* Wix-style dynamic shapes for standard components */
 button, .card, input, select, textarea, .dialog-content {
   border-radius: var(--radius) !important;
-}
-
-/* Custom Scrollbar for modern look */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.2);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.4);
 }

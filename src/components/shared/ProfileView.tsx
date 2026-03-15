@@ -167,10 +167,6 @@ export default function ProfileView() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-white p-10 flex flex-col items-center text-center relative">
-                  <DialogClose className="absolute top-6 right-6 h-10 w-10 rounded-full border border-primary/10 flex items-center justify-center hover:bg-muted transition-colors">
-                    <X className="h-5 w-5 text-primary" />
-                  </DialogClose>
-                  
                   <div className="space-y-1 mb-10">
                     <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-foreground">Identity QR Code</DialogTitle>
                     <DialogDescription className="font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Present for Campus Entry & Services</DialogDescription>

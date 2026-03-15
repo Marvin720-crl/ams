@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { addMaterialAction } from '@/app/actions/dbActions';
 import { toast } from 'sonner';
-import { Loader2, FileText, Plus, Upload, Link as LinkIcon, Trash2, X } from 'lucide-react';
+import { Loader2, FileText, Plus, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 
 interface CreateMaterialDialogProps {
   subjectId: string;
@@ -110,15 +110,12 @@ export default function CreateMaterialDialog({ subjectId, onClose, onCreated }: 
                     SHARE LECTURES, HANDOUTS, OR INSTRUCTIONAL GUIDES WITH YOUR STUDENTS
                 </DialogDescription>
             </DialogHeader>
-            <DialogClose className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
-                <X size={24} />
-            </DialogClose>
         </div>
         
         {/* SCROLLABLE CONTENT - No Scrollbar */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-10 space-y-10 bg-white">
           <div className="space-y-10">
-            {/* MODULE TITLE - Required but missing in user screenshot, added for DB consistency */}
+            {/* MODULE TITLE */}
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">MODULE IDENTIFICATION *</Label>
               <Input 
@@ -130,7 +127,7 @@ export default function CreateMaterialDialog({ subjectId, onClose, onCreated }: 
               />
             </div>
 
-            {/* INSTRUCTIONAL NOTES - Matches Screenshot */}
+            {/* INSTRUCTIONAL NOTES */}
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">INSTRUCTIONAL NOTES (OPTIONAL)</Label>
               <Textarea 
@@ -141,7 +138,7 @@ export default function CreateMaterialDialog({ subjectId, onClose, onCreated }: 
               />
             </div>
 
-            {/* DIGITAL ASSETS - Matches Screenshot */}
+            {/* DIGITAL ASSETS */}
             <div className="space-y-4 p-10 border-4 border-dashed rounded-[2.5rem] border-primary/5 bg-primary/[0.02] text-center relative">
               <div className="h-16 w-16 rounded-2xl bg-white shadow-xl mx-auto flex items-center justify-center text-primary mb-4 border border-primary/5">
                   <Upload />
@@ -178,7 +175,7 @@ export default function CreateMaterialDialog({ subjectId, onClose, onCreated }: 
               )}
             </div>
 
-            {/* REFERENCE LINKS - Matches Screenshot */}
+            {/* REFERENCE LINKS */}
             <div className="space-y-6">
                 <div className="flex items-center gap-3 px-2">
                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><LinkIcon size={16} /></div>
@@ -233,7 +230,7 @@ export default function CreateMaterialDialog({ subjectId, onClose, onCreated }: 
           </div>
         </div>
 
-        {/* STICKY FOOTER - Deploy Button */}
+        {/* STICKY FOOTER */}
         <div className="p-10 bg-muted/10 border-t border-primary/5 flex-none flex flex-col sm:flex-row gap-4">
             <DialogClose asChild>
               <Button type="button" variant="ghost" className="flex-1 h-16 rounded-2xl font-black uppercase text-xs tracking-widest">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -258,9 +259,6 @@ export default function StudentDashboard() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md rounded-[3rem] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-white p-10 flex flex-col items-center text-center relative">
-                  <DialogClose className="absolute top-6 right-6 h-10 w-10 rounded-full border border-primary/10 flex items-center justify-center hover:bg-muted transition-colors">
-                    <X className="h-5 w-5 text-primary" />
-                  </DialogClose>
                   <div className="space-y-1 mb-10">
                     <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-foreground">Identity QR Code</DialogTitle>
                     <DialogDescription className="font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Present for Campus Entry & Services</DialogDescription>
@@ -292,7 +290,7 @@ export default function StudentDashboard() {
           <ActionCard icon={LibraryIcon} label="Library" onClick={() => setCurrentView('library')} />
         </div>
 
-        {/* TERM ENROLLMENT CTA (Matches Screenshot middle card) */}
+        {/* TERM ENROLLMENT CTA */}
         {(unenrolledTerms.length > 0 || pendingTerms.length > 0) && (
           <div className="grid grid-cols-1 gap-8">
             {unenrolledTerms.map(term => (
@@ -375,7 +373,7 @@ export default function StudentDashboard() {
             </Card>
           </div>
 
-          {/* Upcoming Deadlines (Matches screenshot compact design) */}
+          {/* Upcoming Deadlines */}
           <div className="lg:col-span-1">
             <Card className="p-10 rounded-[3rem] border-none shadow-2xl bg-white space-y-10 min-h-[450px] flex flex-col">
               <div className="flex items-center gap-4">
@@ -422,7 +420,7 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* BOTTOM QUICK LINKS (Matches Screenshot red/white long cards) */}
+        {/* BOTTOM QUICK LINKS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-10 rounded-[3rem] border-none shadow-2xl bg-primary text-white flex justify-between items-center group cursor-pointer transition-transform active:scale-[0.98]" onClick={() => setCurrentView('view-card')}>
             <div>
