@@ -34,14 +34,19 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
 
   const loadData = async () => {
     setLoading(true);
-    const [allClassworks, allMaterials] = await Promise.all([
-      getClassworksAction(),
-      getMaterialsAction()
-    ]);
-    
-    setClassworks(allClassworks.filter(cw => cw.subjectId === subject.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-    setMaterials(allMaterials.filter(m => m.subjectId === subject.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-    setLoading(false);
+    try {
+      const [allClassworks, allMaterials] = await Promise.all([
+        getClassworksAction(),
+        getMaterialsAction()
+      ]);
+      
+      setClassworks(allClassworks.filter(cw => cw.subjectId === subject.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      setMaterials(allMaterials.filter(m => m.subjectId === subject.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    } catch (e) {
+      toast.error("Failed to sync records.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteMaterial = async (id: string) => {
@@ -114,22 +119,24 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {classworks.map(cw => (
                 <div key={cw.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group relative overflow-hidden">
-                  {/* Decorative Clipboard with Trash icon inside - Matches screenshot */}
-                  <div className="absolute top-6 right-6 flex items-center justify-center">
-                    <div className="relative">
-                      <ClipboardList size={80} className="text-muted/10" />
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDeleteClasswork(cw.id); }}
-                        className="absolute top-[28px] right-[18px] h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
+                  
+                  {/* Decorative Header Area with clickable delete */}
+                  <div className="absolute top-6 right-6 z-20">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDeleteClasswork(cw.id); }}
+                      className="h-10 w-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-red-600 hover:text-white transition-all active:scale-95"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+
+                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <ClipboardList size={120} />
                   </div>
 
                   <div className="relative z-10">
                     <p className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-2 bg-primary/5 inline-block px-3 py-1 rounded-full">{cw.type.replace('_', ' ')}</p>
-                    <h3 className="font-black text-3xl text-foreground leading-tight uppercase tracking-tight mb-4 group-hover:text-primary transition-colors pr-24">
+                    <h3 className="font-black text-3xl text-primary leading-tight uppercase tracking-tight mb-4 pr-12">
                       {cw.title}
                     </h3>
                     <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-10">
@@ -145,14 +152,14 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
                         className="flex-1 h-14 rounded-xl gap-2 font-black uppercase text-[10px] tracking-widest border-primary/10 hover:bg-primary/5"
                       >
                         <Edit className="h-4 w-4" />
-                        Modify
+                        MODIFY
                       </Button>
                       <Button 
                         onClick={() => setSelectedClasswork(cw)}
                         className="flex-1 h-14 rounded-xl gap-2 bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10"
                       >
                         <Users className="h-4 w-4" />
-                        Submissions
+                        SUBMISSIONS
                       </Button>
                     </div>
                   </div>
@@ -172,32 +179,35 @@ export default function SubjectClasswork({ subject, onBack }: SubjectClassworkPr
               <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mt-2">Upload study materials and lecture guides for your students.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {materials.map(m => (
-                <div key={m.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group">
+                <div key={m.id} className="bg-white rounded-[2.5rem] border border-primary/5 shadow-xl p-8 hover:shadow-2xl transition-all group relative">
+                  
                   <div className="flex justify-between items-start mb-6">
                     <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-inner">
                       <FileText size={24} />
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDeleteMaterial(m.id)} 
-                      className="h-10 w-10 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDeleteMaterial(m.id); }} 
+                      className="h-10 w-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm z-20"
                     >
                         <Trash2 size={18} />
-                    </Button>
+                    </button>
                   </div>
-                  <h3 className="font-black text-xl text-foreground leading-tight uppercase tracking-tight mb-2 group-hover:text-primary transition-colors">
+
+                  <h3 className="font-black text-2xl text-primary leading-tight uppercase tracking-tight mb-2">
                     {m.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground font-medium line-clamp-2 mb-6">
+                  <p className="text-xs text-muted-foreground font-medium line-clamp-2 mb-8">
                     {m.description || "No instructional notes provided."}
                   </p>
-                  <div className="space-y-2">
-                    {m.attachments.map((att, i) => (
-                        <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
-                            <Download size={14} className="text-primary" />
+
+                  <div className="space-y-2 mt-auto">
+                    {m.attachments?.map((att, i) => (
+                        <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 bg-muted/20 rounded-2xl hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+                            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+                                <Download size={14} />
+                            </div>
                             <span className="text-[10px] font-black uppercase tracking-tight truncate flex-1">{att.name}</span>
                         </a>
                     ))}
