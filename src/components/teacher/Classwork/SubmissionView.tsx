@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Classwork, Submission, User, Enrollment } from '@/utils/storage';
 import { getSubmissionsAction, getUsersAction, getEnrollmentsAction, updateSubmissionAction } from '@/app/actions/dbActions';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, User as UserIcon, Download, Send, Lock, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Loader2, User as UserIcon, Download, Send, Lock, CheckCircle2, FileIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +53,6 @@ export default function SubmissionsView({ classwork, onBack }: SubmissionsViewPr
       return { student, submission };
     });
     
-    // Initialize grades and feedbacks state from existing submissions
     const initialGrades: Record<string, string> = {};
     const initialFeedbacks: Record<string, string> = {};
     combinedData.forEach(({ submission }) => {
@@ -95,14 +94,14 @@ export default function SubmissionsView({ classwork, onBack }: SubmissionsViewPr
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" onClick={onBack} className="mb-4 hover:bg-primary/5 rounded-full">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Classwork
           </Button>
-          <h2 className="text-4xl font-black text-primary uppercase tracking-tighter leading-none">{classwork.title}</h2>
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">Submission & Grading Console</p>
+          <h2 className="text-3xl font-black text-primary uppercase tracking-tighter leading-none">{classwork.title}</h2>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">Instructional Evaluation Console</p>
         </div>
         <div className="bg-white px-6 py-3 rounded-2xl border-2 border-primary/5 shadow-sm">
             <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest mb-1">Scale Matrix</p>
@@ -110,134 +109,141 @@ export default function SubmissionsView({ classwork, onBack }: SubmissionsViewPr
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-10">
         {studentsWithSubmissions.map(({ student, submission }) => {
           const isGraded = submission?.status === 'graded';
           
           return (
             <div key={student.id} className={cn(
-              "bg-white rounded-[2.5rem] border-2 p-8 shadow-xl transition-all",
-              isGraded ? "border-green-100 bg-green-50/10" : "border-primary/5"
+              "bg-[#f0f9f6]/50 rounded-[3rem] border-2 p-8 md:p-12 shadow-xl transition-all",
+              isGraded ? "border-green-100" : "border-primary/5"
             )}>
-              <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center overflow-hidden border-2 border-primary/5">
+              <div className="flex items-start justify-between mb-10">
+                  <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-[1.5rem] bg-red-50 flex items-center justify-center overflow-hidden border-2 border-red-100 shadow-inner">
                           {student.profilePic ? (
                             <img src={student.profilePic} className="w-full h-full object-cover" alt={student.name}/>
                           ) : (
-                            <UserIcon className="text-primary/40 w-8 h-8" />
+                            <UserIcon className="text-primary/20 w-10 h-10" />
                           )}
                       </div>
                       <div>
-                          <p className="font-black text-xl text-primary uppercase tracking-tight leading-none">{student.name}</p>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1.5">USN: {student.id}</p>
+                          <p className="font-black text-2xl text-primary uppercase tracking-tight leading-none mb-2">{student.name}</p>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">USN: {student.id}</p>
                       </div>
                   </div>
                   {submission ? (
                     <Badge className={cn(
-                      "h-10 px-6 rounded-full font-black text-[9px] uppercase tracking-widest border-none shadow-md",
+                      "h-12 px-8 rounded-full font-black text-[10px] uppercase tracking-widest border-none shadow-lg",
                       isGraded ? "bg-green-500 text-white" : "bg-primary text-white"
                     )}>
                       {isGraded ? "Grading Finalized" : "Pending Evaluation"}
                     </Badge>
                   ) : (
-                    <Badge variant="destructive" className="h-10 px-6 rounded-full font-black text-[9px] uppercase tracking-widest">
+                    <Badge variant="destructive" className="h-12 px-8 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg">
                       Missing Output
                     </Badge>
                   )}
               </div>
 
-              {submission && (
-                  <div className="space-y-8">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex-1 space-y-4">
-                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                            <Send size={12} /> Transmission Log: {format(new Date(submission.submittedAt), "MMM d, yyyy • h:mm a")}
-                          </p>
-                          
-                          {submission.files && submission.files.length > 0 && (
-                              <div className="space-y-3">
-                                  <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/60">Digital Assets</h4>
-                                  <div className="flex flex-wrap gap-3">
-                                    {submission.files.map((file, i) => (
-                                        <Button key={i} variant="outline" size="sm" asChild className="h-12 px-5 rounded-xl border-primary/10 hover:bg-primary hover:text-white transition-all font-bold">
-                                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="gap-2">
-                                              <Download className="h-4 w-4" />
-                                              {file.name}
-                                            </a>
-                                        </Button>
-                                    ))}
-                                  </div>
-                              </div>
-                          )}
-
-                          {submission.textAnswer && (
-                              <div className="space-y-3">
-                                  <h4 className="text-[10px] font-black uppercase tracking-widest text-primary/60">Response Text</h4>
-                                  <div className="p-6 bg-muted/20 rounded-2xl border border-primary/5 text-sm font-medium leading-relaxed italic">
-                                    "{submission.textAnswer}"
-                                  </div>
-                              </div>
-                          )}
-                        </div>
-
-                        <div className={cn(
-                          "flex-1 p-8 rounded-[2rem] border-2 transition-all relative overflow-hidden",
-                          isGraded ? "bg-white border-green-200" : "bg-primary/5 border-primary/10"
-                        )}>
-                            {isGraded && (
-                              <div className="absolute top-4 right-4 text-green-500/20">
-                                <Lock size={48} />
-                              </div>
-                            )}
-
-                            <div className="space-y-6">
-                              <div className="space-y-2">
-                                  <Label htmlFor={`grade-${submission.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-primary ml-1">Assigned Score</Label>
-                                  <div className="flex items-center gap-4">
-                                      <Input
-                                          id={`grade-${submission.id}`}
-                                          type="number"
-                                          placeholder="0"
-                                          value={grades[submission.id] || ''}
-                                          disabled={isGraded}
-                                          onChange={(e) => setGrades(g => ({...g, [submission.id]: e.target.value}))}
-                                          className="h-16 text-center font-black text-2xl rounded-2xl border-none shadow-inner bg-white focus:ring-2 focus:ring-primary/20"
-                                      />
-                                      <span className="text-xl font-black text-primary/40">/ {classwork.totalPoints}</span>
-                                  </div>
-                              </div>
-
-                              <div className="space-y-2">
-                                  <Label htmlFor={`feedback-${submission.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-primary ml-1">Instructional Feedback</Label>
-                                  <Textarea
-                                      id={`feedback-${submission.id}`}
-                                      placeholder="Leave a comment for the student..."
-                                      value={feedbacks[submission.id] || ''}
-                                      disabled={isGraded}
-                                      onChange={(e) => setFeedbacks(f => ({...f, [submission.id]: e.target.value}))}
-                                      className="rounded-2xl border-none shadow-inner bg-white min-h-[100px] p-4 font-bold focus:ring-2 focus:ring-primary/20"
-                                  />
-                              </div>
-
-                              {!isGraded ? (
-                                <Button 
-                                  onClick={() => handleGradeSubmission(submission.id)} 
-                                  className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black uppercase text-xs tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 gap-3 transition-all active:scale-95"
-                                >
-                                    <Send className="h-5 w-5"/>
-                                    Commit Grade
-                                </Button>
-                              ) : (
-                                <div className="flex items-center justify-center gap-2 h-16 bg-green-500 text-white font-black uppercase text-[10px] tracking-[0.3em] rounded-2xl shadow-lg shadow-green-500/20">
-                                  <CheckCircle2 size={18} />
-                                  GRADE RECORDED & LOCKED
+              {submission ? (
+                  <div className="flex flex-col lg:flex-row gap-12">
+                    <div className="flex-1 space-y-10">
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2 mb-6">
+                          <Send size={14} className="text-primary/40" /> Transmission Log: {format(new Date(submission.submittedAt), "MMM d, yyyy • h:mm a")}
+                        </p>
+                        
+                        {submission.files && submission.files.length > 0 && (
+                            <div className="space-y-4">
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Digital Assets</h4>
+                                <div className="flex flex-wrap gap-4">
+                                  {submission.files.map((file, i) => (
+                                      <Button key={i} variant="outline" size="lg" asChild className="h-14 px-8 rounded-full border-primary/10 hover:bg-primary hover:text-white transition-all font-black text-xs shadow-sm bg-white gap-3">
+                                          <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            <Download className="h-4 w-4" />
+                                            {file.name}
+                                          </a>
+                                      </Button>
+                                  ))}
                                 </div>
-                              )}
                             </div>
-                        </div>
+                        )}
+
+                        {submission.textAnswer && (
+                            <div className="space-y-4 mt-8">
+                                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary">Response Text</h4>
+                                <div className="p-8 bg-white rounded-[2rem] border-2 border-primary/5 text-sm font-bold text-foreground leading-relaxed italic shadow-inner">
+                                  "{submission.textAnswer}"
+                                </div>
+                            </div>
+                        )}
                       </div>
+                    </div>
+
+                    <div className={cn(
+                      "w-full lg:w-[450px] p-10 rounded-[3rem] border-2 transition-all relative shadow-2xl bg-white",
+                      isGraded ? "border-green-200" : "border-primary/10"
+                    )}>
+                        {isGraded && (
+                          <div className="absolute top-8 right-8 text-green-500/20">
+                            <Lock size={56} />
+                          </div>
+                        )}
+
+                        <div className="space-y-8">
+                          <div className="space-y-4">
+                              <Label htmlFor={`grade-${submission.id}`} className="text-[11px] font-black uppercase tracking-[0.2em] text-primary ml-1">Assigned Score</Label>
+                              <div className="flex items-center justify-center gap-4 bg-muted/10 p-6 rounded-2xl relative">
+                                  <Input
+                                      id={`grade-${submission.id}`}
+                                      type="number"
+                                      placeholder="0"
+                                      value={grades[submission.id] || ''}
+                                      disabled={isGraded}
+                                      onChange={(e) => setGrades(g => ({...g, [submission.id]: e.target.value}))}
+                                      className="h-20 text-center font-black text-5xl rounded-none border-none shadow-none bg-transparent focus:ring-0 p-0"
+                                  />
+                                  <div className="text-3xl font-black text-primary/30 flex items-center">
+                                    <span className="mr-2">/</span>
+                                    <span className="text-primary/40">{classwork.totalPoints}</span>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div className="space-y-4">
+                              <Label htmlFor={`feedback-${submission.id}`} className="text-[11px] font-black uppercase tracking-[0.2em] text-primary ml-1">Instructional Feedback</Label>
+                              <Textarea
+                                  id={`feedback-${submission.id}`}
+                                  placeholder="Leave a comment for the student..."
+                                  value={feedbacks[submission.id] || ''}
+                                  disabled={isGraded}
+                                  onChange={(e) => setFeedbacks(f => ({...f, [submission.id]: e.target.value}))}
+                                  className="rounded-[1.5rem] border-primary/5 shadow-inner bg-muted/5 min-h-[120px] p-6 font-bold text-sm focus:ring-2 focus:ring-primary/20"
+                              />
+                          </div>
+
+                          {!isGraded ? (
+                            <Button 
+                              onClick={() => handleGradeSubmission(submission.id)} 
+                              className="w-full h-20 bg-primary hover:bg-primary/90 text-white font-black uppercase text-xs tracking-[0.3em] rounded-[1.5rem] shadow-xl shadow-primary/20 gap-4 transition-all active:scale-95"
+                            >
+                                <Send className="h-5 w-5"/>
+                                Commit Grade Record
+                            </Button>
+                          ) : (
+                            <div className="flex items-center justify-center gap-3 h-20 bg-green-500 text-white font-black uppercase text-[11px] tracking-[0.3em] rounded-[1.5rem] shadow-xl shadow-green-500/20">
+                              <CheckCircle2 size={24} />
+                              GRADE RECORDED & LOCKED
+                            </div>
+                          )}
+                        </div>
+                    </div>
                   </div>
+              ) : (
+                <div className="p-12 text-center border-2 border-dashed rounded-[2rem] border-primary/10">
+                   <p className="font-black text-muted-foreground/40 uppercase tracking-[0.3em]">No submission payload detected</p>
+                </div>
               )}
             </div>
           );
