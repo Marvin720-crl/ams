@@ -195,6 +195,16 @@ export interface Classwork {
   totalPoints: number;
 }
 
+export interface Material {
+  id: string;
+  subjectId: string;
+  teacherId: string;
+  title: string;
+  description: string;
+  attachments: { name: string; url: string }[];
+  createdAt: string;
+}
+
 export interface Submission {
   id: string;
   classworkId: string;

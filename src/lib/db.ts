@@ -37,7 +37,8 @@ export async function ensureDbStructure() {
       'terms.json',
       'academicrecords.json',
       'gradingweights.json',
-      'examscores.json'
+      'examscores.json',
+      'materials.json'
     ];
     for (const file of files) {
       const filePath = path.join(DB_PATH, file);

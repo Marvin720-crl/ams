@@ -2,7 +2,7 @@
 'use server'
 
 import { readDb, writeDb, saveProfileImage, saveClassworkFile, saveSubmissionFile, saveChatFile } from '@/lib/db';
-import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage } from '@/utils/storage';
+import { User, Subject, Enrollment, Attendance, Lab, Pc, LabRequest, AuditLog, Book, LibraryBorrowing, Room, Reservation, BorrowRequest, Schedule, Classwork, Submission, Term, TermEnrollment, GradingWeights, AcademicRecord, ExamScore, Conversation, ChatMessage, Material } from '@/utils/storage';
 
 /**
  * IRON WALL SECURITY PROTOCOL v2.0
@@ -582,6 +582,39 @@ export async function updateSubmissionAction(id: string, updates: Partial<Submis
         return submissions[index];
     }
     return null;
+}
+
+// MATERIALS
+export async function getMaterialsAction(): Promise<Material[]> {
+    return await readDb('materials');
+}
+
+export async function addMaterialAction(material: Omit<Material, 'id' | 'createdAt'> & { materialFiles?: {name: string, data: string}[] }) {
+    const materials = await getMaterialsAction();
+    const id = `MAT-${Date.now()}`;
+    const attachments = [];
+    if (material.materialFiles) {
+        for (const file of material.materialFiles) {
+            const url = await saveClassworkFile(id, file.data, file.name);
+            if (url) attachments.push({ name: file.name, url });
+        }
+    }
+    const newMaterial = {
+        ...sanitizeInput(material, material.teacherId),
+        id,
+        createdAt: new Date().toISOString(),
+        attachments
+    };
+    delete (newMaterial as any).materialFiles;
+    materials.push(newMaterial);
+    await writeDb('materials', materials);
+    return newMaterial;
+}
+
+export async function deleteMaterialAction(id: string) {
+    let materials = await getMaterialsAction();
+    materials = materials.filter(m => m.id !== id);
+    await writeDb('materials', materials);
 }
 
 // GRADING & ACADEMIC
