@@ -662,7 +662,7 @@ export async function endTermAction(termId: string) {
         const subjectWeights = weights.find(w => w.subjectId === subject.id) || {
             attendance: 10, activities: 20, quizzes: 20, performance: 30, finalOutput: 20
         };
-        const subjectClassworks = classworks.filter(cw => cw.type === type);
+        const subjectClassworks = classworks.filter(cw => cw.subjectId === subject.id);
 
         for (const enrollment of subjectEnrollments) {
             const studentSubmissions = submissions.filter(s => s.studentId === enrollment.studentId);

@@ -58,7 +58,6 @@ export const hexToHsl = (hex: string) => {
     }
     h /= 6;
   }
-  // Modern space-separated format for Tailwind CSS HSL variables
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
@@ -72,7 +71,12 @@ export const applyThemeToDocument = (config: Partial<ThemeConfig>) => {
   if (config.header) root.style.setProperty('--header', hexToHsl(config.header));
   if (config.accent) root.style.setProperty('--accent', hexToHsl(config.accent));
   if (config.background) root.style.setProperty('--background', hexToHsl(config.background));
-  if (config.radius !== undefined) root.style.setProperty('--radius', `${config.radius}rem`);
+  
+  if (config.radius !== undefined) {
+    // Inject the radius variable
+    root.style.setProperty('--radius', `${config.radius}rem`);
+  }
+  
   if (config.glassIntensity !== undefined) {
     root.style.setProperty('--glass-opacity', `${config.glassIntensity / 100}`);
     root.style.setProperty('--glass-blur', `${(config.glassIntensity / 100) * 20}px`);
@@ -101,7 +105,6 @@ export const DesignProvider = ({ children }: { children: React.ReactNode }) => {
   const updateConfig = useCallback((updates: Partial<ThemeConfig>) => {
     setConfig(prev => {
       const newConfig = { ...prev, ...updates };
-      // Immediate injection for maximum smoothness
       applyThemeToDocument(newConfig);
       return newConfig;
     });

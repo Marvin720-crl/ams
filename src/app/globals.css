@@ -71,27 +71,32 @@
   .shadow-3xl {
     box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
   }
+
+  /* Dynamic Shaping System */
+  .rounded-theme {
+    border-radius: var(--radius);
+  }
+
+  .rounded-theme-lg {
+    border-radius: calc(var(--radius) * 2);
+  }
+
+  .rounded-theme-xl {
+    border-radius: calc(var(--radius) * 3);
+  }
+
+  .rounded-theme-sm {
+    border-radius: calc(var(--radius) / 2);
+  }
 }
 
 .hero-landscape {
-  @apply relative overflow-hidden rounded-[var(--radius)] text-white shadow-2xl;
+  @apply relative overflow-hidden rounded-theme-xl text-white shadow-2xl;
   background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
 }
 
-/* Wix-style dynamic shapes */
-.rounded-theme {
-  border-radius: var(--radius);
-}
-
-.rounded-theme-lg {
-  border-radius: calc(var(--radius) * 2);
-}
-
-.rounded-theme-sm {
-  border-radius: calc(var(--radius) / 2);
-}
-
-button, .card, input, select, textarea {
+/* Wix-style dynamic shapes for standard components */
+button, .card, input, select, textarea, .dialog-content {
   border-radius: var(--radius) !important;
 }
 

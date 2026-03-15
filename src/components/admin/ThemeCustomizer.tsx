@@ -92,7 +92,6 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   const [localColor, setLocalColor] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Sync with prop only when the picker is closed to prevent "fighting"
   useEffect(() => {
     if (!isOpen) setLocalColor(value);
   }, [value, isOpen]);
@@ -104,14 +103,14 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
   };
 
   return (
-    <div className="relative bg-white rounded-[2.5rem] p-8 shadow-sm border border-primary/5 hover:border-primary/20 transition-all group overflow-hidden">
+    <div className="relative bg-white rounded-theme-xl p-8 shadow-sm border border-primary/5 hover:border-primary/20 transition-all group overflow-hidden">
       <div className="flex justify-between items-start mb-8">
         <div className="space-y-1.5">
           <Label className="font-black uppercase text-sm tracking-widest text-foreground leading-none block">{label}</Label>
           <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider leading-tight">{description}</p>
         </div>
         <div 
-          className="h-16 w-16 rounded-2xl border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
+          className="h-16 w-16 rounded-theme border-4 border-white shadow-2xl transition-transform group-hover:scale-110 shrink-0" 
           style={{ backgroundColor: localColor }} 
         />
       </div>
@@ -119,7 +118,7 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <button 
-            className="h-24 w-full rounded-[1.5rem] bg-muted/20 border-2 border-transparent hover:border-primary/10 flex items-center px-8 transition-all active:scale-[0.98]"
+            className="h-24 w-full rounded-theme bg-muted/20 border-2 border-transparent hover:border-primary/10 flex items-center px-8 transition-all active:scale-[0.98]"
           >
             <div className="flex-1 text-center font-black text-2xl tracking-tighter">
               {localColor?.toUpperCase()}
@@ -131,7 +130,7 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
         </PopoverTrigger>
         <PopoverContent 
           onInteractOutside={(e) => e.preventDefault()} 
-          className="w-[360px] p-0 border-none rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden z-[120]"
+          className="w-[360px] p-0 border-none rounded-theme-xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden z-[120]"
         >
           <div className="bg-white p-10 space-y-8">
             <div className="flex justify-between items-center">
@@ -144,7 +143,7 @@ const ColorInput = React.memo(({ label, value, field, description, onChange }: {
               </button>
             </div>
             
-            <div className="relative aspect-square w-full rounded-[3rem] overflow-hidden border-8 border-muted shadow-inner group">
+            <div className="relative aspect-square w-full rounded-theme-lg overflow-hidden border-8 border-muted shadow-inner group">
               <div className="absolute inset-0" style={{ backgroundColor: localColor }} />
               <input 
                 type="color" 
@@ -205,22 +204,22 @@ export default function ThemeCustomizer() {
         return (
           <div className="space-y-8 w-full p-8">
             <div className="flex justify-between items-center">
-              <div className="h-8 w-48 rounded-lg" style={{ backgroundColor: `${config.primary}20` }} />
+              <div className="h-8 w-48 rounded-md" style={{ backgroundColor: `${config.primary}20` }} />
               <div className="h-10 w-10 rounded-full" style={{ backgroundColor: `${config.accent}20` }} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[1,2,3,4].map(i => (
-                <Card key={i} className="p-6 border-none shadow-xl" style={{ borderRadius: `${config.radius}rem` }}>
-                  <div className="h-8 w-8 rounded-xl mb-4" style={{ backgroundColor: `${config.primary}10` }} />
+                <Card key={i} className="p-6 border-none shadow-xl rounded-theme">
+                  <div className="h-8 w-8 rounded-md mb-4" style={{ backgroundColor: `${config.primary}10` }} />
                   <div className="h-2 w-20 bg-muted-foreground/20 rounded-full" />
                 </Card>
               ))}
             </div>
-            <Card className="p-8 border-none shadow-2xl" style={{ borderRadius: `${config.radius * 1.5}rem` }}>
+            <Card className="p-8 border-none shadow-2xl rounded-theme-lg">
               <div className="h-4 w-32 bg-primary/10 mb-6 rounded-full" />
               <div className="space-y-4">
                 {[1,2].map(i => (
-                  <div key={i} className="h-12 w-full bg-muted/30 rounded-xl" />
+                  <div key={i} className="h-12 w-full bg-muted/30 rounded-theme" />
                 ))}
               </div>
             </Card>
@@ -229,7 +228,7 @@ export default function ThemeCustomizer() {
       default:
         return (
           <div className="h-full flex flex-col items-center justify-center p-12 text-center">
-            <div className="h-24 w-24 rounded-[2.5rem] bg-white/10 flex items-center justify-center mb-6 text-white/20">
+            <div className="h-24 w-24 rounded-theme-xl bg-white/10 flex items-center justify-center mb-6 text-white/20">
               <Layers size={48} />
             </div>
             <h4 className="text-white/40 font-black uppercase text-xs tracking-widest">Workspace Emulator</h4>
@@ -248,10 +247,10 @@ export default function ThemeCustomizer() {
         </div>
 
         <div className="flex gap-4">
-          <Button variant="outline" onClick={resetToDefault} className="h-16 px-8 rounded-[1.5rem] font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted">
+          <Button variant="outline" onClick={resetToDefault} className="h-16 px-8 rounded-theme font-black uppercase text-xs tracking-widest gap-2 bg-white shadow-lg border-primary/5 hover:bg-muted">
             <RotateCcw size={18} />
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-[1.5rem] bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
+          <Button onClick={handleSave} disabled={saving} className="h-16 px-12 rounded-theme bg-primary text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-primary/20 gap-3">
             {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
             Publish Design
           </Button>
@@ -290,7 +289,7 @@ export default function ThemeCustomizer() {
           </Section>
 
           <Section label="Chromatics" icon={Droplets}>
-            <div className="space-y-8 p-8 bg-white rounded-[2.5rem] shadow-xl border border-primary/5">
+            <div className="space-y-8 p-8 bg-white rounded-theme-xl shadow-xl border border-primary/5">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <Label className="font-black uppercase text-[10px] tracking-widest">Glass Intensity</Label>
@@ -303,20 +302,24 @@ export default function ThemeCustomizer() {
                   <Label className="font-black uppercase text-[10px] tracking-widest">Corner Geometry</Label>
                   <Shapes size={14} className="text-primary" />
                 </div>
-                <Slider value={[config.radius * 10]} max={40} step={1} onValueChange={(val) => updateConfig({ radius: val[0] / 10 })} />
+                {/* 
+                  IMPORTANT: The slider updates the 'radius' value in the config.
+                  The DesignContext uses this to set the --radius CSS variable.
+                */}
+                <Slider value={[config.radius * 10]} max={40} min={0} step={1} onValueChange={(val) => updateConfig({ radius: val[0] / 10 })} />
               </div>
             </div>
           </Section>
 
           <Section label="Brand Variables" icon={Type}>
-            <div className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 space-y-6">
+            <div className="rounded-theme-xl border-none shadow-xl bg-white p-8 space-y-6">
               <div className="space-y-2">
                 <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Campus Label</Label>
                 <input 
                   type="text" 
                   value={config.campusLabel || ''}
                   onChange={(e) => updateConfig({ campusLabel: e.target.value })}
-                  className="w-full h-12 bg-muted/20 border-none rounded-xl px-4 font-black uppercase text-xs focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-full h-12 bg-muted/20 border-none rounded-theme px-4 font-black uppercase text-xs focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
               <div className="space-y-2">
@@ -335,16 +338,16 @@ export default function ThemeCustomizer() {
           isPreviewFullscreen ? "fixed inset-0 z-[100] p-12 bg-black/95 backdrop-blur-2xl" : "h-[calc(100vh-280px)]"
         )}>
           <div className={cn(
-            "relative h-full bg-secondary rounded-[4rem] border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden shadow-inner",
+            "relative h-full rounded-theme-xl border-4 border-dashed border-primary/10 flex items-center justify-center overflow-hidden shadow-inner",
             isMobileView ? "max-w-[400px] mx-auto shadow-3xl border-solid bg-white" : "w-full",
-            isPreviewFullscreen ? "bg-white/10 rounded-[3rem] border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
-          )}>
+            isPreviewFullscreen ? "bg-white/10 border-none shadow-[0_0_100px_rgba(0,0,0,0.5)] max-w-full" : ""
+          )} style={{ backgroundColor: config.secondary }}>
             
             <div className="relative w-full h-full flex flex-col">
               <div className="h-20 w-full shadow-sm flex items-center justify-between px-10 border-b border-primary/5 sticky top-0 z-30 transition-colors" style={{ backgroundColor: config.header }}>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
-                  <div className="h-8 rounded-lg bg-white/10 flex items-center px-4">
+                  <div className="h-10 w-10 rounded-theme bg-white/10 flex items-center justify-center text-white"><Layout size={20}/></div>
+                  <div className="h-8 rounded-theme-sm bg-white/10 flex items-center px-4">
                       <span className="text-[9px] font-black text-white uppercase tracking-widest">{config.campusLabel}</span>
                   </div>
                 </div>
@@ -364,7 +367,7 @@ export default function ThemeCustomizer() {
                           key={item.id} 
                           onClick={() => setActivePage(item.id)}
                           className={cn(
-                            "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group",
+                            "w-full flex items-center gap-4 px-4 py-3 rounded-theme transition-all group",
                             activePage === item.id ? "bg-white/10 text-accent" : "text-white/40 hover:text-white"
                           )}
                         >
@@ -418,7 +421,7 @@ function Section({ label, icon: Icon, children }: { label: string, icon: any, ch
   return (
     <section className="space-y-6">
       <div className="flex items-center gap-3 px-2">
-        <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+        <div className="h-8 w-8 rounded-theme bg-primary/10 flex items-center justify-center text-primary">
           <Icon size={16} />
         </div>
         <h3 className="font-black uppercase text-[11px] tracking-[0.3em] text-muted-foreground">{label}</h3>
